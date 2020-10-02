@@ -6,6 +6,12 @@ repositories {
     mavenCentral()
 }
 
+task(run, type: JavaExec) {
+    main = 'Main'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation("junit:junit:4.12")
+    implementation fileTree(dir: "lib", include: "*.jar")
 }
