@@ -12,6 +12,7 @@ public class Main extends Worker {
 
     @Override
     public void run() {
+        System.out.println("Main");
     }
 
 }
