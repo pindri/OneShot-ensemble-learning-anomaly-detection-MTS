@@ -7,6 +7,8 @@ import java.util.function.Function;
 
 public class InvariantsProblem implements GrammarBasedProblem<String, Tree<Element>, Double > {
 
+    // TODO: Define a proper solution space for the problem.
+
     private final Grammar<String> grammar;
     private final Function<Tree<String>, Tree<Element>> solutionMapper;
     private final Function<Tree<Element>, Double> fitnessFunction;
