@@ -35,4 +35,10 @@ public class Record {
     public Double getNum(String var) {
         return this.numVars[namesToIdx.get(var)];
     }
+
+//    public void printMap() {
+//        namesToIdx.entrySet().forEach(entry->{
+//            System.out.println(entry.getKey() + " " + entry.getValue());
+//        });
+//    }
 }
