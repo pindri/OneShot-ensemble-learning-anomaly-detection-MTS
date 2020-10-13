@@ -3,16 +3,14 @@ import java.util.HashMap;
 public class Record {
 
     private static final HashMap<String, Integer> namesToIdx = new HashMap<>();
-    public static final String[] numNames = new String[]{"LIT101"};
-    public static final String[] boolNames = new String[]{"FIT101", "MV101"};
     static {
         int i = 0;
-        for (String name : boolNames) {
+        for (String name : SignalBuilder.boolNames) {
             namesToIdx.put(name, i);
             ++i;
         }
         i = 0;
-        for (String name: numNames) {
+        for (String name: SignalBuilder.numNames) {
             namesToIdx.put(name, i);
             ++i;
         }
