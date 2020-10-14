@@ -1,3 +1,5 @@
+package mapper;
+
 import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.STLMapper;
 import nodes.AbstractSTLNode;
