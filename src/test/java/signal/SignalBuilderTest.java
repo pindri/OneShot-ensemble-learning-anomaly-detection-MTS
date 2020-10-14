@@ -26,7 +26,7 @@ public class SignalBuilderTest {
 
         // Asserting values have been correctly read.
         double value = signal.valueAt(2).getNum(SignalBuilder.numNames[0]);
-        double check = 124.4705; // Directly from file.
+        double check = 1.67; // Directly from file.
         assertEquals(value, check, 0);
     }
 
