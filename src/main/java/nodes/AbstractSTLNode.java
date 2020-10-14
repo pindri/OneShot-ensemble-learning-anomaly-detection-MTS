@@ -47,7 +47,6 @@ public abstract class AbstractSTLNode {
         return Objects.hash(operator, firstChild, secondChild, symbol);
     }
 
-
     @Override
     public String toString() {
         return traversePreOrder(this);

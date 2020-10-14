@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import java.io.PrintStream;
 
+import static org.junit.Assert.assertEquals;
+
 public class STLMapperTest {
 
     @SuppressWarnings("unchecked")
@@ -45,5 +47,7 @@ public class STLMapperTest {
         AbstractSTLNode node = mapper.apply(root);
         System.out.println(node);
 
+        assertEquals(node.getSymbol(), "AND");
+        assertEquals(node.getFirstChild().getSymbol(), "x1 > 3.0");
     }
 }
