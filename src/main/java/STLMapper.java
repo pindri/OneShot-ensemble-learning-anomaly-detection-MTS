@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
     @Override
-    public AbstractSTLNode apply(Tree<String> stringTree) {
+    public AbstractSTLNode apply(Tree<String> root) {
         return null;
     }
 }

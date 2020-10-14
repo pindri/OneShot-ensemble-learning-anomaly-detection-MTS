@@ -29,7 +29,6 @@ public class SignalBuilder {
         int time = 0;
 
         while ((line = buffReader.readLine()) != null) {
-//            numValues = Arrays.stream(line.split(",")).mapToDouble(Double::parseDouble).toArray();
             List<String> input = Arrays.stream(line.split(",")).collect(Collectors.toList());
             numValues = IntStream.range(0, header.length).filter(numIndexes::contains)
                         .mapToDouble(i -> Double.parseDouble(input.get(i))).toArray();
