@@ -23,6 +23,7 @@ public class NumericSTLNode extends AbstractSTLNode {
             }
         }
         this.number = Double.parseDouble(siblings.get(2).child(0).content());
+        this.symbol = this.variable + " " + this.comparisonSymbol.toString() + " " + this.number;
         // Here y is a signal.Record.
         this.operator = x -> TemporalMonitor.atomicMonitor(y -> this.comparisonSymbol.getValue()
                                                                     .apply(y.getNum(this.variable), this.number));

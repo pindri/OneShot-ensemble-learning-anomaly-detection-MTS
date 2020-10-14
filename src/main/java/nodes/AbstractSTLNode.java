@@ -47,9 +47,46 @@ public abstract class AbstractSTLNode {
         return Objects.hash(operator, firstChild, secondChild, symbol);
     }
 
+
     @Override
     public String toString() {
-        // TODO: pretty print.
-        return "NoteToString";
+        return traversePreOrder(this);
+    }
+
+    private static String traversePreOrder(AbstractSTLNode node) {
+        if (node == null) {
+            return "\n";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(node.getSymbol());
+        String pointerRight = "└──";
+        boolean hasRightChild = node.getFirstChild() != null;
+        String pointerLeft = (hasRightChild) ? "├──" : "└──";
+        traverseNodes(sb, "", pointerLeft, node.getSecondChild(), hasRightChild);
+        traverseNodes(sb, "", pointerRight, node.getFirstChild(), false);
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    private static void traverseNodes(StringBuilder sb, String padding, String pointer, AbstractSTLNode node, boolean hasRightSibling) {
+        if (node != null) {
+            sb.append("\n");
+            sb.append(padding);
+            sb.append(pointer);
+            sb.append(node.getSymbol());
+            StringBuilder paddingBuilder = new StringBuilder(padding);
+            if (hasRightSibling) {
+                paddingBuilder.append("│  ");
+            }
+            else {
+                paddingBuilder.append("   ");
+            }
+            String paddingForBoth = paddingBuilder.toString();
+            String pointerRight = "└──";
+            boolean hasRightChild = node.getFirstChild() != null;
+            String pointerLeft = (hasRightChild) ? "├──" : "└──";
+            traverseNodes(sb, paddingForBoth, pointerLeft, node.getSecondChild(), hasRightChild);
+            traverseNodes(sb, paddingForBoth, pointerRight, node.getFirstChild(), false);
+        }
     }
 }

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import static mapper.Expression.*;
 
 public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
+
     @Override
     public AbstractSTLNode apply(Tree<String> root) {
         return parseSubtree(root, new ArrayList<Tree<String>>() {{add(null);}});
