@@ -34,14 +34,10 @@ public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
     }
 
     private static AbstractSTLNode createNode(Expression expr, List<Tree<String>> siblings, List<Tree<String>> ancestors) {
-        switch (expr) {
-            case PROP:
-                return new NumericSTLNode(siblings);
-            case AND:
-                return new AndSTLNode(siblings, ancestors);
-            default:
-                return null;
-        }
+        return switch (expr) {
+            case PROP -> new NumericSTLNode(siblings);
+            case AND -> new AndSTLNode(siblings, ancestors);
+        };
     }
 
     private static List<Tree<String>> getSiblings(Tree<String> node, List<Tree<String>> ancestors) {

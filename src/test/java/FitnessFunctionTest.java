@@ -4,7 +4,6 @@ import nodes.AbstractSTLNode;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.PrintStream;
 
 import static org.junit.Assert.assertTrue;
 
