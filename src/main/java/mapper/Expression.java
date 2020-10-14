@@ -1,9 +1,12 @@
+package mapper;
+
 import it.units.malelab.jgea.problem.symbolicregression.element.Element;
 
 public enum Expression implements Element {
 
-    NOT("not"),
-    OR("or");
+//    NOT("not"),
+    PROP("proposition"),
+    AND("and");
 
     private final String expression;
 

@@ -1,3 +1,5 @@
+package signal;
+
 import eu.quanticol.moonlight.signal.Signal;
 
 import java.io.BufferedReader;

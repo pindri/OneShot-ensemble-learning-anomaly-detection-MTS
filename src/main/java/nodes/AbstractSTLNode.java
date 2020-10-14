@@ -1,7 +1,8 @@
-package elements;
+package nodes;
 
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import eu.quanticol.moonlight.signal.Signal;
+import signal.Record;
 
 import java.util.Objects;
 import java.util.function.Function;

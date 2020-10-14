@@ -1,4 +1,8 @@
+package signal;
+
 import org.junit.Test;
+import signal.Record;
+import signal.SignalBuilder;
 
 import static org.junit.Assert.assertEquals;
 

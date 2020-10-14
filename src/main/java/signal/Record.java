@@ -1,3 +1,7 @@
+package signal;
+
+import signal.SignalBuilder;
+
 import java.util.HashMap;
 
 public class Record {

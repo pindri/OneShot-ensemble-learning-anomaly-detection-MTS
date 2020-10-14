@@ -1,5 +1,9 @@
+package signal;
+
 import eu.quanticol.moonlight.signal.Signal;
 import org.junit.Test;
+import signal.Record;
+import signal.SignalBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
