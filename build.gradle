@@ -6,6 +6,11 @@ repositories {
     mavenCentral()
 }
 
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
 task(run, type: JavaExec) {
     main = 'Main'
     classpath = sourceSets.main.runtimeClasspath
