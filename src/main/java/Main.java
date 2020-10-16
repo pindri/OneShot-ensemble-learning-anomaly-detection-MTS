@@ -3,8 +3,6 @@ import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
 import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
-import it.units.malelab.jgea.core.listener.Listener;
-import it.units.malelab.jgea.core.listener.PrintStreamListener;
 import it.units.malelab.jgea.core.listener.collector.*;
 import it.units.malelab.jgea.core.operator.GeneticOperator;
 import it.units.malelab.jgea.core.order.PartialComparator;
@@ -70,6 +68,22 @@ public class Main extends Worker {
                 100
         );
 
+        @SuppressWarnings("unchecked")
+        Collection<AbstractSTLNode> solutions = evolver.solve(
+                Misc.cached(fitnessFunction, 20),
+                new Iterations(10),
+                r,
+                executorService,
+                listener(
+                        new Basic(),
+                        new Population(),
+                        new Diversity(),
+                        new BestInfo("%5.3f"),
+                        new BestPrinter(BestPrinter.Part.SOLUTION)
+                ));
+        System.out.printf("Found %d solutions with %s.%n", solutions.size(), evolver.getClass().getSimpleName());
+        System.out.println(solutions.iterator().next());
+
         /*
         @SuppressWarnings("unchecked")
         Collection<AbstractSTLNode> solutions = evolver.solve(
@@ -91,23 +105,6 @@ public class Main extends Worker {
         AbstractSTLNode bestFormula = solutions.iterator().next();
         System.out.println(bestFormula);
          */
-
-        Collection<AbstractSTLNode> solutions = evolver.solve(
-                Misc.cached(fitnessFunction, 20),
-                new TargetFitness<>(0d).or(new Iterations(10)),
-                r,
-                executorService,
-                listener(
-                        new Basic(),
-                        new Population(),
-                        new Diversity(),
-                        new BestInfo("%5.3f")
-                ));
-        System.out.printf("Found %d solutions with %s.%n", solutions.size(), evolver.getClass().getSimpleName());
-        System.out.println(solutions.iterator().next());
-
-
-
     }
 
 }

@@ -4,9 +4,10 @@ import it.units.malelab.jgea.problem.symbolicregression.element.Element;
 
 public enum Expression implements Element {
 
-//    NOT("not"),
     PROP("proposition"),
+    NOT("not"),
     AND("and");
+
 
     private final String expression;
 

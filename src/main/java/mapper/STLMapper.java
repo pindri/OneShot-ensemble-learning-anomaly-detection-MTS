@@ -3,6 +3,7 @@ package mapper;
 import nodes.AbstractSTLNode;
 import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AndSTLNode;
+import nodes.NotSTLNode;
 import nodes.NumericSTLNode;
 
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
         return switch (expr) {
             case PROP -> new NumericSTLNode(siblings);
             case AND -> new AndSTLNode(siblings, ancestors);
+            case NOT -> new NotSTLNode(siblings, ancestors);
         };
     }
 
