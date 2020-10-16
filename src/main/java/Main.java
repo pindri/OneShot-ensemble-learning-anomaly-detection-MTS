@@ -45,7 +45,7 @@ public class Main extends Worker {
     }
 
     private void testEvolution() throws IOException, ExecutionException, InterruptedException {
-        Random r = new Random(11);
+        Random r = new Random(42);
         Grammar<String> grammar = Grammar.fromFile(new File("grammar.bnf"));
         FitnessFunction fitnessFunction = new FitnessFunction("data/test_data.csv");
         STLMapper mapper = new STLMapper();
@@ -71,7 +71,7 @@ public class Main extends Worker {
         @SuppressWarnings("unchecked")
         Collection<AbstractSTLNode> solutions = evolver.solve(
                 Misc.cached(fitnessFunction, 20),
-                new Iterations(10),
+                new Iterations(20),
                 r,
                 executorService,
                 listener(
@@ -82,6 +82,7 @@ public class Main extends Worker {
                         new BestPrinter(BestPrinter.Part.SOLUTION)
                 ));
         System.out.printf("Found %d solutions with %s.%n", solutions.size(), evolver.getClass().getSimpleName());
+        System.out.println();
         System.out.println(solutions.iterator().next());
 
         /*
