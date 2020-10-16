@@ -27,9 +27,6 @@ public class NumericSTLNode extends AbstractSTLNode {
         // Here y is a signal.Record.
         this.operator = x -> TemporalMonitor.atomicMonitor(y -> this.comparisonSymbol.getValue()
                                                                     .apply(y.getNum(this.variable), this.number));
-        System.out.println(this.variable);
-        System.out.println(this.comparisonSymbol);
-        System.out.println(this.number);
     }
 
 }

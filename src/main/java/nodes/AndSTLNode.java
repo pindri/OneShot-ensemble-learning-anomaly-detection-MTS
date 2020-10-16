@@ -13,6 +13,7 @@ public class AndSTLNode extends AbstractSTLNode {
         this.firstChild = STLMapper.parseSubtree(siblings.get(0), ancestors);
         this.secondChild = STLMapper.parseSubtree(siblings.get(1), ancestors);
         this.symbol = "AND";
+        // Returns lowest robustness of the two children.
         this.operator = x -> TemporalMonitor.andMonitor(this.firstChild.getOperator().apply(x),
                                                         new DoubleDomain(),
                                                         this.secondChild.getOperator().apply(x));

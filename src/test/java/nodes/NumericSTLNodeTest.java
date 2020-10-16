@@ -25,7 +25,7 @@ public class NumericSTLNodeTest {
         Tree<String> num = Tree.of("<num>", n);
 
 
-        List<Tree<String>> siblings = new ArrayList<Tree<String>>() {{
+        List<Tree<String>> siblings = new ArrayList<>() {{
             add(var);
             add(comp);
             add(num);
@@ -36,10 +36,13 @@ public class NumericSTLNodeTest {
 
         // Creating a record to monitor.
         boolean[] boolValues = new boolean[]{};
-        double[] numValues = new double[]{1, 3.5, 3, 4};
+        double[] numValues = new double[]{1, 4.5, 3, 4};
         Record record = new Record(boolValues, numValues);
-        Signal<Record> signal = new Signal<Record>();
+        Signal<Record> signal = new Signal<>();
         signal.add(0, record);
+        numValues = new double[]{1, 3.5, 3, 4};
+        record = new Record(boolValues, numValues);
+        signal.add(1, record);
 
         double fitness = monitor.getOperator().apply(signal).monitor(signal).valueAt(signal.end());
 
