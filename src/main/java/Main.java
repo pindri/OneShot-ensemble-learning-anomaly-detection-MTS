@@ -51,13 +51,13 @@ public class Main extends Worker {
         STLMapper mapper = new STLMapper();
 
         Map<GeneticOperator<Tree<String>>, Double> operators = new LinkedHashMap<>();
-        operators.put(new GrammarBasedSubtreeMutation<>(12, grammar), 0.2d);
-        operators.put(new SameRootSubtreeCrossover<>(12), 0.8d);
+        operators.put(new GrammarBasedSubtreeMutation<>(10, grammar), 0.2d);
+        operators.put(new SameRootSubtreeCrossover<>(10), 0.8d);
 
 
         StandardWithEnforcedDiversityEvolver<Tree<String>, AbstractSTLNode, Double> evolver = new StandardWithEnforcedDiversityEvolver<>(
                 mapper,
-                new GrammarRampedHalfAndHalf<>(0, 12, grammar),
+                new GrammarRampedHalfAndHalf<>(0, 10, grammar),
                 PartialComparator.from(Double.class).comparing(Individual::getFitness),
                 500,
                 operators,
@@ -78,34 +78,12 @@ public class Main extends Worker {
                         new Basic(),
                         new Population(),
                         new Diversity(),
-                        new BestInfo("%5.3f"),
-                        new BestPrinter(BestPrinter.Part.SOLUTION)
+                        new BestInfo("%5.3f")
+//                        new BestPrinter(BestPrinter.Part.SOLUTION)
                 ));
         System.out.printf("Found %d solutions with %s.%n", solutions.size(), evolver.getClass().getSimpleName());
         System.out.println();
         System.out.println(solutions.iterator().next());
-
-        /*
-        @SuppressWarnings("unchecked")
-        Collection<AbstractSTLNode> solutions = evolver.solve(
-                Misc.cached(fitnessFunction, 10),
-                new Iterations(1),
-                r,
-                this.executorService,
-                Listener.onExecutor(new PrintStreamListener<>(System.out,
-                            false,
-                            10,
-                            ",",
-                            ",",
-                            new Basic(),
-                            new Population(),
-                            new Diversity(),
-                            new BestInfo("%5.3f")),
-                        this.executorService));
-
-        AbstractSTLNode bestFormula = solutions.iterator().next();
-        System.out.println(bestFormula);
-         */
     }
 
 }

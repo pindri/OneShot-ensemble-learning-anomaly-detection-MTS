@@ -1,5 +1,6 @@
 import eu.quanticol.moonlight.signal.Signal;
 import nodes.AbstractSTLNode;
+import org.apache.commons.math3.util.IntegerSequence;
 import signal.Record;
 import signal.SignalBuilder;
 
@@ -23,11 +24,13 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
 
     @Override
     public Double apply(AbstractSTLNode monitor) {
-        double count;
-        count = Math.abs(monitor.getOperator()
-                                .apply(this.signal)
-                                .monitor(this.signal)
-                                .valueAt(this.signal.end()));
+        double count = 0;
+        for (int t = 0; t < signal.size(); t++) {
+            count += Math.abs(monitor.getOperator()
+                    .apply(this.signal)
+                    .monitor(this.signal)
+                    .valueAt(t));
+        }
         return count;
     }
 }
