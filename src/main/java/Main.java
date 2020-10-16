@@ -2,12 +2,10 @@ import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
 import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
+import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.listener.Listener;
 import it.units.malelab.jgea.core.listener.PrintStreamListener;
-import it.units.malelab.jgea.core.listener.collector.Basic;
-import it.units.malelab.jgea.core.listener.collector.BestInfo;
-import it.units.malelab.jgea.core.listener.collector.Diversity;
-import it.units.malelab.jgea.core.listener.collector.Population;
+import it.units.malelab.jgea.core.listener.collector.*;
 import it.units.malelab.jgea.core.operator.GeneticOperator;
 import it.units.malelab.jgea.core.order.PartialComparator;
 import it.units.malelab.jgea.core.selector.Tournament;
@@ -23,10 +21,7 @@ import nodes.AbstractSTLNode;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class Main extends Worker {
@@ -52,7 +47,7 @@ public class Main extends Worker {
     }
 
     private void testEvolution() throws IOException, ExecutionException, InterruptedException {
-        Random r = new Random(42);
+        Random r = new Random(11);
         Grammar<String> grammar = Grammar.fromFile(new File("grammar.bnf"));
         FitnessFunction fitnessFunction = new FitnessFunction("data/test_data.csv");
         STLMapper mapper = new STLMapper();
@@ -75,6 +70,7 @@ public class Main extends Worker {
                 100
         );
 
+        /*
         @SuppressWarnings("unchecked")
         Collection<AbstractSTLNode> solutions = evolver.solve(
                 Misc.cached(fitnessFunction, 10),
@@ -94,6 +90,24 @@ public class Main extends Worker {
 
         AbstractSTLNode bestFormula = solutions.iterator().next();
         System.out.println(bestFormula);
+         */
+
+        Collection<AbstractSTLNode> solutions = evolver.solve(
+                Misc.cached(fitnessFunction, 20),
+                new TargetFitness<>(0d).or(new Iterations(10)),
+                r,
+                executorService,
+                listener(
+                        new Basic(),
+                        new Population(),
+                        new Diversity(),
+                        new BestInfo("%5.3f")
+                ));
+        System.out.printf("Found %d solutions with %s.%n", solutions.size(), evolver.getClass().getSimpleName());
+        System.out.println(solutions.iterator().next());
+
+
+
     }
 
 }
