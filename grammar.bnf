@@ -1,5 +1,7 @@
-<e> ::= <prop> | <two>
-<two> ::= and <e> <e> | not <e>
+<e> ::= <prop> | <one>
+<one> ::= and <e> <e> | not <e> | until <temp_e> <interval> <interval> <temp_e>
+<temp_e> ::= and  <prop> <prop> | not <prop>
+<interval> ::= <num> <num>
 <prop> ::= proposition <var> <comp> <num>
 <var> ::= x1 | x2 | x3 | x4
 <comp> ::= < | >

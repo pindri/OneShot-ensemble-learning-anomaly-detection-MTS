@@ -1,10 +1,7 @@
 package mapper;
 
-import nodes.AbstractSTLNode;
+import nodes.*;
 import it.units.malelab.jgea.representation.tree.Tree;
-import nodes.AndSTLNode;
-import nodes.NotSTLNode;
-import nodes.NumericSTLNode;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,9 +31,10 @@ public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
         return parseSubtree(firstChild, ancestors);
     }
 
-    private static AbstractSTLNode createNode(Expression expr, List<Tree<String>> siblings, List<Tree<String>> ancestors) {
-        return switch (expr) {
+    private static AbstractSTLNode createNode(Expression expression, List<Tree<String>> siblings, List<Tree<String>> ancestors) {
+        return switch (expression) {
             case PROP -> new NumericSTLNode(siblings);
+            case UNTIL -> new BinaryTemporalSTLNode(expression, siblings, ancestors);
             case AND -> new AndSTLNode(siblings, ancestors);
             case NOT -> new NotSTLNode(siblings, ancestors);
         };

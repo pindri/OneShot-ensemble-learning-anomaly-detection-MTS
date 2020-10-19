@@ -4,6 +4,7 @@ import it.units.malelab.jgea.problem.symbolicregression.element.Element;
 
 public enum Expression implements Element {
 
+    UNTIL("until"),
     PROP("proposition"),
     NOT("not"),
     AND("and");
