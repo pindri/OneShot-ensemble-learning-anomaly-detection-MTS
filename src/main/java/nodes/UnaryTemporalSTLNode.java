@@ -1,7 +1,5 @@
 package nodes;
 
-import eu.quanticol.moonlight.formula.DoubleDomain;
-import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.Expression;
 import mapper.STLMapper;

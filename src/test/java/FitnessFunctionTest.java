@@ -9,7 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 public class FitnessFunctionTest {
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "SpellCheckingInspection"})
     @Test
     public void applyTest() throws IOException {
         // Creating monitor manually.

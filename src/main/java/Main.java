@@ -1,9 +1,7 @@
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
-import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
 import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
-import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.listener.collector.*;
 import it.units.malelab.jgea.core.operator.GeneticOperator;
 import it.units.malelab.jgea.core.order.PartialComparator;
@@ -68,7 +66,6 @@ public class Main extends Worker {
                 true
         );
 
-        @SuppressWarnings("unchecked")
         Collection<AbstractSTLNode> solutions = evolver.solve(
                 Misc.cached(fitnessFunction, 20),
                 new Iterations(50),

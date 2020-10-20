@@ -1,6 +1,5 @@
 import eu.quanticol.moonlight.signal.Signal;
 import nodes.AbstractSTLNode;
-import org.apache.commons.math3.util.IntegerSequence;
 import signal.Record;
 import signal.SignalBuilder;
 
@@ -10,9 +9,9 @@ import java.util.function.Function;
 
 public class FitnessFunction implements Function<AbstractSTLNode, Double> {
 
-    SignalBuilder signalBuilder = new SignalBuilder();
-    List<Integer> numIndexes = new ArrayList<>(Arrays.asList(0, 1, 2, 3));
-    List<Integer> boolIndexes = new ArrayList<>(Collections.emptyList());
+    final SignalBuilder signalBuilder = new SignalBuilder();
+    final List<Integer> numIndexes = new ArrayList<>(Arrays.asList(0, 1, 2, 3));
+    final List<Integer> boolIndexes = new ArrayList<>(Collections.emptyList());
     Signal<Record> signal;
 
     public FitnessFunction(String path) throws IOException {

@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractTemporalSTLNode extends AbstractSTLNode {
 
-    public int start;
-    public int end;
+    public final int start;
+    public final int end;
 
     public AbstractTemporalSTLNode(List<Tree<String>> siblings, Expression expression) {
         this.start = (int) this.parseIntervalBound(siblings.get(1).childStream().collect(Collectors.toList()));

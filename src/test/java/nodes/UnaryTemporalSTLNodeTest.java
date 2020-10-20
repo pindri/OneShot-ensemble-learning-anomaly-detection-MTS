@@ -16,6 +16,7 @@ import static org.junit.Assert.assertEquals;
 
 public class UnaryTemporalSTLNodeTest {
 
+    @SuppressWarnings("unchecked")
     @Test
     public void eventuallyTest() {
         Tree<String> v = Tree.of("x1");
@@ -53,7 +54,7 @@ public class UnaryTemporalSTLNodeTest {
         // Actual monitor.
         int inf = 0;
         int sup = 2;
-        int end = inf +  (int) Math.max(1.0, sup);
+        int end = inf +  (int) sup;
         Function<Signal<Record>, TemporalMonitor<Record, Double>> operator;
         operator = x -> TemporalMonitor.eventuallyMonitor(firstChild.getOperator().apply(x),
                                                           new DoubleDomain(),

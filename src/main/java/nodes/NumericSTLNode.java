@@ -10,8 +10,8 @@ public class NumericSTLNode extends AbstractSTLNode {
 
     // TODO: Better number parsing.
 
-    private String variable;
-    private Double number;
+    private final String variable;
+    private final Double number;
     private Comparison comparisonSymbol;
 
     public NumericSTLNode(List<Tree<String>> siblings) {
