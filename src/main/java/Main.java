@@ -1,6 +1,7 @@
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
+import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
 import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.listener.collector.*;
 import it.units.malelab.jgea.core.operator.GeneticOperator;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+@SuppressWarnings("unchecked")
 public class Main extends Worker {
 
     // TODO: fix 'unchecked or unsafe operations' warning (now suppressed, caused by PrintStreamListener).
@@ -51,8 +53,8 @@ public class Main extends Worker {
         STLMapper mapper = new STLMapper();
 
         Map<GeneticOperator<Tree<String>>, Double> operators = new LinkedHashMap<>();
-        operators.put(new GrammarBasedSubtreeMutation<>(10, grammar), 0.2d);
-        operators.put(new SameRootSubtreeCrossover<>(10), 0.8d);
+        operators.put(new GrammarBasedSubtreeMutation<>(12, grammar), 0.5d);
+        operators.put(new SameRootSubtreeCrossover<>(12), 0.5d);
 
         StandardEvolver<Tree<String>, AbstractSTLNode, Double> evolver = new StandardEvolver<>(
                 mapper,
@@ -66,9 +68,24 @@ public class Main extends Worker {
                 true
         );
 
-        Collection<AbstractSTLNode> solutions = evolver.solve(
+        StandardWithEnforcedDiversityEvolver<Tree<String>, AbstractSTLNode, Double>
+                evolverDiversity = new StandardWithEnforcedDiversityEvolver<>(
+                    mapper,
+                    new GrammarRampedHalfAndHalf<>(3, 12, grammar),
+                    PartialComparator.from(Double.class).comparing(Individual::getFitness),
+                    500,
+                    operators,
+                    new Tournament(5),
+                    new Worst(),
+                    500,
+                    true,
+                    100
+        );
+
+//        Collection<AbstractSTLNode> solutions = evolver.solve(
+        Collection<AbstractSTLNode> solutions = evolverDiversity.solve(
                 Misc.cached(fitnessFunction, 20),
-                new Iterations(50),
+                new Iterations(25),
                 r,
                 executorService,
                 listener(

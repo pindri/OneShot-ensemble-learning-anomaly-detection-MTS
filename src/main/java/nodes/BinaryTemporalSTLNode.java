@@ -12,12 +12,18 @@ public class BinaryTemporalSTLNode extends AbstractTemporalSTLNode {
     public BinaryTemporalSTLNode(List<Tree<String>> siblings, List<Tree<String>> ancestors, Expression expression) {
         super(siblings, expression);
         this.firstChild = STLMapper.parseSubtree(siblings.get(0), ancestors);
-        this.secondChild= STLMapper.parseSubtree(siblings.get(3), ancestors);
+        this.secondChild = STLMapper.parseSubtree(siblings.get(3), ancestors);
         switch (expression) {
-            case UNTIL -> this.operator = x -> TemporalMonitor.untilMonitor(this.firstChild.getOperator().apply(x),
-                                                                            this.createInterval(),
-                                                                            this.secondChild.getOperator().apply(x),
-                                                                            new DoubleDomain());
+            case UNTIL -> this.operator = x ->
+                    TemporalMonitor.untilMonitor(this.firstChild.getOperator().apply(x),
+                                                 this.createInterval(),
+                                                 this.secondChild.getOperator().apply(x),
+                                                 new DoubleDomain());
+            case SINCE -> this.operator = x ->
+                    TemporalMonitor.sinceMonitor(this.firstChild.getOperator().apply(x),
+                                                 this.createInterval(),
+                                                 this.secondChild.getOperator().apply(x),
+                                                 new DoubleDomain());
         }
     }
 

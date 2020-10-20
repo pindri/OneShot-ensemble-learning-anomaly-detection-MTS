@@ -56,12 +56,11 @@ public class UnaryTemporalSTLNodeTest {
         }
     }
 
+
     @Test
     public void eventuallyTest() {
-        // Creating a record to monitor.
         populateSignal();
 
-        // Actual monitor.
         int inf = 0;
         int sup = 2;
         int end = inf + sup;
@@ -73,7 +72,6 @@ public class UnaryTemporalSTLNodeTest {
         Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
 
 //        printFitness(fitness);
-        
         assertEquals(0.5, fitness.valueAt(0), 0.01);
         assertEquals(-0.1, fitness.valueAt(2), 0.01);
     }
@@ -114,5 +112,22 @@ public class UnaryTemporalSTLNodeTest {
         assertEquals(0.5, fitness.valueAt(2), 0.01);
     }
 
+    @Test
+    public void globallyTest() {
+        populateSignal();
+
+        int inf = 0;
+        int sup = 2;
+        int end = inf + sup;
+        Function<Signal<Record>, TemporalMonitor<Record, Double>> operator;
+        operator = x -> TemporalMonitor.globallyMonitor(this.firstChild.getOperator().apply(x),
+                                                        new DoubleDomain(),
+                                                        new Interval(inf, end));
+
+        Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
+
+//        printFitness(fitness);
+        assertEquals(-1, fitness.valueAt(2), 0.01);
+    }
 
 }
