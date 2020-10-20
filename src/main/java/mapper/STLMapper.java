@@ -34,9 +34,8 @@ public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
     private static AbstractSTLNode createNode(Expression expression, List<Tree<String>> siblings, List<Tree<String>> ancestors) {
         return switch (expression) {
             case PROP -> new NumericSTLNode(siblings);
-            case ONCE -> null;
+            case ONCE, EVENTUALLY -> new UnaryTemporalSTLNode(siblings, ancestors, expression);
             case HISTORICALLY -> null;
-            case EVENTUALLY -> null;
             case GLOBALLY -> null;
             case SINCE -> null;
             case UNTIL -> new BinaryTemporalSTLNode(siblings, ancestors, expression);
