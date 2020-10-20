@@ -1,5 +1,7 @@
 package nodes;
 
+import eu.quanticol.moonlight.formula.DoubleDomain;
+import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.Expression;
 import mapper.STLMapper;
@@ -11,9 +13,12 @@ public class UnaryTemporalSTLNode extends AbstractTemporalSTLNode {
         super(siblings, expression);
         this.firstChild = STLMapper.parseSubtree(siblings.get(0), ancestors);
         switch (expression) {
-//            case EVENTUALLY -> this.operator = x -> TemporalMonitor.eventuallyMonitor(this.firstChild.getOperator().apply(x),
-//                                                                                      new DoubleDomain(),
-//                                                                                      this.createInterval());
+            case ONCE -> this.operator = x -> TemporalMonitor.onceMonitor(this.firstChild.getOperator().apply(x),
+                                                                          new DoubleDomain(),
+                                                                          this.createInterval());
+            case EVENTUALLY -> this.operator = x -> TemporalMonitor.eventuallyMonitor(this.firstChild.getOperator().apply(x),
+                                                                                      new DoubleDomain(),
+                                                                                      this.createInterval());
         }
     }
 

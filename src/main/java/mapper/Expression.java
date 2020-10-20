@@ -4,12 +4,18 @@ import it.units.malelab.jgea.problem.symbolicregression.element.Element;
 
 public enum Expression implements Element {
 
+    ONCE("once"),
+    HISTORICALLY("historically"),
+    EVENTUALLY("eventually"),
+    GLOBALLY("globally"),
+
+    SINCE("since"),
     UNTIL("until"),
-//    EVENTUALLY("eventually"),
+
     PROP("proposition"),
     NOT("not"),
-    AND("and");
-
+    AND("and"),
+    OR("or");
 
     private final String expression;
 

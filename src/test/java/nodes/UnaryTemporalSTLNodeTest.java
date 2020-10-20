@@ -14,65 +14,105 @@ import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("unchecked")
 public class UnaryTemporalSTLNodeTest {
 
-    @SuppressWarnings("unchecked")
+    // Test tree.
+    Tree<String> v = Tree.of("x1");
+    Tree<String> c = Tree.of(">");
+    Tree<String> n = Tree.of("3");
+    Tree<String> var = Tree.of("<var>", v);
+    Tree<String> comp = Tree.of("<comp>", c);
+    Tree<String> num = Tree.of("<num>", n);
+    List<Tree<String>> siblings = new ArrayList<>() {{
+        add(var);
+        add(comp);
+        add(num);
+    }};
+    boolean[] boolValues = new boolean[]{};
+    Signal<Record> signal = new Signal<>();
+    Record record;
+
+    // Creates monitor with x1 > 3.
+    NumericSTLNode firstChild = new NumericSTLNode(siblings);
+
+    public void populateSignal() {
+        this.record = new Record(this.boolValues, new double[]{1, 2.0, 3.0, 4.0});
+        this.signal.add(0, this.record);
+        this.record = new Record(this.boolValues, new double[]{3.5, 2.1, 3.1, 4.1});
+        this.signal.add(1, this.record);
+        this.record = new Record(this.boolValues, new double[]{2, 2.2, 3.2, 4.2});
+        this.signal.add(2, this.record);
+        this.record = new Record(this.boolValues, new double[]{2.3, 2.2, 3.2, 4.2});
+        this.signal.add(3, this.record);
+        this.record = new Record(this.boolValues, new double[]{2.9, 2.2, 3.2, 4.2});
+        this.signal.add(4, this.record);
+    }
+
+    public void printFitness(Signal<Double> fitness) {
+        System.out.println(fitness);
+        for (int t = (int) fitness.start(); t <= fitness.end(); t++) {
+            System.out.println("t: " + t + "\t" + fitness.valueAt(t));
+        }
+    }
+
     @Test
     public void eventuallyTest() {
-        Tree<String> v = Tree.of("x1");
-        Tree<String> c = Tree.of(">");
-        Tree<String> n = Tree.of("3");
-
-        Tree<String> var = Tree.of("<var>", v);
-        Tree<String> comp = Tree.of("<comp>", c);
-        Tree<String> num = Tree.of("<num>", n);
-
-
-        List<Tree<String>> siblings = new ArrayList<>() {{
-            add(var);
-            add(comp);
-            add(num);
-        }};
-
-        // Creates monitor with x1 > 3.
-        NumericSTLNode firstChild = new NumericSTLNode(siblings);
-
         // Creating a record to monitor.
-        boolean[] boolValues = new boolean[]{};
-        Record record = new Record(boolValues, new double[]{1, 2.0, 3.0, 4.0});
-        Signal<Record> signal = new Signal<>();
-        signal.add(0, record);
-        record = new Record(boolValues, new double[]{3.5, 2.1, 3.1, 4.1});
-        signal.add(1, record);
-        record = new Record(boolValues, new double[]{2, 2.2, 3.2, 4.2});
-        signal.add(2, record);
-        record = new Record(boolValues, new double[]{2.3, 2.2, 3.2, 4.2});
-        signal.add(3, record);
-        record = new Record(boolValues, new double[]{2.9, 2.2, 3.2, 4.2});
-        signal.add(4, record);
+        populateSignal();
 
         // Actual monitor.
         int inf = 0;
         int sup = 2;
-        int end = inf +  (int) sup;
+        int end = inf + sup;
         Function<Signal<Record>, TemporalMonitor<Record, Double>> operator;
-        operator = x -> TemporalMonitor.eventuallyMonitor(firstChild.getOperator().apply(x),
+        operator = x -> TemporalMonitor.eventuallyMonitor(this.firstChild.getOperator().apply(x),
                                                           new DoubleDomain(),
                                                           new Interval(inf, end));
 
+        Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
 
-        System.out.println("Min length: " + end + "\tSignal size: " + signal.size());
-
-        Signal<Double> fitness = operator.apply(signal).monitor(signal);
-
-//        System.out.println("Monitor signal: " + fitness);
-//
-//        for (int i = (int) fitness.start(); i <= fitness.end() ; i++) {
-//            System.out.println("t: " + i + "\t" + fitness.valueAt(i));
-//        }
-
+//        printFitness(fitness);
+        
         assertEquals(0.5, fitness.valueAt(0), 0.01);
         assertEquals(-0.1, fitness.valueAt(2), 0.01);
     }
+
+    @Test
+    public void historicallyTest() {
+        populateSignal();
+
+        int inf = 0;
+        int sup = 2;
+        int end = inf + sup;
+        Function<Signal<Record>, TemporalMonitor<Record, Double>> operator;
+        operator = x -> TemporalMonitor.historicallyMonitor(this.firstChild.getOperator().apply(x),
+                                                            new DoubleDomain(),
+                                                            new Interval(inf, end));
+
+        Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
+
+//        printFitness(fitness);
+        assertEquals(-1, fitness.valueAt(3), 0.01);
+    }
+
+    @Test
+    public void onceTest() {
+        populateSignal();
+
+        int inf = 0;
+        int sup = 2;
+        int end = inf + sup;
+        Function<Signal<Record>, TemporalMonitor<Record, Double>> operator;
+        operator = x -> TemporalMonitor.onceMonitor(this.firstChild.getOperator().apply(x),
+                                                    new DoubleDomain(),
+                                                    new Interval(inf, end));
+
+        Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
+
+//        printFitness(fitness);
+        assertEquals(0.5, fitness.valueAt(2), 0.01);
+    }
+
 
 }
