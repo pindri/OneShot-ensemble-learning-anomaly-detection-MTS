@@ -1,5 +1,6 @@
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
+import it.units.malelab.jgea.core.evolver.StandardEvolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
 import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
@@ -38,15 +39,16 @@ public class Main extends Worker {
     public void run() {
         System.out.println("Main");
         try {
-            testEvolution();
+            nonTemporalRun();
         } catch (IOException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
 
-    private void testEvolution() throws IOException, ExecutionException, InterruptedException {
+    private void nonTemporalRun() throws IOException, ExecutionException, InterruptedException {
         Random r = new Random(42);
-        Grammar<String> grammar = Grammar.fromFile(new File("grammar.bnf"));
+//        Grammar<String> grammar = Grammar.fromFile(new File("grammar.bnf"));
+        Grammar<String> grammar = Grammar.fromFile(new File("grammar_temporal.bnf"));
         FitnessFunction fitnessFunction = new FitnessFunction("data/test_data.csv");
         STLMapper mapper = new STLMapper();
 
@@ -54,24 +56,22 @@ public class Main extends Worker {
         operators.put(new GrammarBasedSubtreeMutation<>(10, grammar), 0.2d);
         operators.put(new SameRootSubtreeCrossover<>(10), 0.8d);
 
-
-        StandardWithEnforcedDiversityEvolver<Tree<String>, AbstractSTLNode, Double> evolver = new StandardWithEnforcedDiversityEvolver<>(
+        StandardEvolver<Tree<String>, AbstractSTLNode, Double> evolver = new StandardEvolver<>(
                 mapper,
-                new GrammarRampedHalfAndHalf<>(0, 10, grammar),
+                new GrammarRampedHalfAndHalf<>(3, 12, grammar),
                 PartialComparator.from(Double.class).comparing(Individual::getFitness),
                 500,
                 operators,
                 new Tournament(5),
                 new Worst(),
                 500,
-                true,
-                100
+                true
         );
 
         @SuppressWarnings("unchecked")
         Collection<AbstractSTLNode> solutions = evolver.solve(
                 Misc.cached(fitnessFunction, 20),
-                new Iterations(20),
+                new Iterations(50),
                 r,
                 executorService,
                 listener(
@@ -79,7 +79,6 @@ public class Main extends Worker {
                         new Population(),
                         new Diversity(),
                         new BestInfo("%5.3f")
-//                        new BestPrinter(BestPrinter.Part.SOLUTION)
                 ));
         System.out.printf("Found %d solutions with %s.%n", solutions.size(), evolver.getClass().getSimpleName());
         System.out.println();

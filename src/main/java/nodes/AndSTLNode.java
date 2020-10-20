@@ -19,4 +19,9 @@ public class AndSTLNode extends AbstractSTLNode {
                                                         this.secondChild.getOperator().apply(x));
 
     }
+
+    @Override
+    public int getMinLength() {
+        return Math.max(this.firstChild.getMinLength(), this.secondChild.getMinLength());
+    }
 }

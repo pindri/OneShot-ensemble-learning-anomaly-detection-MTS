@@ -31,6 +31,8 @@ public abstract class AbstractSTLNode {
         return symbol;
     }
 
+    public abstract int getMinLength();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

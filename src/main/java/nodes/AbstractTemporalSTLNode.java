@@ -7,7 +7,7 @@ import mapper.Expression;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AbstractTemporalSTLNode extends AbstractSTLNode {
+public abstract class AbstractTemporalSTLNode extends AbstractSTLNode {
 
     public int start;
     public int end;

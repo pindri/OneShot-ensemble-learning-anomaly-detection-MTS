@@ -15,7 +15,7 @@ public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
 
     @Override
     public AbstractSTLNode apply(Tree<String> root) {
-        return parseSubtree(root, new ArrayList<Tree<String>>() {{add(null);}});
+        return parseSubtree(root, new ArrayList<>() {{add(null);}});
     }
 
     public static AbstractSTLNode parseSubtree(Tree<String> root, List<Tree<String>> ancestors) {
@@ -34,7 +34,8 @@ public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
     private static AbstractSTLNode createNode(Expression expression, List<Tree<String>> siblings, List<Tree<String>> ancestors) {
         return switch (expression) {
             case PROP -> new NumericSTLNode(siblings);
-            case UNTIL -> new BinaryTemporalSTLNode(expression, siblings, ancestors);
+//            case UNTIL -> new BinaryTemporalSTLNode(siblings, ancestors, expression);
+            case EVENTUALLY -> new UnaryTemporalSTLNode(siblings, ancestors, expression);
             case AND -> new AndSTLNode(siblings, ancestors);
             case NOT -> new NotSTLNode(siblings, ancestors);
         };

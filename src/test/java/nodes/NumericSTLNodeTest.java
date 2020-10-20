@@ -47,6 +47,7 @@ public class NumericSTLNodeTest {
         double fitness = monitor.getOperator().apply(signal).monitor(signal).valueAt(signal.end());
 
         assertEquals(fitness, 0.5, 0);
+        assertEquals(monitor.getMinLength(), 0, 0);
     }
 
 }

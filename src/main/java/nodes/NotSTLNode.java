@@ -15,4 +15,8 @@ public class NotSTLNode extends AbstractSTLNode {
         this.operator = x -> TemporalMonitor.notMonitor(this.firstChild.getOperator().apply(x), new DoubleDomain());
     }
 
+    @Override
+    public int getMinLength() {
+        return this.firstChild.getMinLength();
+    }
 }

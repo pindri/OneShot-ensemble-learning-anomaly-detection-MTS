@@ -15,8 +15,6 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
     List<Integer> boolIndexes = new ArrayList<>(Collections.emptyList());
     Signal<Record> signal;
 
-    // test path: "data/test_data.csv"
-
     public FitnessFunction(String path) throws IOException {
         signal = this.signalBuilder.build(path, this.boolIndexes, this.numIndexes);
     }
@@ -25,12 +23,29 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
     @Override
     public Double apply(AbstractSTLNode monitor) {
         double count = 0;
-        for (int t = 0; t < signal.size(); t++) {
-            count += Math.abs(monitor.getOperator()
-                    .apply(this.signal)
-                    .monitor(this.signal)
-                    .valueAt(t));
+//        System.out.println("\n\nMonitor length: " + monitor.getMinLength());
+//        System.out.println("STL tree:");
+//        System.out.println(monitor);
+//        if (this.signal.size() < monitor.getMinLength()) {
+//            count += this.signal.size();
+//        } else {
+//            count += Math.abs(monitor.getOperator()
+//                    .apply(this.signal)
+//                    .monitor(this.signal)
+//                    .valueAt(signal.end()));
+//        }
+        Signal<Double> pointRobustness = monitor.getOperator().apply(this.signal).monitor(this.signal);
+
+        for (int t = (int) pointRobustness.start(); t < pointRobustness.end(); t++) {
+            count += Math.abs(pointRobustness.valueAt(t));
         }
-        return count;
+//        for (int t = 0; t < this.signal.size(); t++) {
+//            count += Math.abs(monitor.getOperator()
+//                    .apply(this.signal)
+//                    .monitor(this.signal)
+//                    .valueAt(t));
+//        }
+//        System.out.println("Fitness: " + count);
+        return count/pointRobustness.size();
     }
 }

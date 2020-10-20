@@ -29,4 +29,8 @@ public class NumericSTLNode extends AbstractSTLNode {
                                                                     .apply(y.getNum(this.variable), this.number));
     }
 
+    @Override
+    public int getMinLength() {
+        return 0;
+    }
 }
