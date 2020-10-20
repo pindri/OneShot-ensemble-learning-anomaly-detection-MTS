@@ -53,27 +53,25 @@ public class UnaryTemporalSTLNodeTest {
         // Actual monitor.
         int inf = 0;
         int sup = 2;
-        int start = inf;
-        int end = start +  (int) Math.max(1.0, sup);
+        int end = inf +  (int) Math.max(1.0, sup);
         Function<Signal<Record>, TemporalMonitor<Record, Double>> operator;
         operator = x -> TemporalMonitor.eventuallyMonitor(firstChild.getOperator().apply(x),
-                                        new DoubleDomain()
-//                    new DoubleDomain());
-                , new Interval(start, end));
+                                                          new DoubleDomain(),
+                                                          new Interval(inf, end));
 
 
-        int min_length = 0 + end;
-
-        System.out.println("Min length: " + min_length + "\tSignal size: " + signal.size());
+        System.out.println("Min length: " + end + "\tSignal size: " + signal.size());
 
         Signal<Double> fitness = operator.apply(signal).monitor(signal);
-        System.out.println("Monitor signal: " + fitness);
 
-        for (int i = (int) fitness.start(); i <= fitness.end() ; i++) {
-            System.out.println("t: " + i + "\t" + fitness.valueAt(i));
-        }
+//        System.out.println("Monitor signal: " + fitness);
+//
+//        for (int i = (int) fitness.start(); i <= fitness.end() ; i++) {
+//            System.out.println("t: " + i + "\t" + fitness.valueAt(i));
+//        }
 
-        System.out.println("At end: " + fitness.valueAt(fitness.end()));
+        assertEquals(0.5, fitness.valueAt(0), 0.01);
+        assertEquals(-0.1, fitness.valueAt(2), 0.01);
     }
 
 }

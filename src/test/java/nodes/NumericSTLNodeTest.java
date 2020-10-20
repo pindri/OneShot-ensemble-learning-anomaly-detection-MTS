@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 
 public class NumericSTLNodeTest {
 
+    @SuppressWarnings("unchecked")
     @Test
     public void numericOperatorTest() {
 

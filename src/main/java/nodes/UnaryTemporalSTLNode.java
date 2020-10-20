@@ -13,11 +13,9 @@ public class UnaryTemporalSTLNode extends AbstractTemporalSTLNode {
         super(siblings, expression);
         this.firstChild = STLMapper.parseSubtree(siblings.get(0), ancestors);
         switch (expression) {
-            case EVENTUALLY:
-                this.operator = x -> TemporalMonitor.eventuallyMonitor(this.firstChild.getOperator().apply(x),
-                                                                       new DoubleDomain(),
-                                                                       this.createInterval());
-                break;
+//            case EVENTUALLY -> this.operator = x -> TemporalMonitor.eventuallyMonitor(this.firstChild.getOperator().apply(x),
+//                                                                                      new DoubleDomain(),
+//                                                                                      this.createInterval());
         }
     }
 

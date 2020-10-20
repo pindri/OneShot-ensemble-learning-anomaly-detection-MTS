@@ -14,15 +14,10 @@ public class BinaryTemporalSTLNode extends AbstractTemporalSTLNode {
         this.firstChild = STLMapper.parseSubtree(siblings.get(0), ancestors);
         this.secondChild= STLMapper.parseSubtree(siblings.get(3), ancestors);
         switch (expression) {
-//            case UNTIL:
-//                this.operator = x -> TemporalMonitor.untilMonitor(this.firstChild.getOperator().apply(x),
-//                                                                            this.createInterval(),
-//                                                                            this.secondChild.getOperator().apply(x),
-//                                                                            new DoubleDomain());
-//                this.operator = x -> TemporalMonitor.untilMonitor(this.firstChild.getOperator().apply(x),
-//                                                                  this.secondChild.getOperator().apply(x),
-//                                                                  new DoubleDomain());
-//            break;
+            case UNTIL -> this.operator = x -> TemporalMonitor.untilMonitor(this.firstChild.getOperator().apply(x),
+                                                                            this.createInterval(),
+                                                                            this.secondChild.getOperator().apply(x),
+                                                                            new DoubleDomain());
         }
     }
 

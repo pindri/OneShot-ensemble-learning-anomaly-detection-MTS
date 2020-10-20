@@ -15,6 +15,7 @@ import java.util.function.Function;
 
 import static org.junit.Assert.assertEquals;
 
+@SuppressWarnings("unchecked")
 public class AndSTLNodeTest {
 
     @Test

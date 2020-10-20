@@ -1,5 +1,5 @@
 <e> ::= <prop> | <one>
-<one> ::= and <e> <e> | not <e> | eventually <second_prop> <interval> <interval>
+<one> ::= and <e> <e> | not <e> | until <second_prop> <interval> <interval> <second_prop>
 <second_prop> ::= and <second_prop> <second_prop> | not <second_prop> | <prop>
 <interval> ::= <num>
 <prop> ::= proposition <var> <comp> <num>
