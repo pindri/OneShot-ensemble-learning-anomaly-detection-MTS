@@ -48,13 +48,14 @@ public class Main extends Worker {
     private void nonTemporalRun() throws IOException, ExecutionException, InterruptedException {
         Random r = new Random(42);
 //        Grammar<String> grammar = Grammar.fromFile(new File("grammar.bnf"));
+//        FitnessFunction fitnessFunction = new FitnessFunction("data/test_data.csv");
         Grammar<String> grammar = Grammar.fromFile(new File("grammar_temporal.bnf"));
-        FitnessFunction fitnessFunction = new FitnessFunction("data/test_data.csv");
+        FitnessFunction fitnessFunction = new FitnessFunction("data/swat_partial.csv");
         STLMapper mapper = new STLMapper();
 
         Map<GeneticOperator<Tree<String>>, Double> operators = new LinkedHashMap<>();
-        operators.put(new GrammarBasedSubtreeMutation<>(12, grammar), 0.5d);
-        operators.put(new SameRootSubtreeCrossover<>(12), 0.5d);
+        operators.put(new GrammarBasedSubtreeMutation<>(12, grammar), 0.2d);
+        operators.put(new SameRootSubtreeCrossover<>(12), 0.8d);
 
         StandardEvolver<Tree<String>, AbstractSTLNode, Double> evolver = new StandardEvolver<>(
                 mapper,
@@ -82,10 +83,10 @@ public class Main extends Worker {
                     100
         );
 
-//        Collection<AbstractSTLNode> solutions = evolver.solve(
-        Collection<AbstractSTLNode> solutions = evolverDiversity.solve(
+        Collection<AbstractSTLNode> solutions = evolver.solve(
+//        Collection<AbstractSTLNode> solutions = evolverDiversity.solve(
                 Misc.cached(fitnessFunction, 20),
-                new Iterations(25),
+                new Iterations(20),
                 r,
                 executorService,
                 listener(

@@ -10,7 +10,7 @@ import java.util.function.Function;
 public class FitnessFunction implements Function<AbstractSTLNode, Double> {
 
     final SignalBuilder signalBuilder = new SignalBuilder();
-    final List<Integer> numIndexes = new ArrayList<>(Arrays.asList(0, 1, 2, 3));
+    final List<Integer> numIndexes = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
     final List<Integer> boolIndexes = new ArrayList<>(Collections.emptyList());
     Signal<Record> signal;
 

@@ -5,6 +5,7 @@ import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.Comparison;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NumericSTLNode extends AbstractSTLNode {
 
@@ -22,7 +23,7 @@ public class NumericSTLNode extends AbstractSTLNode {
                 break;
             }
         }
-        this.number = Double.parseDouble(siblings.get(2).child(0).content());
+        this.number = parseNumber(siblings.get(2).childStream().collect(Collectors.toList()));
         this.symbol = this.variable + " " + this.comparisonSymbol.toString() + " " + this.number;
         // Here y is a signal.Record.
         this.operator = x -> TemporalMonitor.atomicMonitor(y -> this.comparisonSymbol.getValue()
@@ -32,5 +33,13 @@ public class NumericSTLNode extends AbstractSTLNode {
     @Override
     public int getMinLength() {
         return 0;
+    }
+
+    private double parseNumber(List<Tree<String>> digits) {
+        double result = 0.0;
+        for (int i = 0; i < digits.size(); i++) {
+            result += Double.parseDouble(digits.get(i).child(0).content()) * Math.pow(10, - (i));
+        }
+        return result;
     }
 }
