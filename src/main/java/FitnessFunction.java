@@ -25,26 +25,20 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
 //        System.out.println("\n\nMonitor length: " + monitor.getMinLength());
 //        System.out.println("STL tree:");
 //        System.out.println(monitor);
-//        if (this.signal.size() < monitor.getMinLength()) {
-//            count += this.signal.size();
-//        } else {
-//            count += Math.abs(monitor.getOperator()
-//                    .apply(this.signal)
-//                    .monitor(this.signal)
-//                    .valueAt(signal.end()));
-//        }
+
+        if (this.signal.size() < monitor.getMinLength()) {
+            System.out.println("Signal: " + this.signal.size() + "\tminLength: " + monitor.getMinLength());
+            return 1.0;
+        }
+
         Signal<Double> pointRobustness = monitor.getOperator().apply(this.signal).monitor(this.signal);
 
         for (int t = (int) pointRobustness.start(); t < pointRobustness.end(); t++) {
             count += Math.abs(pointRobustness.valueAt(t));
         }
-//        for (int t = 0; t < this.signal.size(); t++) {
-//            count += Math.abs(monitor.getOperator()
-//                    .apply(this.signal)
-//                    .monitor(this.signal)
-//                    .valueAt(t));
-//        }
+
 //        System.out.println("Fitness: " + count);
+
         return count/pointRobustness.size();
     }
 }

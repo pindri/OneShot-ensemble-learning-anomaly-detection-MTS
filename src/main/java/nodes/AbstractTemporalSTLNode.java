@@ -23,10 +23,11 @@ public abstract class AbstractTemporalSTLNode extends AbstractSTLNode {
     }
 
     private double parseIntervalBound(List<Tree<String>> leaves) {
-        int k = leaves.size() - 1;
+        int k = 0;
         double value = 0.0;
         for (Tree<String> leaf : leaves) {
-            value += Double.parseDouble(leaf.child(0).content()) * Math.pow(10, k--);
+            value += Double.parseDouble(leaf.child(0).content()) * Math.pow(10, k);
+            k++;
         }
         return value;
     }

@@ -17,7 +17,6 @@ public class SignalBuilder {
     // TODO: would it be useful to keep timestamps?
     // TODO: maybe better exception handling?
 
-//    public static final String[] numNames = new String[]{"x1", "x2", "x3", "x4"};
     public static final String[] numNames = new String[]{"FIT101","LIT101","MV101","P101",
                                                          "P102","AIT201","AIT202","AIT203"};
     public static final String[] boolNames = new String[]{};

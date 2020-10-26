@@ -4,7 +4,7 @@
 <e_2> ::= <prop> | <log_2>
 <log_2> ::= and <e_2> <e_2> | not <e_2>
 <prop> ::= proposition <var> <comp> <num>
-<interval> ::= <dig>
+<interval> ::= <dig> <dig> <dig>
 <var> ::= FIT101 | LIT101 | MV101 | P101 | P102 | AIT201 | AIT202 | AIT203
 <comp> ::= < | >
 <num> ::= <dig> <dig>
