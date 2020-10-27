@@ -1,10 +1,12 @@
 package nodes;
 
+import core.InvariantsProblem;
 import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.representation.tree.Tree;
 import org.junit.Test;
 import signal.Record;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +16,12 @@ public class NumericSTLNodeTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void numericOperatorTest() {
+    public void numericOperatorTest() throws IOException {
+
+        // Initialising variables.
+        String grammarPath = "test_grammar.bnf";
+        String dataPath = "data/test_data.csv";
+        new InvariantsProblem(grammarPath, dataPath);
 
         // Tree to be parsed.
         Tree<String> v = Tree.of("x2");
@@ -23,7 +30,8 @@ public class NumericSTLNodeTest {
 
         Tree<String> var = Tree.of("<var>", v);
         Tree<String> comp = Tree.of("<comp>", c);
-        Tree<String> num = Tree.of("<num>", n);
+        Tree<String> dig = Tree.of("<dig>", n);
+        Tree<String> num = Tree.of("<num>", dig);
 
 
         List<Tree<String>> siblings = new ArrayList<>() {{

@@ -1,5 +1,6 @@
 package nodes;
 
+import core.InvariantsProblem;
 import eu.quanticol.moonlight.formula.DoubleDomain;
 import eu.quanticol.moonlight.formula.Interval;
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
@@ -8,6 +9,7 @@ import it.units.malelab.jgea.representation.tree.Tree;
 import org.junit.Test;
 import signal.Record;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -23,7 +25,8 @@ public class UnaryTemporalSTLNodeTest {
     Tree<String> n = Tree.of("3");
     Tree<String> var = Tree.of("<var>", v);
     Tree<String> comp = Tree.of("<comp>", c);
-    Tree<String> num = Tree.of("<num>", n);
+    Tree<String> dig = Tree.of("<dig>", n);
+    Tree<String> num = Tree.of("<num>", dig);
     List<Tree<String>> siblings = new ArrayList<>() {{
         add(var);
         add(comp);
@@ -35,6 +38,13 @@ public class UnaryTemporalSTLNodeTest {
 
     // Creates monitor with x1 > 3.
     NumericSTLNode firstChild = new NumericSTLNode(siblings);
+
+    public UnaryTemporalSTLNodeTest() throws IOException {
+        // Initialising variables.
+        String grammarPath = "test_grammar.bnf";
+        String dataPath = "data/test_data.csv";
+        new InvariantsProblem(grammarPath, dataPath);
+    }
 
     public void populateSignal() {
         this.record = new Record(this.boolValues, new double[]{1, 2.0, 3.0, 4.0});

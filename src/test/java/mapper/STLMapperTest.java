@@ -22,7 +22,8 @@ public class STLMapperTest {
         Tree<String> propSymbol1 = Tree.of("proposition");
         Tree<String> var1 = Tree.of("<var>", v1);
         Tree<String> comp1 = Tree.of("<comp>", c1);
-        Tree<String> num1 = Tree.of("<num>", n1);
+        Tree<String> dig1 = Tree.of("<dig>", n1);
+        Tree<String> num1 = Tree.of("<num>", dig1);
 
         Tree<String> prop1 = Tree.of("<prop>", propSymbol1, var1, comp1, num1);
 
@@ -34,7 +35,8 @@ public class STLMapperTest {
         Tree<String> propSymbol2 = Tree.of("proposition");
         Tree<String> var2 = Tree.of("<var>", v2);
         Tree<String> comp2 = Tree.of("<comp>", c2);
-        Tree<String> num2 = Tree.of("<num>", n2);
+        Tree<String> dig2 = Tree.of("<dig>", n2);
+        Tree<String> num2 = Tree.of("<num>", dig2);
 
         Tree<String> prop2 = Tree.of("<prop>", propSymbol2, var2, comp2, num2);
 

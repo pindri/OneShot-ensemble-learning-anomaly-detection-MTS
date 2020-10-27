@@ -1,5 +1,6 @@
 package nodes;
 
+import core.InvariantsProblem;
 import eu.quanticol.moonlight.formula.DoubleDomain;
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import eu.quanticol.moonlight.signal.Signal;
@@ -7,6 +8,7 @@ import it.units.malelab.jgea.representation.tree.Tree;
 import org.junit.Test;
 import signal.Record;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -17,7 +19,12 @@ import static org.junit.Assert.assertEquals;
 public class AndSTLNodeTest {
 
     @Test
-    public void andMonitorTest() {
+    public void andMonitorTest() throws IOException {
+
+        // Initialising variables.
+        String grammarPath = "test_grammar.bnf";
+        String dataPath = "data/test_data.csv";
+        new InvariantsProblem(grammarPath, dataPath);
 
             // Tree to be parsed.
             Tree<String> v = Tree.of("x1");
@@ -26,9 +33,10 @@ public class AndSTLNodeTest {
 
             Tree<String> var = Tree.of("<var>", v);
             Tree<String> comp = Tree.of("<comp>", c);
-            Tree<String> num = Tree.of("<num>", n);
+            Tree<String> dig = Tree.of("<dig>", n);
+            Tree<String> num = Tree.of("<num>", dig);
 
-            List<Tree<String>> siblings = new ArrayList<>() {{
+        List<Tree<String>> siblings = new ArrayList<>() {{
                 add(var);
                 add(comp);
                 add(num);
@@ -44,9 +52,10 @@ public class AndSTLNodeTest {
 
             Tree<String> var1 = Tree.of("<var>", v1);
             Tree<String> comp1 = Tree.of("<comp>", c1);
-            Tree<String> num1 = Tree.of("<num>", n1);
+            Tree<String> dig1 = Tree.of("<dig>", n1);
+            Tree<String> num1 = Tree.of("<num>", dig1);
 
-            List<Tree<String>> siblings1 = new ArrayList<>() {{
+        List<Tree<String>> siblings1 = new ArrayList<>() {{
                 add(var1);
                 add(comp1);
                 add(num1);

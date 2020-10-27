@@ -13,13 +13,7 @@ import java.util.stream.IntStream;
 
 public class SignalBuilder {
     // TODO: abstraction if more signal builders are necessary.
-    // TODO: use boolean variables as well?
-    // TODO: would it be useful to keep timestamps?
     // TODO: maybe better exception handling?
-
-    public static final String[] numNames = new String[]{"FIT101","LIT101","MV101","P101",
-                                                         "P102","AIT201","AIT202","AIT203"};
-    public static final String[] boolNames = new String[]{};
 
     public Signal<Record> build(String path, List<Integer> boolIndexes, List<Integer> numIndexes) throws IOException {
         Signal<Record> signal = new Signal<>();
@@ -35,7 +29,6 @@ public class SignalBuilder {
             List<String> input = Arrays.stream(line.split(",")).collect(Collectors.toList());
             numValues = IntStream.range(0, header.length).filter(numIndexes::contains)
                         .mapToDouble(i -> Double.parseDouble(input.get(i))).toArray();
-//            boolValues = IntStream.range(0, header.length).filter(boolIndexes::contains).mapToObj(input::get).map(Boolean::parseBoolean).toArray();
 
             signal.add(time, new Record(boolValues, numValues));
             time++;

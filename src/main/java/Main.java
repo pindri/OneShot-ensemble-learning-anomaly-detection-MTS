@@ -1,3 +1,5 @@
+import core.FitnessFunction;
+import core.InvariantsProblem;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
@@ -17,14 +19,9 @@ import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.STLMapper;
 import nodes.AbstractSTLNode;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
 public class Main extends Worker {
@@ -49,34 +46,21 @@ public class Main extends Worker {
         }
     }
 
-    public static Grammar<String> initialiseGrammar(String grammarPath, String dataPath) throws IOException {
-        String replacement = Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null)).replace("\"", "").replace(",", " | ");
-
-        try (Stream<String> lines = Files.lines(Path.of(grammarPath))) {
-            List<String> replaced = lines
-                    .map(line-> line.replaceAll("(?m)^<var>.*", "<var> ::= " + replacement))
-                    .collect(Collectors.toList());
-            Files.write(Path.of(grammarPath), replaced);
-        }
-
-        return Grammar.fromFile(new File(grammarPath ));
-    }
 
     private void nonTemporalRun() throws IOException, ExecutionException, InterruptedException {
         Random r = new Random(42);
         String grammarPath = "grammar_temporal.bnf";
-        String dataPath = "data/swat_minimal.csv";
-        Grammar<String> grammar = initialiseGrammar(grammarPath, dataPath);
-        FitnessFunction fitnessFunction = new FitnessFunction(dataPath);
-        STLMapper mapper = new STLMapper();
+//        String dataPath = "data/swat_minimal.csv";
+        String dataPath = "data/test_data.csv";
+        InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath);
 
         Map<GeneticOperator<Tree<String>>, Double> operators = new LinkedHashMap<>();
-        operators.put(new GrammarBasedSubtreeMutation<>(12, grammar), 0.2d);
+        operators.put(new GrammarBasedSubtreeMutation<>(12, problem.getGrammar()), 0.2d);
         operators.put(new SameRootSubtreeCrossover<>(12), 0.8d);
 
         StandardEvolver<Tree<String>, AbstractSTLNode, Double> evolver = new StandardEvolver<>(
-                mapper,
-                new GrammarRampedHalfAndHalf<>(3, 12, grammar),
+                problem.getSolutionMapper(),
+                new GrammarRampedHalfAndHalf<>(3, 12, problem.getGrammar()),
                 PartialComparator.from(Double.class).comparing(Individual::getFitness),
                 500,
                 operators,
@@ -88,8 +72,8 @@ public class Main extends Worker {
 
         StandardWithEnforcedDiversityEvolver<Tree<String>, AbstractSTLNode, Double>
                 evolverDiversity = new StandardWithEnforcedDiversityEvolver<>(
-                    mapper,
-                    new GrammarRampedHalfAndHalf<>(3, 20, grammar),
+                    problem.getSolutionMapper(),
+                    new GrammarRampedHalfAndHalf<>(3, 20, problem.getGrammar()),
                     PartialComparator.from(Double.class).comparing(Individual::getFitness),
                     500,
                     operators,
@@ -102,7 +86,7 @@ public class Main extends Worker {
 
         Collection<AbstractSTLNode> solutions = evolver.solve(
 //        Collection<AbstractSTLNode> solutions = evolverDiversity.solve(
-                Misc.cached(fitnessFunction, 20),
+                Misc.cached(problem.getFitnessFunction(), 20),
                 new Iterations(10),
                 r,
                 executorService,

@@ -1,3 +1,5 @@
+package core;
+
 import eu.quanticol.moonlight.signal.Signal;
 import nodes.AbstractSTLNode;
 import signal.Record;
@@ -6,16 +8,18 @@ import signal.SignalBuilder;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class FitnessFunction implements Function<AbstractSTLNode, Double> {
 
     final SignalBuilder signalBuilder = new SignalBuilder();
-    final List<Integer> numIndexes = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7));
-    final List<Integer> boolIndexes = new ArrayList<>(Collections.emptyList());
+    final List<Integer> numIndexes = IntStream.range(0, InvariantsProblem.getNumNames().length).boxed().collect(Collectors.toList());
+    final List<Integer> boolIndexes = IntStream.range(0, InvariantsProblem.getBoolNames().length).boxed().collect(Collectors.toList());
     Signal<Record> signal;
 
     public FitnessFunction(String path) throws IOException {
-        signal = this.signalBuilder.build(path, this.boolIndexes, this.numIndexes);
+        this.signal = this.signalBuilder.build(path, this.boolIndexes, this.numIndexes);
     }
 
 
