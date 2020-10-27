@@ -1,4 +1,3 @@
-import core.FitnessFunction;
 import core.InvariantsProblem;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
@@ -11,22 +10,20 @@ import it.units.malelab.jgea.core.order.PartialComparator;
 import it.units.malelab.jgea.core.selector.Tournament;
 import it.units.malelab.jgea.core.selector.Worst;
 import it.units.malelab.jgea.core.util.Misc;
-import it.units.malelab.jgea.representation.grammar.Grammar;
 import it.units.malelab.jgea.representation.grammar.cfggp.GrammarBasedSubtreeMutation;
 import it.units.malelab.jgea.representation.grammar.cfggp.GrammarRampedHalfAndHalf;
 import it.units.malelab.jgea.representation.tree.SameRootSubtreeCrossover;
 import it.units.malelab.jgea.representation.tree.Tree;
-import mapper.STLMapper;
 import nodes.AbstractSTLNode;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-@SuppressWarnings("unchecked")
 public class Main extends Worker {
 
     // TODO: fix 'unchecked or unsafe operations' warning (now suppressed, caused by PrintStreamListener).
+    // TODO: properly save result of evolution.
 
     public static void main(String[] args) {
         new Main(args);
@@ -40,18 +37,20 @@ public class Main extends Worker {
     public void run() {
         System.out.println("Main");
         try {
-            nonTemporalRun();
+            solve();
         } catch (IOException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
 
 
-    private void nonTemporalRun() throws IOException, ExecutionException, InterruptedException {
+    @SuppressWarnings("RedundantSuppression")
+    private void solve() throws IOException, ExecutionException, InterruptedException {
         Random r = new Random(42);
-        String grammarPath = "grammar_temporal.bnf";
-//        String dataPath = "data/swat_minimal.csv";
+        String grammarPath = "test_grammar.bnf";
         String dataPath = "data/test_data.csv";
+//        String grammarPath = "grammar_temporal.bnf";
+//        String dataPath = "data/swat_partial.csv";
         InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath);
 
         Map<GeneticOperator<Tree<String>>, Double> operators = new LinkedHashMap<>();
@@ -84,8 +83,9 @@ public class Main extends Worker {
                     100
         );
 
-        Collection<AbstractSTLNode> solutions = evolver.solve(
-//        Collection<AbstractSTLNode> solutions = evolverDiversity.solve(
+        @SuppressWarnings("unchecked")
+//        Collection<AbstractSTLNode> solutions = evolver.solve(
+        Collection<AbstractSTLNode> solutions = evolverDiversity.solve(
                 Misc.cached(problem.getFitnessFunction(), 20),
                 new Iterations(10),
                 r,

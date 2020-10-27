@@ -1,7 +1,6 @@
 package signal;
 
 import core.InvariantsProblem;
-import signal.SignalBuilder;
 
 import java.util.HashMap;
 

@@ -1,6 +1,5 @@
 package core;
 
-import core.FitnessFunction;
 import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.STLMapper;
 import nodes.AbstractSTLNode;

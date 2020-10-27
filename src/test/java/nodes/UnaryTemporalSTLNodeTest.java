@@ -20,24 +20,24 @@ import static org.junit.Assert.assertEquals;
 public class UnaryTemporalSTLNodeTest {
 
     // Test tree.
-    Tree<String> v = Tree.of("x1");
-    Tree<String> c = Tree.of(">");
-    Tree<String> n = Tree.of("3");
-    Tree<String> var = Tree.of("<var>", v);
-    Tree<String> comp = Tree.of("<comp>", c);
-    Tree<String> dig = Tree.of("<dig>", n);
-    Tree<String> num = Tree.of("<num>", dig);
-    List<Tree<String>> siblings = new ArrayList<>() {{
+    final Tree<String> v = Tree.of("x1");
+    final Tree<String> c = Tree.of(">");
+    final Tree<String> n = Tree.of("3");
+    final Tree<String> var = Tree.of("<var>", v);
+    final Tree<String> comp = Tree.of("<comp>", c);
+    final Tree<String> dig = Tree.of("<dig>", n);
+    final Tree<String> num = Tree.of("<num>", dig);
+    final List<Tree<String>> siblings = new ArrayList<>() {{
         add(var);
         add(comp);
         add(num);
     }};
-    boolean[] boolValues = new boolean[]{};
-    Signal<Record> signal = new Signal<>();
+    final boolean[] boolValues = new boolean[]{};
+    final Signal<Record> signal = new Signal<>();
     Record record;
 
     // Creates monitor with x1 > 3.
-    NumericSTLNode firstChild = new NumericSTLNode(siblings);
+    final NumericSTLNode firstChild = new NumericSTLNode(siblings);
 
     public UnaryTemporalSTLNodeTest() throws IOException {
         // Initialising variables.

@@ -31,7 +31,7 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
 //        System.out.println(monitor);
 
         if (this.signal.size() < monitor.getMinLength()) {
-            System.out.println("Signal: " + this.signal.size() + "\tminLength: " + monitor.getMinLength());
+//            System.out.println("Signal: " + this.signal.size() + "\t min length: " + monitor.getMinLength());
             return 1.0;
         }
 
