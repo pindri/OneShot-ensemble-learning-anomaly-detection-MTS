@@ -22,6 +22,10 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
         this.signal = this.signalBuilder.build(path, this.boolIndexes, this.numIndexes);
     }
 
+    public Signal<Record> buildTest(String path) throws IOException {
+        return this.signalBuilder.build(path, this.boolIndexes, this.numIndexes);
+    }
+
 
     @Override
     public Double apply(AbstractSTLNode monitor) {
@@ -30,15 +34,26 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
 //        System.out.println("STL tree:");
 //        System.out.println(monitor);
 
+        double penalty = 10.0;
+
         if (this.signal.size() < monitor.getMinLength()) {
 //            System.out.println("Signal: " + this.signal.size() + "\t min length: " + monitor.getMinLength());
-            return 1.0;
+            return penalty;
         }
 
         Signal<Double> pointRobustness = monitor.getOperator().apply(this.signal).monitor(this.signal);
 
-        for (int t = (int) pointRobustness.start(); t < pointRobustness.end(); t++) {
-            count += Math.abs(pointRobustness.valueAt(t));
+        double rho;
+
+        for (int t = (int) pointRobustness.start(); t <= pointRobustness.end(); t++) {
+            rho = pointRobustness.valueAt(t);
+//            count += Math.abs(rho);
+            if (rho < 0) {
+                count += penalty;
+                return penalty;
+            } else {
+                count += rho;
+            }
         }
 
 //        System.out.println("Fitness: " + count);

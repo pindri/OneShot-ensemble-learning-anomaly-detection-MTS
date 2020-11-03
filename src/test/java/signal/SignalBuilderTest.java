@@ -19,7 +19,7 @@ public class SignalBuilderTest {
     @Test
     public void buildTest() throws IOException {
         String grammarPath = "test_grammar.bnf";
-        String dataPath = "data/test_data.csv";
+        String dataPath = "data/toy_train_data.csv";
         new InvariantsProblem(grammarPath, dataPath);
         SignalBuilder sb = new SignalBuilder();
         List<Integer> numIndexes = new ArrayList<>(Arrays.asList(0, 1, 2, 3));

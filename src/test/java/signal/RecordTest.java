@@ -12,7 +12,7 @@ public class RecordTest {
     @Test
     public void recordTest() throws IOException {
         String grammarPath = "test_grammar.bnf";
-        String dataPath = "data/test_data.csv";
+        String dataPath = "data/toy_train_data.csv";
         // Initialises the variables names taking the first line from the data-path.
         new InvariantsProblem(grammarPath, dataPath);
         boolean[] boolValues = new boolean[]{};

@@ -1,4 +1,6 @@
+import core.FitnessFunction;
 import core.InvariantsProblem;
+import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
@@ -15,6 +17,7 @@ import it.units.malelab.jgea.representation.grammar.cfggp.GrammarRampedHalfAndHa
 import it.units.malelab.jgea.representation.tree.SameRootSubtreeCrossover;
 import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AbstractSTLNode;
+import signal.Record;
 
 import java.io.IOException;
 import java.util.*;
@@ -47,19 +50,22 @@ public class Main extends Worker {
     @SuppressWarnings("RedundantSuppression")
     private void solve() throws IOException, ExecutionException, InterruptedException {
         Random r = new Random(42);
-        String grammarPath = "test_grammar.bnf";
-        String dataPath = "data/test_data.csv";
-//        String grammarPath = "grammar_temporal.bnf";
-//        String dataPath = "data/swat_partial.csv";
+//        String grammarPath = "test_grammar.bnf";
+//        String dataPath = "data/toy_train_data.csv";
+        String grammarPath = "grammar_temporal.bnf";
+        String dataPath = "data/SWaT/full_train_normal_partial.csv";
+//        String dataPath = "data/SWaT/8_vars_train_normal_partial.csv";
         InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath);
 
+        int treeHeight = 35;
+
         Map<GeneticOperator<Tree<String>>, Double> operators = new LinkedHashMap<>();
-        operators.put(new GrammarBasedSubtreeMutation<>(12, problem.getGrammar()), 0.2d);
-        operators.put(new SameRootSubtreeCrossover<>(12), 0.8d);
+        operators.put(new GrammarBasedSubtreeMutation<>(treeHeight, problem.getGrammar()), 0.2d);
+        operators.put(new SameRootSubtreeCrossover<>(treeHeight), 0.8d);
 
         StandardEvolver<Tree<String>, AbstractSTLNode, Double> evolver = new StandardEvolver<>(
                 problem.getSolutionMapper(),
-                new GrammarRampedHalfAndHalf<>(3, 12, problem.getGrammar()),
+                new GrammarRampedHalfAndHalf<>(3, treeHeight, problem.getGrammar()),
                 PartialComparator.from(Double.class).comparing(Individual::getFitness),
                 500,
                 operators,
@@ -72,7 +78,7 @@ public class Main extends Worker {
         StandardWithEnforcedDiversityEvolver<Tree<String>, AbstractSTLNode, Double>
                 evolverDiversity = new StandardWithEnforcedDiversityEvolver<>(
                     problem.getSolutionMapper(),
-                    new GrammarRampedHalfAndHalf<>(3, 20, problem.getGrammar()),
+                    new GrammarRampedHalfAndHalf<>(3, treeHeight, problem.getGrammar()),
                     PartialComparator.from(Double.class).comparing(Individual::getFitness),
                     500,
                     operators,
@@ -87,7 +93,7 @@ public class Main extends Worker {
 //        Collection<AbstractSTLNode> solutions = evolver.solve(
         Collection<AbstractSTLNode> solutions = evolverDiversity.solve(
                 Misc.cached(problem.getFitnessFunction(), 20),
-                new Iterations(10),
+                new Iterations(40),
                 r,
                 executorService,
                 listener(
@@ -99,6 +105,29 @@ public class Main extends Worker {
         System.out.printf("Found %d solutions with %s.%n", solutions.size(), evolver.getClass().getSimpleName());
         System.out.println();
         System.out.println(solutions.iterator().next());
+        evaluateSolution(solutions, (FitnessFunction) problem.getFitnessFunction());
+    }
+
+    public void evaluateSolution(Collection<AbstractSTLNode> solutions, FitnessFunction fitnessFunction) throws IOException {
+        AbstractSTLNode solution = solutions.iterator().next();
+//        String testPath = "data/toy_test_data.csv";
+        String testPath = "data/SWaT/full_test_normal_partial.csv";
+        Signal<Record> testSignal = fitnessFunction.buildTest(testPath);
+
+        Signal<Double> pointRobustness = solution.getOperator().apply(testSignal).monitor(testSignal);
+        double rho;
+
+        int count = 0;
+
+        for (int t = (int) pointRobustness.start(); t <= pointRobustness.end(); t++) {
+            rho = pointRobustness.valueAt(t);
+            if (rho < 0) {
+                System.out.println(t+2 + ": " + rho);
+                count++;
+            }
+        }
+
+        System.out.println("FP: " + count/pointRobustness.size());
     }
 
 }

@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 public class NumericSTLNode extends AbstractSTLNode {
 
-    // TODO: Better number parsing.
-
     private final String variable;
     private final Double number;
     private Comparison comparisonSymbol;

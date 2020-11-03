@@ -42,7 +42,7 @@ public class UnaryTemporalSTLNodeTest {
     public UnaryTemporalSTLNodeTest() throws IOException {
         // Initialising variables.
         String grammarPath = "test_grammar.bnf";
-        String dataPath = "data/test_data.csv";
+        String dataPath = "data/toy_train_data.csv";
         new InvariantsProblem(grammarPath, dataPath);
     }
 
@@ -100,7 +100,7 @@ public class UnaryTemporalSTLNodeTest {
 
         Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
 
-//        printFitness(fitness);
+        printFitness(fitness);
         assertEquals(-1, fitness.valueAt(3), 0.01);
     }
 

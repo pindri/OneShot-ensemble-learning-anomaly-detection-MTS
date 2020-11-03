@@ -20,7 +20,7 @@ public class NumericSTLNodeTest {
 
         // Initialising variables.
         String grammarPath = "test_grammar.bnf";
-        String dataPath = "data/test_data.csv";
+        String dataPath = "data/toy_train_data.csv";
         new InvariantsProblem(grammarPath, dataPath);
 
         // Tree to be parsed.
