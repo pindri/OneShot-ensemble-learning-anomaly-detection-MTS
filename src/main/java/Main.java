@@ -6,6 +6,7 @@ import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
 import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
+import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.listener.collector.*;
 import it.units.malelab.jgea.core.operator.GeneticOperator;
 import it.units.malelab.jgea.core.order.PartialComparator;
@@ -54,10 +55,10 @@ public class Main extends Worker {
 //        String dataPath = "data/toy_train_data.csv";
         String grammarPath = "grammar_temporal.bnf";
         String dataPath = "data/SWaT/full_train_normal_partial.csv";
-//        String dataPath = "data/SWaT/8_vars_train_normal_partial.csv";
-        InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath);
+//        String dataPath = "data/SWaT/8_vars_train_normal_minimal.csv";
+        InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath, 100);
 
-        int treeHeight = 35;
+        int treeHeight = 16;
 
         Map<GeneticOperator<Tree<String>>, Double> operators = new LinkedHashMap<>();
         operators.put(new GrammarBasedSubtreeMutation<>(treeHeight, problem.getGrammar()), 0.2d);
@@ -93,7 +94,7 @@ public class Main extends Worker {
 //        Collection<AbstractSTLNode> solutions = evolver.solve(
         Collection<AbstractSTLNode> solutions = evolverDiversity.solve(
                 Misc.cached(problem.getFitnessFunction(), 20),
-                new Iterations(40),
+                new TargetFitness<>(1d).or(new Iterations(30)),
                 r,
                 executorService,
                 listener(
@@ -105,29 +106,29 @@ public class Main extends Worker {
         System.out.printf("Found %d solutions with %s.%n", solutions.size(), evolver.getClass().getSimpleName());
         System.out.println();
         System.out.println(solutions.iterator().next());
-        evaluateSolution(solutions, (FitnessFunction) problem.getFitnessFunction());
+//        evaluateSolution(solutions, (FitnessFunction) problem.getFitnessFunction());
     }
 
-    public void evaluateSolution(Collection<AbstractSTLNode> solutions, FitnessFunction fitnessFunction) throws IOException {
-        AbstractSTLNode solution = solutions.iterator().next();
-//        String testPath = "data/toy_test_data.csv";
-        String testPath = "data/SWaT/full_test_normal_partial.csv";
-        Signal<Record> testSignal = fitnessFunction.buildTest(testPath);
-
-        Signal<Double> pointRobustness = solution.getOperator().apply(testSignal).monitor(testSignal);
-        double rho;
-
-        int count = 0;
-
-        for (int t = (int) pointRobustness.start(); t <= pointRobustness.end(); t++) {
-            rho = pointRobustness.valueAt(t);
-            if (rho < 0) {
-                System.out.println(t+2 + ": " + rho);
-                count++;
-            }
-        }
-
-        System.out.println("FP: " + count/pointRobustness.size());
-    }
+//    public void evaluateSolution(Collection<AbstractSTLNode> solutions, FitnessFunction fitnessFunction) throws IOException {
+//        AbstractSTLNode solution = solutions.iterator().next();
+////        String testPath = "data/toy_test_data.csv";
+//        String testPath = "data/SWaT/full_test_normal_partial.csv";
+//        List<Signal<Record>> testSignal = fitnessFunction.buildTest(testPath);
+//
+//        Signal<Double> pointRobustness = solution.getOperator().apply(testSignal).monitor(testSignal);
+//        double rho;
+//
+//        int count = 0;
+//
+//        for (int t = (int) pointRobustness.start(); t <= pointRobustness.end(); t++) {
+//            rho = pointRobustness.valueAt(t);
+//            if (rho < 0) {
+//                System.out.println(t+2 + ": " + rho);
+//                count++;
+//            }
+//        }
+//
+//        System.out.println("FP: " + count/pointRobustness.size());
+//    }
 
 }

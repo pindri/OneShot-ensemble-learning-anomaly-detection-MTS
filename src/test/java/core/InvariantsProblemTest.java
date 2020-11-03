@@ -13,7 +13,7 @@ public class InvariantsProblemTest {
         String grammarPath = "grammar_temporal.bnf";
         String dataPath = "data/toy_train_data.csv";
         // Null before an InvariantsProblem is created.
-        new InvariantsProblem(grammarPath, dataPath);
+        new InvariantsProblem(grammarPath, dataPath, 10);
         assertArrayEquals(new String[]{"x1", "x2", "x3", "x4"}, InvariantsProblem.getNumNames());
         assertArrayEquals(new String[]{}, InvariantsProblem.getBoolNames());
     }

@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,8 +16,9 @@ public class SignalBuilder {
     // TODO: abstraction if more signal builders are necessary.
     // TODO: maybe better exception handling?
 
-    public Signal<Record> build(String path, List<Integer> boolIndexes, List<Integer> numIndexes) throws IOException {
-        Signal<Record> signal = new Signal<>();
+    public List<Signal<Record>> build(String path, List<Integer> boolIndexes,
+                                      List<Integer> numIndexes, int traceLength) throws IOException {
+        List<Signal<Record>> signals = new ArrayList<>();
         BufferedReader buffReader = Files.newBufferedReader(Paths.get(path));
         String[] header = buffReader.readLine().split(",");
 
@@ -25,18 +27,24 @@ public class SignalBuilder {
         boolean[] boolValues = new boolean[boolIndexes.size()]; // Dummy variable.
         int time = 0;
 
+        Signal<Record> trace = new Signal<>();
         while ((line = buffReader.readLine()) != null) {
             List<String> input = Arrays.stream(line.split(",")).collect(Collectors.toList());
             numValues = IntStream.range(0, header.length).filter(numIndexes::contains)
-                        .mapToDouble(i -> Double.parseDouble(input.get(i))).toArray();
-
-            signal.add(time, new Record(boolValues, numValues));
+                    .mapToDouble(i -> Double.parseDouble(input.get(i))).toArray();
+            trace.add(time, new Record(boolValues, numValues));
             time++;
+
+            if (time == traceLength) {
+                signals.add(trace);
+                trace = new Signal<>();
+                time = 0;
+            }
         }
 
         buffReader.close();
 
-        return signal;
+        return signals;
     }
 
 

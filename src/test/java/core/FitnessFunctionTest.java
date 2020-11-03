@@ -11,13 +11,14 @@ import static org.junit.Assert.assertTrue;
 
 public class FitnessFunctionTest {
 
+
     @SuppressWarnings({"unchecked", "SpellCheckingInspection"})
     @Test
     public void applyTest() throws IOException {
         // Initialising variables.
         String grammarPath = "test_grammar.bnf";
         String dataPath = "data/toy_train_data.csv";
-        InvariantsProblem p = new InvariantsProblem(grammarPath, dataPath);
+        InvariantsProblem p = new InvariantsProblem(grammarPath, dataPath, 10);
 
         // Creating monitor manually.
         STLMapper mapper = new STLMapper();

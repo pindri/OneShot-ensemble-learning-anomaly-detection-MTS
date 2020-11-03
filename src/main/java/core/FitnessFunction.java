@@ -1,5 +1,6 @@
 package core;
 
+import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import eu.quanticol.moonlight.signal.Signal;
 import nodes.AbstractSTLNode;
 import signal.Record;
@@ -16,48 +17,38 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
     final SignalBuilder signalBuilder = new SignalBuilder();
     final List<Integer> numIndexes = IntStream.range(0, InvariantsProblem.getNumNames().length).boxed().collect(Collectors.toList());
     final List<Integer> boolIndexes = IntStream.range(0, InvariantsProblem.getBoolNames().length).boxed().collect(Collectors.toList());
-    Signal<Record> signal;
+    final int traceLength;
+    List<Signal<Record>> signals;
 
-    public FitnessFunction(String path) throws IOException {
-        this.signal = this.signalBuilder.build(path, this.boolIndexes, this.numIndexes);
+    public FitnessFunction(String path, int traceLength) throws IOException {
+        this.traceLength = traceLength;
+        this.signals = this.signalBuilder.build(path, this.boolIndexes, this.numIndexes, this.traceLength);
     }
-
-    public Signal<Record> buildTest(String path) throws IOException {
-        return this.signalBuilder.build(path, this.boolIndexes, this.numIndexes);
-    }
-
 
     @Override
     public Double apply(AbstractSTLNode monitor) {
-        double count = 0;
 //        System.out.println("\n\nMonitor length: " + monitor.getMinLength());
 //        System.out.println("STL tree:");
 //        System.out.println(monitor);
-
+//
         double penalty = 10.0;
+        double fitness = 0.0;
 
-        if (this.signal.size() < monitor.getMinLength()) {
-//            System.out.println("Signal: " + this.signal.size() + "\t min length: " + monitor.getMinLength());
+        if (this.signals.size() <= monitor.getMinLength()) {
+//            System.out.println("Signal: " + this.signals.size() + "\t min length: " + monitor.getMinLength());
             return penalty;
         }
 
-        Signal<Double> pointRobustness = monitor.getOperator().apply(this.signal).monitor(this.signal);
+//        System.out.println(signals.size() + " " + " " + monitor.getMinLength());
 
-        double rho;
-
-        for (int t = (int) pointRobustness.start(); t <= pointRobustness.end(); t++) {
-            rho = pointRobustness.valueAt(t);
-//            count += Math.abs(rho);
-            if (rho < 0) {
-                count += penalty;
-                return penalty;
-            } else {
-                count += rho;
-            }
+        for (Signal<Record> signal : this.signals) {
+//            double test = monitor.getOperator().apply(signal).monitor(signal).valueAt(signal.start());
+            Signal<Double> m = monitor.getOperator().apply(signal).monitor(signal);
+            fitness += Math.abs(m.valueAt(m.start()));
         }
 
-//        System.out.println("Fitness: " + count);
+//        System.out.println("fitness: " + fitness);
 
-        return count/pointRobustness.size();
+        return fitness;
     }
 }

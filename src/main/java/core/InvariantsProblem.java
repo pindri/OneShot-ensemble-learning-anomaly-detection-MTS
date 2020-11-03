@@ -24,13 +24,13 @@ public class InvariantsProblem implements GrammarBasedProblem<String, AbstractST
     private final STLMapper solutionMapper;
     private final FitnessFunction fitnessFunction;
 
-    public InvariantsProblem(String grammarPath, String dataPath) throws IOException {
+    public InvariantsProblem(String grammarPath, String dataPath, int traceLength) throws IOException {
         // Note: names must be initialised first.
         boolNames = new String[]{}; // No boolean variables are used.
         numNames = initialiseNames(dataPath);
         this.grammar = initialiseGrammar(grammarPath, dataPath);
         this.solutionMapper = new STLMapper();
-        this.fitnessFunction = new FitnessFunction(dataPath);
+        this.fitnessFunction = new FitnessFunction(dataPath, traceLength);
     }
 
     public String[] initialiseNames(String dataPath) throws IOException {

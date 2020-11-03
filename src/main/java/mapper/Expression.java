@@ -15,7 +15,8 @@ public enum Expression implements Element {
     PROP("proposition"),
     NOT("not"),
     AND("and"),
-    OR("or");
+    OR("or"),
+    IMPLIES("implies");
 
     private final String expression;
 

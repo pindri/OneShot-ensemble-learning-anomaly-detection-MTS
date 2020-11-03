@@ -14,7 +14,7 @@ public class RecordTest {
         String grammarPath = "test_grammar.bnf";
         String dataPath = "data/toy_train_data.csv";
         // Initialises the variables names taking the first line from the data-path.
-        new InvariantsProblem(grammarPath, dataPath);
+        new InvariantsProblem(grammarPath, dataPath, 10);
         boolean[] boolValues = new boolean[]{};
         double[] numValues = new double[]{1.43, 12.2, 14.1, 232.3};
 

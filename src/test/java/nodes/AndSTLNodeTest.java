@@ -24,7 +24,7 @@ public class AndSTLNodeTest {
         // Initialising variables.
         String grammarPath = "test_grammar.bnf";
         String dataPath = "data/toy_train_data.csv";
-        new InvariantsProblem(grammarPath, dataPath);
+        new InvariantsProblem(grammarPath, dataPath, 10);
 
             // Tree to be parsed.
             Tree<String> v = Tree.of("x1");
