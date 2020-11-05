@@ -42,4 +42,10 @@ public class SignalBuilderTest {
         assertFalse(signals.isEmpty());
     }
 
+    @Test
+    public void testTest() {
+        SignalBuilder sb = new SignalBuilder();
+
+    }
+
 }

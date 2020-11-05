@@ -48,4 +48,29 @@ public class SignalBuilder {
     }
 
 
+    public List<Integer> parseLabels(String path, int traceLength) throws IOException {
+        BufferedReader buffReader = Files.newBufferedReader(Paths.get(path));
+        buffReader.readLine(); // Header.
+        List<Integer> result = new ArrayList<>();
+
+        String line;
+        int time = 0;
+        int input = 0;
+
+        while ((line = buffReader.readLine()) != null) {
+            input += Integer.parseInt(line);
+            time++;
+
+            if (time == traceLength) {
+                result.add(input);
+                time = 0;
+                input = 0;
+            }
+        }
+
+        buffReader.close();
+
+        return result;
+    }
+
 }

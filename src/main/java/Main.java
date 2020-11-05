@@ -54,26 +54,26 @@ public class Main extends Worker {
 //        String grammarPath = "test_grammar.bnf";
 //        String dataPath = "data/toy_train_data.csv";
         String grammarPath = "grammar_temporal.bnf";
-        String dataPath = "data/SWaT/full_train_normal_partial.csv";
-//        String dataPath = "data/SWaT/8_vars_train_normal_minimal.csv";
+        String dataPath = "data/SWaT/train_partial.csv";
         InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath, 100);
 
-        int treeHeight = 16;
+        int treeHeight = 20;
 
         Map<GeneticOperator<Tree<String>>, Double> operators = new LinkedHashMap<>();
         operators.put(new GrammarBasedSubtreeMutation<>(treeHeight, problem.getGrammar()), 0.2d);
         operators.put(new SameRootSubtreeCrossover<>(treeHeight), 0.8d);
 
-        StandardEvolver<Tree<String>, AbstractSTLNode, Double> evolver = new StandardEvolver<>(
-                problem.getSolutionMapper(),
-                new GrammarRampedHalfAndHalf<>(3, treeHeight, problem.getGrammar()),
-                PartialComparator.from(Double.class).comparing(Individual::getFitness),
-                500,
-                operators,
-                new Tournament(5),
-                new Worst(),
-                500,
-                true
+        StandardEvolver<Tree<String>, AbstractSTLNode, Double>
+                evolver = new StandardEvolver<>(
+                    problem.getSolutionMapper(),
+                    new GrammarRampedHalfAndHalf<>(3, treeHeight, problem.getGrammar()),
+                    PartialComparator.from(Double.class).comparing(Individual::getFitness),
+                    500,
+                    operators,
+                    new Tournament(5),
+                    new Worst(),
+                    500,
+                    true
         );
 
         StandardWithEnforcedDiversityEvolver<Tree<String>, AbstractSTLNode, Double>
@@ -94,7 +94,7 @@ public class Main extends Worker {
 //        Collection<AbstractSTLNode> solutions = evolver.solve(
         Collection<AbstractSTLNode> solutions = evolverDiversity.solve(
                 Misc.cached(problem.getFitnessFunction(), 20),
-                new TargetFitness<>(1d).or(new Iterations(30)),
+                new TargetFitness<>(0d).or(new Iterations(50)),
                 r,
                 executorService,
                 listener(
@@ -106,29 +106,48 @@ public class Main extends Worker {
         System.out.printf("Found %d solutions with %s.%n", solutions.size(), evolver.getClass().getSimpleName());
         System.out.println();
         System.out.println(solutions.iterator().next());
-//        evaluateSolution(solutions, (FitnessFunction) problem.getFitnessFunction());
+        evaluateSolution(solutions, (FitnessFunction) problem.getFitnessFunction());
     }
 
-//    public void evaluateSolution(Collection<AbstractSTLNode> solutions, FitnessFunction fitnessFunction) throws IOException {
-//        AbstractSTLNode solution = solutions.iterator().next();
-////        String testPath = "data/toy_test_data.csv";
-//        String testPath = "data/SWaT/full_test_normal_partial.csv";
-//        List<Signal<Record>> testSignal = fitnessFunction.buildTest(testPath);
-//
-//        Signal<Double> pointRobustness = solution.getOperator().apply(testSignal).monitor(testSignal);
-//        double rho;
-//
-//        int count = 0;
-//
-//        for (int t = (int) pointRobustness.start(); t <= pointRobustness.end(); t++) {
-//            rho = pointRobustness.valueAt(t);
-//            if (rho < 0) {
-//                System.out.println(t+2 + ": " + rho);
-//                count++;
-//            }
-//        }
-//
-//        System.out.println("FP: " + count/pointRobustness.size());
-//    }
+    public void evaluateSolution(Collection<AbstractSTLNode> solutions, FitnessFunction fitnessFunction) throws IOException {
+        AbstractSTLNode solution = solutions.iterator().next();
+        String testPath = "data/SWaT/test.csv";
+        String labelsPath = "data/SWaT/labels.csv";
+        List<Signal<Record>> testSignal = fitnessFunction.getTestSignals(testPath);
+        List<Integer> labels = fitnessFunction.getTestLabels(labelsPath);
+
+//        System.out.println(labels);
+
+        int TP = 0;
+        int TN = 0;
+        int FP = 0;
+        int FN = 0;
+
+        long P = labels.stream().filter(x -> x > 0).count();
+        long N = labels.size() - P;
+
+        for (int i = 0; i < testSignal.size(); i++) {
+            Signal<Double> s = solution.getOperator().apply(testSignal.get(i)).monitor(testSignal.get(i));
+            double fitness = s.valueAt(s.start());
+            if (fitness == 0) {
+                if (labels.get(i) > 0) {
+                    FN++;
+                } else {
+                    TN++;
+                }
+            } else {
+                if (labels.get(i) > 0) {
+                    TP++;
+                } else {
+                    FP++;
+                }
+            }
+        }
+
+        System.out.println("P: " + P + "\t\tN: " + N);
+        System.out.println("TP: " + TP + "\tFP: " + FP + "\tTN: " + TN + "\tFN: " + FN);
+        System.out.println("TPR: " + TP/P + "\tFPR: " + FP/N + "\tFNR: " + FN/P);
+
+    }
 
 }
