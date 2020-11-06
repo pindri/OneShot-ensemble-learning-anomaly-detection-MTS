@@ -14,8 +14,8 @@ public abstract class AbstractTemporalSTLNode extends AbstractSTLNode {
 
     public AbstractTemporalSTLNode(List<Tree<String>> siblings, Expression expression) {
         this.start = (int) this.parseIntervalBound(siblings.get(1).childStream().collect(Collectors.toList()));
-        this.end = start + (int) Math.max(1.0, this.parseIntervalBound(siblings.get(2).childStream().collect(Collectors.toList())));
-        this.symbol = expression.toString();
+        this.end = this.start + (int) Math.max(1.0, this.parseIntervalBound(siblings.get(2).childStream().collect(Collectors.toList())));
+        this.symbol = expression.toString() + " [" + this.start + ", " + this.end + "]";
     }
 
     public Interval createInterval() {

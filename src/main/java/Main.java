@@ -54,8 +54,8 @@ public class Main extends Worker {
 //        String grammarPath = "test_grammar.bnf";
 //        String dataPath = "data/toy_train_data.csv";
         String grammarPath = "grammar_temporal.bnf";
-        String dataPath = "data/SWaT/train_partial.csv";
-        InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath, 100);
+        String dataPath = "data/SWaT/train.csv";
+        InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath, 50);
 
         int treeHeight = 20;
 
@@ -116,8 +116,6 @@ public class Main extends Worker {
         List<Signal<Record>> testSignal = fitnessFunction.getTestSignals(testPath);
         List<Integer> labels = fitnessFunction.getTestLabels(labelsPath);
 
-//        System.out.println(labels);
-
         int TP = 0;
         int TN = 0;
         int FP = 0;
@@ -146,7 +144,7 @@ public class Main extends Worker {
 
         System.out.println("P: " + P + "\t\tN: " + N);
         System.out.println("TP: " + TP + "\tFP: " + FP + "\tTN: " + TN + "\tFN: " + FN);
-        System.out.println("TPR: " + TP/P + "\tFPR: " + FP/N + "\tFNR: " + FN/P);
+        System.out.println("TPR: " + (TP*1.0)/(P*1.0) + "\tFPR: " + (FP*1.0)/(N*1.0) + "\tFNR: " + (1.0*FN)/(P*1.0));
 
     }
 

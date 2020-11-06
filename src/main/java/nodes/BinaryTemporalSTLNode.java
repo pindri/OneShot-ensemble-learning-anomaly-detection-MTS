@@ -20,12 +20,14 @@ public class BinaryTemporalSTLNode extends AbstractTemporalSTLNode {
                                                  this.createInterval(),
                                                  this.secondChild.getOperator().apply(x),
                                                  new DoubleDomain());
+                break;
             case SINCE:
                 this.operator = x ->
                     TemporalMonitor.sinceMonitor(this.firstChild.getOperator().apply(x),
                                                  this.createInterval(),
                                                  this.secondChild.getOperator().apply(x),
                                                  new DoubleDomain());
+                break;
         }
     }
 

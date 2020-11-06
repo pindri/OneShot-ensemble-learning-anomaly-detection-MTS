@@ -1,5 +1,6 @@
 package core;
 
+import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import eu.quanticol.moonlight.signal.Signal;
 import nodes.AbstractSTLNode;
 import signal.Record;
@@ -43,10 +44,16 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
 
         for (Signal<Record> signal : this.signals) {
             if (signal.size() <= monitor.getMinLength()) {
+//                System.out.println("Monitor length: " + monitor.getMinLength());
+//                System.out.println("LENGTH");
                 fitness += penalty;
+                continue;
             }
-            Signal<Double> m = monitor.getOperator().apply(signal).monitor(signal);
-            fitness += Math.abs(m.valueAt(m.start()));
+//            Signal<Double> m = monitor.getOperator().apply(signal).monitor(signal);
+//            fitness += Math.abs(m.valueAt(m.start()));
+            TemporalMonitor<Record, Double> m = monitor.getOperator().apply(signal);
+            Signal<Double> s = m.monitor(signal);
+            fitness += Math.abs(s.valueAt(s.start()));
         }
 
         return fitness;

@@ -18,21 +18,25 @@ public class UnaryTemporalSTLNode extends AbstractTemporalSTLNode {
                     TemporalMonitor.onceMonitor(this.firstChild.getOperator().apply(x),
                                                 new DoubleDomain(),
                                                 this.createInterval());
+                break;
             case EVENTUALLY:
                 this.operator = x ->
                     TemporalMonitor.eventuallyMonitor(this.firstChild.getOperator().apply(x),
                                                       new DoubleDomain(),
                                                       this.createInterval());
+                break;
             case HISTORICALLY:
                 this.operator = x ->
                     TemporalMonitor.historicallyMonitor(this.firstChild.getOperator().apply(x),
                                                         new DoubleDomain(),
                                                         this.createInterval());
+                break;
             case GLOBALLY:
                 this.operator = x ->
                     TemporalMonitor.globallyMonitor(this.firstChild.getOperator().apply(x),
                                                     new DoubleDomain(),
                                                     this.createInterval());
+                break;
         }
     }
 

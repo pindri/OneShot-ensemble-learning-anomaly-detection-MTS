@@ -46,6 +46,8 @@ public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
             case NOT: return new NotSTLNode(siblings, ancestors);
             case IMPLIES: return new ImpliesSTLNode(siblings, ancestors);
             case OR: return null;
+
+            // Requires Java 14.
 //            case PROP -> new NumericSTLNode(siblings);
 //            case ONCE, EVENTUALLY, HISTORICALLY, GLOBALLY -> new UnaryTemporalSTLNode(siblings, ancestors, expression);
 //            case UNTIL, SINCE -> new BinaryTemporalSTLNode(siblings, ancestors, expression);
