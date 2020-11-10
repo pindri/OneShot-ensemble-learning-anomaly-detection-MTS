@@ -7,8 +7,6 @@ repositories {
 }
 
 compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
     options.encoding = 'UTF-8'
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
@@ -18,14 +16,33 @@ task(run, type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
-task buildFatJar(type: Jar) {
+task mainJar(type: Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes(
                 'Main-Class': 'Main'             
         )
     }
-    classifier = 'all'
-    archiveBaseName = 'fatJar'
+    archiveBaseName = 'mainJar'
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+         }
+            {
+                exclude "META-INF/*.SF"
+                exclude "META-INF/*.DSA"
+                exclude "META-INF/*.RSA"
+            }
+    with jar
+}
+
+task comparisonJar(type: Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes(
+                'Main-Class': 'InvariantsProblemComparison'             
+        )
+    }
+    archiveBaseName = 'comparisonJar'
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
          }
