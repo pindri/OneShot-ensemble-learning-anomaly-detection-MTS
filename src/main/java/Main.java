@@ -55,7 +55,7 @@ public class Main extends Worker {
 //        String dataPath = "data/toy_train_data.csv";
         String grammarPath = "grammar_temporal.bnf";
         String dataPath = "data/SWaT/train.csv";
-        InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath, 50);
+        InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath, 10);
 
         int treeHeight = 20;
 

@@ -59,5 +59,42 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
         return fitness;
     }
 
+    public void evaluateSolution(AbstractSTLNode solution) throws IOException {
+        String testPath = "data/SWaT/test.csv";
+        String labelsPath = "data/SWaT/labels.csv";
+        List<Signal<Record>> testSignal = this.getTestSignals(testPath);
+        List<Integer> labels = this.getTestLabels(labelsPath);
+
+        int TP = 0;
+        int TN = 0;
+        int FP = 0;
+        int FN = 0;
+
+        long P = labels.stream().filter(x -> x > 0).count();
+        long N = labels.size() - P;
+
+        for (int i = 0; i < testSignal.size(); i++) {
+            Signal<Double> s = solution.getOperator().apply(testSignal.get(i)).monitor(testSignal.get(i));
+            double fitness = s.valueAt(s.start());
+            if (fitness == 0) {
+                if (labels.get(i) > 0) {
+                    FN++;
+                } else {
+                    TN++;
+                }
+            } else {
+                if (labels.get(i) > 0) {
+                    TP++;
+                } else {
+                    FP++;
+                }
+            }
+        }
+
+        System.out.println("P: " + P + "\t\tN: " + N);
+        System.out.println("TP: " + TP + "\tFP: " + FP + "\tTN: " + TN + "\tFN: " + FN);
+        System.out.println("TPR: " + (TP*1.0)/(P*1.0) + "\tFPR: " + (FP*1.0)/(N*1.0) + "\tFNR: " + (1.0*FN)/(P*1.0));
+
+    }
 
 }
