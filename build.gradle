@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 repositories {
@@ -11,9 +12,9 @@ compileJava {
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
-task(run, type: JavaExec) {
-    main = 'Main'
-    classpath = sourceSets.main.runtimeClasspath
+task compare (type: JavaExec){
+  main = "InvariantsProblemComparison"
+  classpath = sourceSets.main.runtimeClasspath
 }
 
 task mainJar(type: Jar) {

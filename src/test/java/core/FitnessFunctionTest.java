@@ -18,7 +18,9 @@ public class FitnessFunctionTest {
         // Initialising variables.
         String grammarPath = "test_grammar.bnf";
         String dataPath = "data/toy_train_data.csv";
-        InvariantsProblem p = new InvariantsProblem(grammarPath, dataPath, 10);
+        String testPath = "data/SWaT/test.csv";
+        String labelsPath = "data/SWaT/labels.csv";
+        InvariantsProblem p = new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10);
 
         // Creating monitor manually.
         STLMapper mapper = new STLMapper();

@@ -43,7 +43,9 @@ public class UnaryTemporalSTLNodeTest {
         // Initialising variables.
         String grammarPath = "test_grammar.bnf";
         String dataPath = "data/toy_train_data.csv";
-        new InvariantsProblem(grammarPath, dataPath, 2);
+        String testPath = "data/SWaT/test.csv";
+        String labelsPath = "data/SWaT/labels.csv";
+        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10);
     }
 
     public void populateSignal() {
