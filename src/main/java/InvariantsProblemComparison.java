@@ -51,15 +51,17 @@ public class InvariantsProblemComparison extends Worker {
         int nIterations = i(a("nIterations", "100"));
         String evolverNamePattern = a("evolver", ".*Diversity.*");
         int[] seeds = ri(a("seed", "0:1"));
+        String trainPath = a("trainPath", "data/SWaT/train_partial.csv");
+        String testPath = a("testPath", "data/SWaT/test.csv");
+        String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
+        String grammarPath = a("grammarPath", "grammar_temporal.bnf");
 //        double[] constants = new double[]{0.1, 1d, 10d};
 
-        String grammarPath = "grammar_temporal.bnf";
-        String dataPath = "data/SWaT/train_partial.csv";
 
         List<InvariantsProblem> problems = null;
         try {
             problems = List.of(
-                    new InvariantsProblem(grammarPath, dataPath, 12)
+                    new InvariantsProblem(grammarPath, trainPath, testPath, labelsPath, 12)
             );
         } catch (IOException e) {
             e.printStackTrace();
@@ -132,15 +134,17 @@ public class InvariantsProblemComparison extends Worker {
                                         new Basic(),
                                         new Population(),
                                         new Diversity(),
-                                        new FunctionOfOneBest<>(i -> List.of(new Item(
-                                           "temporal.length",
-                                           i.getSolution().getMinLength(),
-                                           "%3d"
-                                        ))),
+                                        new FunctionOfOneBest<>
+                                                (i -> List.of(new Item(
+                                                        "temporal.length",
+                                                        i.getSolution().getMinLength(),
+                                                        "%3d"
+                                                ))),
+                                        new FunctionOfOneBest<>
+                                                (i -> problem.getFitnessFunction().evaluateSolution(i.getSolution())),
                                         new BestTreeInfo("%7.5f")
-//                                        , new BestPrinter(BestPrinter.Part.SOLUTION, "%80.80s")
+////                                        , new BestPrinter(BestPrinter.Part.SOLUTION, "%80.80s")
                         );
-
 
                         Stopwatch stopwatch = Stopwatch.createStarted();
                         Evolver<Tree<String>, AbstractSTLNode, Double> evolver = evolverEntry.getValue().apply(problem);

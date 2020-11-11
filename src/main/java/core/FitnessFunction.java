@@ -2,6 +2,7 @@ package core;
 
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import eu.quanticol.moonlight.signal.Signal;
+import it.units.malelab.jgea.core.listener.collector.Item;
 import nodes.AbstractSTLNode;
 import signal.Record;
 import signal.SignalBuilder;
@@ -18,20 +19,17 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
     final List<Integer> numIndexes = IntStream.range(0, InvariantsProblem.getNumNames().length).boxed().collect(Collectors.toList());
     final List<Integer> boolIndexes = IntStream.range(0, InvariantsProblem.getBoolNames().length).boxed().collect(Collectors.toList());
     final int traceLength;
+    private final List<Signal<Record>> testSignals;
+    private final List<Integer> testLabels;
     List<Signal<Record>> signals;
 
-    public FitnessFunction(String path, int traceLength) throws IOException {
+    public FitnessFunction(String trainPath, String testPath, String labelPath, int traceLength) throws IOException {
         this.traceLength = traceLength;
-        this.signals = this.signalBuilder.build(path, this.boolIndexes, this.numIndexes, this.traceLength);
+        this.signals = this.signalBuilder.build(trainPath, this.boolIndexes, this.numIndexes, this.traceLength);
+        this.testSignals = this.signalBuilder.build(testPath, this.boolIndexes, this.numIndexes, this.traceLength);
+        this.testLabels = this.signalBuilder.parseLabels(labelPath, this.traceLength);
     }
 
-    public List<Signal<Record>> getTestSignals (String path) throws IOException {
-        return this.signalBuilder.build(path, this.boolIndexes, this.numIndexes, this.traceLength);
-    }
-
-    public List<Integer> getTestLabels (String path) throws IOException {
-        return this.signalBuilder.parseLabels(path, this.traceLength);
-    }
 
     @Override
     public Double apply(AbstractSTLNode monitor) {
@@ -59,11 +57,9 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
         return fitness;
     }
 
-    public void evaluateSolution(AbstractSTLNode solution) throws IOException {
-        String testPath = "data/SWaT/test.csv";
-        String labelsPath = "data/SWaT/labels.csv";
-        List<Signal<Record>> testSignal = this.getTestSignals(testPath);
-        List<Integer> labels = this.getTestLabels(labelsPath);
+    public List<Item> evaluateSolution(AbstractSTLNode solution) {
+        List<Signal<Record>> testSignal = this.testSignals;
+        List<Integer> labels = this.testLabels;
 
         int TP = 0;
         int TN = 0;
@@ -91,9 +87,21 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
             }
         }
 
-        System.out.println("P: " + P + "\t\tN: " + N);
-        System.out.println("TP: " + TP + "\tFP: " + FP + "\tTN: " + TN + "\tFN: " + FN);
-        System.out.println("TPR: " + (TP*1.0)/(P*1.0) + "\tFPR: " + (FP*1.0)/(N*1.0) + "\tFNR: " + (1.0*FN)/(P*1.0));
+        double TPR =(TP*1.0)/(P*1.0);
+        double FPR = (FP*1.0)/(N*1.0);
+        double FNR = (1.0*FN)/(P*1.0);
+
+        List<Item> items = new ArrayList<>();
+        items.add(new Item("test.TPR", TPR, "%7.5f"));
+        items.add(new Item("test.FPR", FPR, "%7.5f"));
+        items.add(new Item("test.FNR", FNR, "%7.5f"));
+
+//        System.out.println("P: " + P + "\t\tN: " + N);
+//        System.out.println("TP: " + TP + "\tFP: " + FP + "\tTN: " + TN + "\tFN: " + FN);
+//        System.out.println("TPR: " + (TP*1.0)/(P*1.0) + "\tFPR: " + (FP*1.0)/(N*1.0) + "\tFNR: " + (1.0*FN)/(P*1.0));
+
+        return items;
+
 
     }
 

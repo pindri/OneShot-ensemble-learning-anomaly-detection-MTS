@@ -2,7 +2,6 @@ package core;
 
 import it.units.malelab.jgea.representation.grammar.Grammar;
 import it.units.malelab.jgea.representation.grammar.GrammarBasedProblem;
-import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.STLMapper;
 import nodes.AbstractSTLNode;
 
@@ -12,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,13 +22,14 @@ public class InvariantsProblem implements GrammarBasedProblem<String, AbstractST
     private final STLMapper solutionMapper;
     private final FitnessFunction fitnessFunction;
 
-    public InvariantsProblem(String grammarPath, String dataPath, int traceLength) throws IOException {
+    public InvariantsProblem(String grammarPath, String trainPath, String testPath, String labelPath,
+                             int traceLength) throws IOException {
         // Note: names must be initialised first.
         boolNames = new String[]{}; // No boolean variables are used.
-        numNames = initialiseNames(dataPath);
-        this.grammar = initialiseGrammar(grammarPath, dataPath);
+        numNames = initialiseNames(trainPath);
+        this.grammar = initialiseGrammar(grammarPath, trainPath);
         this.solutionMapper = new STLMapper();
-        this.fitnessFunction = new FitnessFunction(dataPath, traceLength);
+        this.fitnessFunction = new FitnessFunction(trainPath, testPath, labelPath, traceLength);
     }
 
     public String[] initialiseNames(String dataPath) throws IOException {
@@ -56,12 +55,12 @@ public class InvariantsProblem implements GrammarBasedProblem<String, AbstractST
     }
 
     @Override
-    public Function<Tree<String>, AbstractSTLNode> getSolutionMapper() {
+    public STLMapper getSolutionMapper() {
         return this.solutionMapper;
     }
 
     @Override
-    public Function<AbstractSTLNode, Double> getFitnessFunction() {
+    public FitnessFunction getFitnessFunction() {
         return this.fitnessFunction;
     }
 
