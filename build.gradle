@@ -17,33 +17,14 @@ task compare (type: JavaExec){
   classpath = sourceSets.main.runtimeClasspath
 }
 
-task mainJar(type: Jar) {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    manifest {
-        attributes(
-                'Main-Class': 'Main'             
-        )
-    }
-    archiveBaseName = 'mainJar'
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-         }
-            {
-                exclude "META-INF/*.SF"
-                exclude "META-INF/*.DSA"
-                exclude "META-INF/*.RSA"
-            }
-    with jar
-}
-
-task comparisonJar(type: Jar) {
+task buildComparisonJar(type: Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes(
                 'Main-Class': 'InvariantsProblemComparison'             
         )
     }
-    archiveBaseName = 'comparisonJar'
+    archiveBaseName = 'comparison'
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
          }

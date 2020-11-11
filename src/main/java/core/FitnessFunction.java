@@ -49,9 +49,8 @@ public class FitnessFunction implements Function<AbstractSTLNode, Double> {
             }
 //            Signal<Double> m = monitor.getOperator().apply(signal).monitor(signal);
 //            fitness += Math.abs(m.valueAt(m.start()));
-            TemporalMonitor<Record, Double> m = monitor.getOperator().apply(signal);
-            Signal<Double> s = m.monitor(signal);
-            fitness += Math.abs(s.valueAt(s.start()));
+            Signal<Double> m = monitor.getOperator().apply(signal).monitor(signal);
+            fitness += Math.abs(m.valueAt(m.start()));
         }
 
         return fitness;

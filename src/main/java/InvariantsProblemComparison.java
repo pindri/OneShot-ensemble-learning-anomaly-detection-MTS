@@ -45,23 +45,24 @@ public class InvariantsProblemComparison extends Worker {
     @Override
     public void run() {
         int nPop = i(a("nPop", "100"));
-        int maxHeight = i(a("maxHeight", "10"));
+        int maxHeight = i(a("maxHeight", "20"));
         int nTournament = 5;
         int diversityMaxAttempts = 100;
-        int nIterations = i(a("nIterations", "100"));
+        int nIterations = i(a("nIterations", "250"));
         String evolverNamePattern = a("evolver", ".*Diversity.*");
-        int[] seeds = ri(a("seed", "0:1"));
-        String trainPath = a("trainPath", "data/SWaT/train_partial.csv");
+        int[] seeds = ri(a("seed", "42:43"));
+        String trainPath = a("trainPath", "data/SWaT/train.csv");
         String testPath = a("testPath", "data/SWaT/test.csv");
         String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
         String grammarPath = a("grammarPath", "grammar_temporal.bnf");
+        int traceLength = i(a("traceLength", "100"));
 //        double[] constants = new double[]{0.1, 1d, 10d};
 
 
         List<InvariantsProblem> problems = null;
         try {
             problems = List.of(
-                    new InvariantsProblem(grammarPath, trainPath, testPath, labelsPath, 12)
+                    new InvariantsProblem(grammarPath, trainPath, testPath, labelsPath, traceLength)
             );
         } catch (IOException e) {
             e.printStackTrace();

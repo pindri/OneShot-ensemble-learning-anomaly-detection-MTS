@@ -18,7 +18,6 @@ import it.units.malelab.jgea.representation.grammar.cfggp.GrammarRampedHalfAndHa
 import it.units.malelab.jgea.representation.tree.SameRootSubtreeCrossover;
 import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AbstractSTLNode;
-import signal.Record;
 
 import java.io.IOException;
 import java.util.*;
@@ -55,7 +54,7 @@ public class Main extends Worker {
         String dataPath = "data/SWaT/train.csv";
         String testPath = "data/SWaT/test.csv";
         String labelsPath = "data/SWaT/labels.csv";
-        InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10);
+        InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 250);
 
 
         int treeHeight = 20;
