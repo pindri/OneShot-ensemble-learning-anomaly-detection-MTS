@@ -17,7 +17,7 @@ public class STLMapperTest {
         // First branch.
         Tree<String> v1 = Tree.of("x1");
         Tree<String> c1 = Tree.of(">");
-        Tree<String> n1 = Tree.of("3");
+        Tree<String> n1 = Tree.of("1");
 
         Tree<String> propSymbol1 = Tree.of("proposition");
         Tree<String> var1 = Tree.of("<var>", v1);
@@ -30,7 +30,7 @@ public class STLMapperTest {
         // Second branch.
         Tree<String> v2 = Tree.of("x2");
         Tree<String> c2 = Tree.of("<");
-        Tree<String> n2 = Tree.of("3");
+        Tree<String> n2 = Tree.of("2");
 
         Tree<String> propSymbol2 = Tree.of("proposition");
         Tree<String> var2 = Tree.of("<var>", v2);
@@ -52,6 +52,6 @@ public class STLMapperTest {
         System.out.println(node);
 
         assertEquals(node.getSymbol(), "AND");
-        assertEquals(node.getFirstChild().getSymbol(), "x1 > 3.0");
+        assertEquals(node.getFirstChild().getSymbol(), "x1 > 0.1");
     }
 }

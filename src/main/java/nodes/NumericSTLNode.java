@@ -36,7 +36,7 @@ public class NumericSTLNode extends AbstractSTLNode {
     private double parseNumber(List<Tree<String>> digits) {
         double result = 0.0;
         for (int i = 0; i < digits.size(); i++) {
-            result += Double.parseDouble(digits.get(i).child(0).content()) * Math.pow(10, - (i));
+            result += Double.parseDouble(digits.get(i).child(0).content()) * Math.pow(10, - (i+1));
         }
         return result;
     }

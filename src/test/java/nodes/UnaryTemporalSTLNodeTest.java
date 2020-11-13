@@ -43,21 +43,21 @@ public class UnaryTemporalSTLNodeTest {
         // Initialising variables.
         String grammarPath = "test_grammar.bnf";
         String dataPath = "data/toy_train_data.csv";
-        String testPath = "data/SWaT/test.csv";
-        String labelsPath = "data/SWaT/labels.csv";
+        String testPath = "data/toy_test_data.csv";
+        String labelsPath = "data/toy_labels.csv";
         new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10);
     }
 
     public void populateSignal() {
-        this.record = new Record(this.boolValues, new double[]{1, 2.0, 3.0, 4.0});
+        this.record = new Record(this.boolValues, new double[]{0.1, 0.20, 0.30, 0.40});
         this.signal.add(0, this.record);
-        this.record = new Record(this.boolValues, new double[]{3.5, 2.1, 3.1, 4.1});
+        this.record = new Record(this.boolValues, new double[]{0.35, 0.21, 0.31, 0.41});
         this.signal.add(1, this.record);
-        this.record = new Record(this.boolValues, new double[]{2, 2.2, 3.2, 4.2});
+        this.record = new Record(this.boolValues, new double[]{0.2, 0.22, 0.32, 0.42});
         this.signal.add(2, this.record);
-        this.record = new Record(this.boolValues, new double[]{2.3, 2.2, 3.2, 4.2});
+        this.record = new Record(this.boolValues, new double[]{0.23, 0.22, 0.32, 0.42});
         this.signal.add(3, this.record);
-        this.record = new Record(this.boolValues, new double[]{2.9, 2.2, 3.2, 4.2});
+        this.record = new Record(this.boolValues, new double[]{0.29, 0.22, 0.32, 0.42});
         this.signal.add(4, this.record);
     }
 
@@ -84,8 +84,8 @@ public class UnaryTemporalSTLNodeTest {
         Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
 
 //        printFitness(fitness);
-        assertEquals(0.5, fitness.valueAt(0), 0.01);
-        assertEquals(-0.1, fitness.valueAt(2), 0.01);
+        assertEquals(0.05, fitness.valueAt(0), 0.001);
+        assertEquals(-0.01, fitness.valueAt(2), 0.001);
     }
 
     @Test
@@ -102,8 +102,8 @@ public class UnaryTemporalSTLNodeTest {
 
         Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
 
-        printFitness(fitness);
-        assertEquals(-1, fitness.valueAt(3), 0.01);
+        //printFitness(fitness);
+        assertEquals(-0.1, fitness.valueAt(3), 0.001);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class UnaryTemporalSTLNodeTest {
         Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
 
 //        printFitness(fitness);
-        assertEquals(0.5, fitness.valueAt(2), 0.01);
+        assertEquals(0.05, fitness.valueAt(2), 0.001);
     }
 
     @Test
@@ -139,7 +139,7 @@ public class UnaryTemporalSTLNodeTest {
         Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
 
 //        printFitness(fitness);
-        assertEquals(-1, fitness.valueAt(2), 0.01);
+        assertEquals(-0.1, fitness.valueAt(2), 0.001);
     }
 
 }

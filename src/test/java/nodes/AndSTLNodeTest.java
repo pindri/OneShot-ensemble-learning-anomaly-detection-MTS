@@ -24,8 +24,8 @@ public class AndSTLNodeTest {
         // Initialising variables.
         String grammarPath = "test_grammar.bnf";
         String dataPath = "data/toy_train_data.csv";
-        String testPath = "data/SWaT/test.csv";
-        String labelsPath = "data/SWaT/labels.csv";
+        String testPath = "data/toy_test_data.csv";
+        String labelsPath = "data/toy_labels.csv";
         new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10);
 
             // Tree to be parsed.
@@ -44,7 +44,7 @@ public class AndSTLNodeTest {
                 add(num);
             }};
 
-        // Creates monitor with x2 > 3.
+        // Creates monitor with x2 > 0.3.
         NumericSTLNode node = new NumericSTLNode(siblings);
 
             // Tree to be parsed.
@@ -63,24 +63,26 @@ public class AndSTLNodeTest {
                 add(num1);
             }};
 
-        // Creates monitor with x1 < 5.
+        // Creates monitor with x3 < 0.5.
         NumericSTLNode node1 = new NumericSTLNode(siblings1);
 
 
         // Creating a record to monitor.
         boolean[] boolValues = new boolean[]{};
-        double[] numValues = new double[]{3.5, 4, 1.5, 4};
+        double[] numValues = new double[]{0.35, 0.4, 0.15, 0.4};
         Record record = new Record(boolValues, numValues);
         Signal<Record> signal = new Signal<>();
         signal.add(0, record);
 
-        // Creating AND TemporalMonitor for x1 > 3 and x3 < 5.
+        // Creating AND TemporalMonitor for x1 > 0.3 and x3 < 0.5.
         Function<Signal<Record>, TemporalMonitor<Record, Double>> operator;
         operator = x -> TemporalMonitor.andMonitor(node.getOperator().apply(x),
                                                    new DoubleDomain(),
                                                    node1.getOperator().apply(x));
-        double fitness = operator.apply(signal).monitor(signal).valueAt(signal.end());
-        assertEquals(0.5, fitness, 0);
+        Signal<Double> m = operator.apply(signal).monitor(signal);
+
+        double fitness = m.valueAt(m.start());
+        assertEquals(0.05, fitness, 0.001);
 
     }
 }

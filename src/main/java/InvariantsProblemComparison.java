@@ -85,7 +85,7 @@ public class InvariantsProblemComparison extends Worker {
                 nPop,
                 Map.of(
                     new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
-                    new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.20d
+                    new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
                 ),
                 new Tournament(nTournament),
                 new Worst(),
@@ -100,7 +100,7 @@ public class InvariantsProblemComparison extends Worker {
                 nPop,
                 Map.of(
                         new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
-                        new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.20d
+                        new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
                 ),
                 new Tournament(nTournament),
                 new Worst(),
@@ -116,6 +116,7 @@ public class InvariantsProblemComparison extends Worker {
                 .filter(e -> e.getKey().matches(evolverNamePattern))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         L.info(String.format("Going to test with %d evolver/s: %s%n", evolvers.size(), evolvers.keySet()));
+
 
 
         for (int seed : seeds) {
@@ -154,7 +155,7 @@ public class InvariantsProblemComparison extends Worker {
                         @SuppressWarnings("unchecked")
                         Collection<AbstractSTLNode> solutions = evolver.solve(
                                 Misc.cached(problem.getFitnessFunction(), 10000),
-                                new TargetFitness<>(0d).or(new Iterations(nIterations)),
+                                new TargetFitness<>(0d),
                                 new Random(seed),
                                 executorService,
                                 Listener.onExecutor((listenerFactory.getBaseFileName() == null) ?
@@ -163,6 +164,7 @@ public class InvariantsProblemComparison extends Worker {
                                                     executorService)
                         );
 
+                        System.out.println(solutions.iterator().next());
 
                         L.info(String.format("Done %s: %d solutions in %4.1fs",
                                              keys,
