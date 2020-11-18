@@ -20,7 +20,7 @@ public class InvariantsProblem implements GrammarBasedProblem<String, AbstractST
     private static String[] numNames;
     private final Grammar<String> grammar;
     private final STLMapper solutionMapper;
-    private final FitnessFunction fitnessFunction;
+    private final AbstractFitnessFunction fitnessFunction;
 
     public InvariantsProblem(String grammarPath, String trainPath, String testPath, String labelPath,
                              int traceLength) throws IOException {
@@ -29,7 +29,8 @@ public class InvariantsProblem implements GrammarBasedProblem<String, AbstractST
         numNames = initialiseNames(trainPath);
         this.grammar = initialiseGrammar(grammarPath, trainPath);
         this.solutionMapper = new STLMapper();
-        this.fitnessFunction = new FitnessFunction(trainPath, testPath, labelPath, traceLength);
+//        this.fitnessFunction = new FitnessFunction(trainPath, testPath, labelPath, traceLength);
+        this.fitnessFunction = new FitnessFunctionValidation(trainPath, testPath, labelPath, traceLength);
     }
 
     public String[] initialiseNames(String dataPath) throws IOException {
@@ -60,7 +61,7 @@ public class InvariantsProblem implements GrammarBasedProblem<String, AbstractST
     }
 
     @Override
-    public FitnessFunction getFitnessFunction() {
+    public AbstractFitnessFunction getFitnessFunction() {
         return this.fitnessFunction;
     }
 

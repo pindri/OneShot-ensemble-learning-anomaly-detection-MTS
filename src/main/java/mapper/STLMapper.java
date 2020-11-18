@@ -15,7 +15,9 @@ public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
 
     @Override
     public AbstractSTLNode apply(Tree<String> root) {
-        return parseSubtree(root, new ArrayList<Tree<String>>() {{add(null);}});
+        return parseSubtree(root, new ArrayList<>() {{
+            add(null);
+        }});
     }
 
     public static AbstractSTLNode parseSubtree(Tree<String> root, List<Tree<String>> ancestors) {
@@ -32,31 +34,15 @@ public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
     }
 
     private static AbstractSTLNode createNode(Expression expression, List<Tree<String>> siblings, List<Tree<String>> ancestors) {
-        switch (expression) {
-            case PROP: return new NumericSTLNode(siblings);
-            case HISTORICALLY:
-            case EVENTUALLY:
-            case GLOBALLY:
-            case ONCE:
-                return new UnaryTemporalSTLNode(siblings, ancestors, expression);
-            case UNTIL:
-            case SINCE:
-                return new BinaryTemporalSTLNode(siblings, ancestors, expression);
-            case AND: return new AndSTLNode(siblings, ancestors);
-            case NOT: return new NotSTLNode(siblings, ancestors);
-            case IMPLIES: return new ImpliesSTLNode(siblings, ancestors);
-            case OR: return null;
-
-            // Requires Java 14.
-//            case PROP -> new NumericSTLNode(siblings);
-//            case ONCE, EVENTUALLY, HISTORICALLY, GLOBALLY -> new UnaryTemporalSTLNode(siblings, ancestors, expression);
-//            case UNTIL, SINCE -> new BinaryTemporalSTLNode(siblings, ancestors, expression);
-//            case AND -> new AndSTLNode(siblings, ancestors);
-//            case NOT -> new NotSTLNode(siblings, ancestors);
-//            case IMPLIES -> new ImpliesSTLNode(siblings, ancestors);
-//            case OR -> null;
+        return switch (expression) {
+            case PROP -> new NumericSTLNode(siblings);
+            case HISTORICALLY, EVENTUALLY, GLOBALLY, ONCE -> new UnaryTemporalSTLNode(siblings, ancestors, expression);
+            case UNTIL, SINCE -> new BinaryTemporalSTLNode(siblings, ancestors, expression);
+            case AND -> new AndSTLNode(siblings, ancestors);
+            case NOT -> new NotSTLNode(siblings, ancestors);
+            case IMPLIES -> new ImpliesSTLNode(siblings, ancestors);
+            case OR -> null;
         };
-        return null;
     }
 
     private static List<Tree<String>> getSiblings(Tree<String> node, List<Tree<String>> ancestors) {

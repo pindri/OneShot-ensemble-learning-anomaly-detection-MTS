@@ -1,6 +1,4 @@
-import core.FitnessFunction;
 import core.InvariantsProblem;
-import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;

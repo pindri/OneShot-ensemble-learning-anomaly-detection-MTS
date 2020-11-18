@@ -5,7 +5,6 @@ import it.units.malelab.jgea.core.listener.collector.Item;
 import it.units.malelab.jgea.representation.tree.Tree;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 

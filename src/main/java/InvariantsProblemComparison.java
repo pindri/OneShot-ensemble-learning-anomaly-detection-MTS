@@ -6,7 +6,6 @@ import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
-import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.listener.Listener;
 import it.units.malelab.jgea.core.listener.MultiFileListenerFactory;
@@ -48,15 +47,14 @@ public class InvariantsProblemComparison extends Worker {
         int maxHeight = i(a("maxHeight", "20"));
         int nTournament = 5;
         int diversityMaxAttempts = 100;
-        int nIterations = i(a("nIterations", "250"));
+//        int nIterations = i(a("nIterations", "250"));
         String evolverNamePattern = a("evolver", ".*Diversity.*");
-        int[] seeds = ri(a("seed", "42:43"));
+        int[] seeds = ri(a("seed", "0:1"));
         String trainPath = a("trainPath", "data/SWaT/train.csv");
         String testPath = a("testPath", "data/SWaT/test.csv");
         String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
         String grammarPath = a("grammarPath", "grammar_temporal.bnf");
-        int traceLength = i(a("traceLength", "100"));
-//        double[] constants = new double[]{0.1, 1d, 10d};
+        int traceLength = i(a("traceLength", "50"));
 
 
         List<InvariantsProblem> problems = null;
@@ -115,9 +113,7 @@ public class InvariantsProblemComparison extends Worker {
         evolvers = evolvers.entrySet().stream()
                 .filter(e -> e.getKey().matches(evolverNamePattern))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        L.info(String.format("Going to test with %d evolver/s: %s%n", evolvers.size(), evolvers.keySet()));
-
-
+        L.fine(String.format("Going to test with %d evolver/s: %s%n", evolvers.size(), evolvers.keySet()));
 
         for (int seed : seeds) {
             assert problems != null;
@@ -127,7 +123,8 @@ public class InvariantsProblemComparison extends Worker {
                     Map<String, String> keys = new TreeMap<>(Map.of(
                             "seed", Integer.toString(seed),
                             "problem", problem.getClass().getSimpleName().toLowerCase(),
-                            "evolver", evolverEntry.getKey()
+                            "evolver", evolverEntry.getKey(),
+                            "traceLength", String.valueOf(traceLength)
                     ));
                     try {
                         List<DataCollector<? super Tree<String>, ? super AbstractSTLNode, ? super Double>>
@@ -145,7 +142,7 @@ public class InvariantsProblemComparison extends Worker {
                                         new FunctionOfOneBest<>
                                                 (i -> problem.getFitnessFunction().evaluateSolution(i.getSolution())),
                                         new BestTreeInfo("%7.5f")
-////                                        , new BestPrinter(BestPrinter.Part.SOLUTION, "%80.80s")
+//                                        , new BestPrinter(BestPrinter.Part.SOLUTION, "%80.80s")
                         );
 
                         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -164,7 +161,7 @@ public class InvariantsProblemComparison extends Worker {
                                                     executorService)
                         );
 
-                        System.out.println(solutions.iterator().next());
+                        System.out.println("\n" + solutions.iterator().next());
 
                         L.info(String.format("Done %s: %d solutions in %4.1fs",
                                              keys,
