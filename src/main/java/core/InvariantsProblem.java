@@ -30,7 +30,7 @@ public class InvariantsProblem implements GrammarBasedProblem<String, AbstractST
         this.grammar = initialiseGrammar(grammarPath, trainPath);
         this.solutionMapper = new STLMapper();
 //        this.fitnessFunction = new FitnessFunction(trainPath, testPath, labelPath, traceLength);
-        this.fitnessFunction = new FitnessFunctionValidation(trainPath, testPath, labelPath, traceLength);
+        this.fitnessFunction = new FitnessFunction(trainPath, testPath, labelPath, traceLength);
     }
 
     public String[] initialiseNames(String dataPath) throws IOException {
@@ -38,14 +38,14 @@ public class InvariantsProblem implements GrammarBasedProblem<String, AbstractST
     }
 
     private Grammar<String> initialiseGrammar(String grammarPath, String dataPath) throws IOException {
-        String replacement = Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null)).replace("\"", "").replace(",", " | ");
-
-        try (Stream<String> lines = Files.lines(Path.of(grammarPath))) {
-            List<String> replaced = lines
-                    .map(line-> line.replaceAll("(?m)^<var>.*", "<var> ::= " + replacement))
-                    .collect(Collectors.toList());
-            Files.write(Path.of(grammarPath), replaced);
-        }
+//        String replacement = Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null)).replace("\"", "").replace(",", " | ");
+//
+//        try (Stream<String> lines = Files.lines(Path.of(grammarPath))) {
+//            List<String> replaced = lines
+//                    .map(line-> line.replaceAll("(?m)^<var>.*", "<var> ::= " + replacement))
+//                    .collect(Collectors.toList());
+//            Files.write(Path.of(grammarPath), replaced);
+//        }
 
         return Grammar.fromFile(new File(grammarPath ));
     }

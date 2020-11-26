@@ -6,6 +6,7 @@ import nodes.AbstractSTLNode;
 import signal.Record;
 import signal.SignalBuilder;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,74 +14,83 @@ import java.util.stream.IntStream;
 
 public class FitnessFunction extends AbstractFitnessFunction {
 
-    final SignalBuilder signalBuilder = new SignalBuilder();
+    final SignalBuilder signalBuilder;
     final List<Integer> numIndexes = IntStream.range(0, InvariantsProblem.getNumNames().length).boxed().collect(Collectors.toList());
     final List<Integer> boolIndexes = IntStream.range(0, InvariantsProblem.getBoolNames().length).boxed().collect(Collectors.toList());
-    final int traceLength;
     private final List<Signal<Record>> testSignals;
     private final List<Integer> testLabels;
     List<Signal<Record>> signals;
 
     public FitnessFunction(String trainPath, String testPath, String labelPath, int traceLength) throws IOException {
-        this.traceLength = traceLength;
-        this.signals = this.signalBuilder.build(trainPath, this.boolIndexes, this.numIndexes, this.traceLength);
-        this.testSignals = this.signalBuilder.build(testPath, this.boolIndexes, this.numIndexes, this.traceLength);
-        this.testLabels = this.signalBuilder.parseLabels(labelPath, this.traceLength);
+        this.signalBuilder = new SignalBuilder(traceLength);
+        this.signals = this.signalBuilder.build(trainPath, this.boolIndexes, this.numIndexes);
+        this.testSignals = this.signalBuilder.build(testPath, this.boolIndexes, this.numIndexes);
+        this.testLabels = this.signalBuilder.parseLabels(labelPath);
     }
 
 
     @Override
     public Double apply(AbstractSTLNode monitor) {
-//        System.out.println("\n\nMonitor length: " + monitor.getMinLength());
-//        System.out.println("STL tree:");
-//        System.out.println(monitor);
 
-        double penalty = 10.0;
+        double penalty = Double.MAX_VALUE;
         double fitness = 0.0;
 
         for (Signal<Record> signal : this.signals) {
             if (signal.size() <= monitor.getMinLength()) {
-//                System.out.println("Monitor length: " + monitor.getMinLength());
-//                System.out.println("LENGTH");
                 fitness += penalty;
                 continue;
             }
-//            Signal<Double> m = monitor.getOperator().apply(signal).monitor(signal);
-//            fitness += Math.abs(m.valueAt(m.start()));
-            Signal<Double> m = monitor.getOperator().apply(signal).monitor(signal);
-            fitness += Math.abs(m.valueAt(m.start()));
+
+            Signal<Double> robustness = monitor.getOperator().apply(signal).monitor(signal);
+
+//            fitness_old += Math.abs(monitor.getOperator().apply(signal).monitor(signal).valueAt(signal.end()));
+//            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
+//                fitness_old += Math.abs(robustness.valueAt(t));
+//                count++;
+//            }
+
+            double[] range = IntStream.rangeClosed((int) robustness.start(), (int) robustness.end())
+                    .asDoubleStream().toArray();
+            // robustnessArray: double[][time, value]
+            double[][] robustnessArray = robustness.arrayOf(range, Double::valueOf);
+            // Mean fitness for this signal.
+            fitness += (Arrays.stream(robustnessArray).mapToDouble(x -> Math.abs(x[1])).sum())/(1.0*range.length);
         }
 
-        return fitness;
+        return fitness/this.signals.size();
     }
 
     @Override
     public List<Item> evaluateSolution(AbstractSTLNode solution) {
-        List<Signal<Record>> testSignal = this.testSignals;
-        List<Integer> labels = this.testLabels;
 
         int TP = 0;
         int TN = 0;
         int FP = 0;
         int FN = 0;
 
-        long P = labels.stream().filter(x -> x > 0).count();
-        long N = labels.size() - P;
+        // TODO: first elements will not be considered.
+        long P = this.testLabels.stream().filter(x -> x > 0).count();
+        long N = this.testLabels.size() - P;
+        double fitness;
+        int label;
 
-        for (int i = 0; i < testSignal.size(); i++) {
-            Signal<Double> s = solution.getOperator().apply(testSignal.get(i)).monitor(testSignal.get(i));
-            double fitness = s.valueAt(s.start());
-            if (fitness == 0) {
-                if (labels.get(i) > 0) {
-                    FN++;
+        for (Signal<Record> signal : this.testSignals) {
+            Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
+            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
+                label = this.testLabels.get(t);
+                fitness = robustness.valueAt(t);
+                if (fitness >= 0.0) {
+                    if (label > 0) {
+                        FN++;
+                    } else {
+                        TN++;
+                    }
                 } else {
-                    TN++;
-                }
-            } else {
-                if (labels.get(i) > 0) {
-                    TP++;
-                } else {
-                    FP++;
+                    if (label > 0) {
+                        TP++;
+                    } else {
+                        FP++;
+                    }
                 }
             }
         }
@@ -95,6 +105,25 @@ public class FitnessFunction extends AbstractFitnessFunction {
         items.add(new Item("test.FNR", FNR, "%7.5f"));
 
         return items;
+    }
+
+    @Override
+    public void solutionToFile(AbstractSTLNode solution, String filename) throws IOException {
+
+        FileWriter fw = new FileWriter(filename);
+        fw.write("fitness;label\n");
+
+        double fitness;
+        int label;
+
+        for (Signal<Record> signal : this.testSignals) {
+            Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
+            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
+                label = this.testLabels.get(t);
+                fitness = robustness.valueAt(t);
+                fw.write(fitness + ";" + label + "\n");
+            }
+        }
     }
 
 }

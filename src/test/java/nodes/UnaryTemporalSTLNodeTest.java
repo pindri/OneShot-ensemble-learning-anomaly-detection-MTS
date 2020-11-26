@@ -6,6 +6,7 @@ import eu.quanticol.moonlight.formula.Interval;
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.representation.tree.Tree;
+import mapper.Comparison;
 import org.junit.Test;
 import signal.Record;
 
@@ -102,7 +103,7 @@ public class UnaryTemporalSTLNodeTest {
 
         Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
 
-        //printFitness(fitness);
+//        printFitness(fitness);
         assertEquals(-0.1, fitness.valueAt(3), 0.001);
     }
 
@@ -142,4 +143,13 @@ public class UnaryTemporalSTLNodeTest {
         assertEquals(-0.1, fitness.valueAt(2), 0.001);
     }
 
+    @Test
+    public void sizeTest() {
+        Signal<Double> s = new Signal<>();
+        s.add(0, 3.0);
+        s.add(1, 0.0);
+        s.add(2, 9.0);
+        s.add(3, 9.0);
+        assertEquals(3, s.size());
+    }
 }

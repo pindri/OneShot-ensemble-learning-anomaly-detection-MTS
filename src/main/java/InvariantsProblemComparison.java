@@ -54,7 +54,8 @@ public class InvariantsProblemComparison extends Worker {
         String testPath = a("testPath", "data/SWaT/test.csv");
         String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
         String grammarPath = a("grammarPath", "grammar_temporal.bnf");
-        int traceLength = i(a("traceLength", "50"));
+        String testResultsFile = a("testResultsFile", "testResults.txt");
+        int traceLength = i(a("traceLength", "0"));
 
 
         List<InvariantsProblem> problems = null;
@@ -113,7 +114,7 @@ public class InvariantsProblemComparison extends Worker {
         evolvers = evolvers.entrySet().stream()
                 .filter(e -> e.getKey().matches(evolverNamePattern))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        L.fine(String.format("Going to test with %d evolver/s: %s%n", evolvers.size(), evolvers.keySet()));
+        L.info(String.format("Going to test with %d evolver/s: %s%n", evolvers.size(), evolvers.keySet()));
 
         for (int seed : seeds) {
             assert problems != null;
@@ -161,7 +162,10 @@ public class InvariantsProblemComparison extends Worker {
                                                     executorService)
                         );
 
-                        System.out.println("\n" + solutions.iterator().next());
+                        AbstractSTLNode solution = solutions.iterator().next();
+
+                        System.out.println("\n" + solution);
+                        problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
 
                         L.info(String.format("Done %s: %d solutions in %4.1fs",
                                              keys,
@@ -169,7 +173,7 @@ public class InvariantsProblemComparison extends Worker {
                                              (double) stopwatch.elapsed(TimeUnit.MILLISECONDS) / 1000d
                         ));
 
-                    } catch (InterruptedException | ExecutionException e) {
+                    } catch (InterruptedException | ExecutionException | IOException e) {
                         L.severe(String.format("Cannot complete %s due to %s", keys, e));
                         e.printStackTrace();
                     }

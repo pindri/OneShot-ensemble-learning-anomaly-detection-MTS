@@ -44,7 +44,7 @@ public class NumericSTLNodeTest {
             add(num);
         }};
 
-        // Creates monitor with x2 > 3.
+        // Creates monitor with x2 > 0.2.
         NumericSTLNode monitor = new NumericSTLNode(siblings);
 
         // Creating a record to monitor.
@@ -62,6 +62,7 @@ public class NumericSTLNodeTest {
         signal.add(2, record);
 
         Signal<Double> m = monitor.getOperator().apply(signal).monitor(signal);
+        System.out.println(m.valueAt(0));
 
         assertEquals(0.1, m.valueAt(0), 0.005);
         assertEquals(-0.1, m.valueAt(2), 0.005);
