@@ -5,6 +5,7 @@ import it.units.malelab.jgea.core.listener.collector.Item;
 import nodes.AbstractSTLNode;
 import signal.Record;
 import signal.SignalBuilder;
+import signal.SignalHandler;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,8 +16,10 @@ import java.util.stream.IntStream;
 public class FitnessFunction extends AbstractFitnessFunction {
 
     final SignalBuilder signalBuilder;
-    final List<Integer> numIndexes = IntStream.range(0, InvariantsProblem.getNumNames().length).boxed().collect(Collectors.toList());
-    final List<Integer> boolIndexes = IntStream.range(0, InvariantsProblem.getBoolNames().length).boxed().collect(Collectors.toList());
+    final List<Integer> numIndexes = IntStream.range(0, InvariantsProblem.getNumNames().length).boxed()
+            .collect(Collectors.toList());
+    final List<Integer> boolIndexes = IntStream.range(0, InvariantsProblem.getBoolNames().length).boxed()
+            .collect(Collectors.toList());
     private final List<Signal<Record>> testSignals;
     private final List<Integer> testLabels;
     List<Signal<Record>> signals;
@@ -43,29 +46,25 @@ public class FitnessFunction extends AbstractFitnessFunction {
 
             Signal<Double> robustness = monitor.getOperator().apply(signal).monitor(signal);
 
-//            fitness_old += Math.abs(monitor.getOperator().apply(signal).monitor(signal).valueAt(signal.end()));
-//            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
-//                fitness_old += Math.abs(robustness.valueAt(t));
-//                count++;
-//            }
+            // Last element.
+            fitness += Math.abs(robustness.valueAt(robustness.end()));
 
-            double[] range = IntStream.rangeClosed((int) robustness.start(), (int) robustness.end())
-                    .asDoubleStream().toArray();
-            // robustnessArray: double[][time, value]
-            double[][] robustnessArray = robustness.arrayOf(range, Double::valueOf);
             // Mean fitness for this signal.
-            fitness += (Arrays.stream(robustnessArray).mapToDouble(x -> Math.abs(x[1])).sum())/(1.0*range.length);
+//            int range = (int) robustness.start() - (int) robustness.end();
+//            fitness += ((Arrays.stream(SignalHandler.toDoubleArray(robustness)))
+//                    .mapToDouble(x -> Math.abs(x[1])).sum())/(1.0*range);
         }
 
         return fitness/this.signals.size();
     }
 
+
     @Override
     public List<Item> evaluateSolution(AbstractSTLNode solution) {
 
         int TP = 0;
-        int TN = 0;
         int FP = 0;
+        int TN = 0;
         int FN = 0;
 
         // TODO: first elements will not be considered.
@@ -73,24 +72,28 @@ public class FitnessFunction extends AbstractFitnessFunction {
         long N = this.testLabels.size() - P;
         double fitness;
         int label;
+        int position = 0;
 
+//        for (Signal<Record> signal : this.testSignals) {
+//            Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
+//            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
+//                label = this.testLabels.get(t);
+//                fitness = robustness.valueAt(t);
         for (Signal<Record> signal : this.testSignals) {
-            Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
-            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
-                label = this.testLabels.get(t);
-                fitness = robustness.valueAt(t);
-                if (fitness >= 0.0) {
-                    if (label > 0) {
-                        FN++;
-                    } else {
-                        TN++;
-                    }
+            fitness = solution.getOperator().apply(signal).monitor(signal).valueAt(signal.end());
+            label = this.testLabels.get(position);
+            position++;
+            if (fitness >= 0) {
+                if (label > 0) {
+                    FN++;
                 } else {
-                    if (label > 0) {
-                        TP++;
-                    } else {
-                        FP++;
-                    }
+                    TN++;
+                }
+            } else {
+                if (label > 0) {
+                    TP++;
+                } else {
+                    FP++;
                 }
             }
         }
@@ -115,14 +118,19 @@ public class FitnessFunction extends AbstractFitnessFunction {
 
         double fitness;
         int label;
+        int position = 0;
 
         for (Signal<Record> signal : this.testSignals) {
             Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
-            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
-                label = this.testLabels.get(t);
-                fitness = robustness.valueAt(t);
-                fw.write(fitness + ";" + label + "\n");
-            }
+            fitness = robustness.valueAt(signal.end());
+            label = this.testLabels.get(position);
+            fw.write(fitness + ";" + label + "\n");
+            position++;
+//            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
+//                label = this.testLabels.get(t);
+//                fitness = robustness.valueAt(t);
+//                fw.write(fitness + ";" + label + "\n");
+//            }
         }
     }
 

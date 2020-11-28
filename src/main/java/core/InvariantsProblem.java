@@ -29,16 +29,17 @@ public class InvariantsProblem implements GrammarBasedProblem<String, AbstractST
         numNames = initialiseNames(trainPath);
         this.grammar = initialiseGrammar(grammarPath, trainPath);
         this.solutionMapper = new STLMapper();
-//        this.fitnessFunction = new FitnessFunction(trainPath, testPath, labelPath, traceLength);
         this.fitnessFunction = new FitnessFunction(trainPath, testPath, labelPath, traceLength);
     }
 
     public String[] initialiseNames(String dataPath) throws IOException {
-        return Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null)).replace("\"", "").split(",");
+        return Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null))
+                .replace("\"", "").split(",");
     }
 
     private Grammar<String> initialiseGrammar(String grammarPath, String dataPath) throws IOException {
-//        String replacement = Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null)).replace("\"", "").replace(",", " | ");
+//        String replacement = Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null))
+//                .replace("\"", "").replace(",", " | ");
 //
 //        try (Stream<String> lines = Files.lines(Path.of(grammarPath))) {
 //            List<String> replaced = lines

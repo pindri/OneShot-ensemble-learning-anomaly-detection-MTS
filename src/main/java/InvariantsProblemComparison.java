@@ -6,6 +6,7 @@ import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
+import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.listener.Listener;
 import it.units.malelab.jgea.core.listener.MultiFileListenerFactory;
@@ -55,7 +56,7 @@ public class InvariantsProblemComparison extends Worker {
         String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
         String grammarPath = a("grammarPath", "grammar_temporal.bnf");
         String testResultsFile = a("testResultsFile", "testResults.txt");
-        int traceLength = i(a("traceLength", "0"));
+        int traceLength = i(a("traceLength", "30"));
 
 
         List<InvariantsProblem> problems = null;
@@ -154,11 +155,13 @@ public class InvariantsProblemComparison extends Worker {
                         Collection<AbstractSTLNode> solutions = evolver.solve(
                                 Misc.cached(problem.getFitnessFunction(), 10000),
                                 new TargetFitness<>(0d),
+//                                new Iterations(1),
                                 new Random(seed),
                                 executorService,
                                 Listener.onExecutor((listenerFactory.getBaseFileName() == null) ?
                                                             listener(collectors.toArray(DataCollector[]::new)) :
-                                                            listenerFactory.build(collectors.toArray(DataCollector[]::new)),
+                                                            listenerFactory
+                                                                    .build(collectors.toArray(DataCollector[]::new)),
                                                     executorService)
                         );
 
