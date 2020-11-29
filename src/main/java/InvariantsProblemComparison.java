@@ -29,8 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static it.units.malelab.jgea.core.util.Args.i;
-import static it.units.malelab.jgea.core.util.Args.ri;
+import static it.units.malelab.jgea.core.util.Args.*;
 
 public class InvariantsProblemComparison extends Worker {
 
@@ -57,12 +56,13 @@ public class InvariantsProblemComparison extends Worker {
         String grammarPath = a("grammarPath", "grammar_temporal.bnf");
         String testResultsFile = a("testResultsFile", "testResults.txt");
         int traceLength = i(a("traceLength", "30"));
+        double validationFraction = d(a("validationFraction", "0.2"));
 
 
         List<InvariantsProblem> problems = null;
         try {
             problems = List.of(
-                    new InvariantsProblem(grammarPath, trainPath, testPath, labelsPath, traceLength)
+                    new InvariantsProblem(grammarPath, trainPath, testPath, labelsPath, traceLength, validationFraction)
             );
         } catch (IOException e) {
             e.printStackTrace();
@@ -126,7 +126,8 @@ public class InvariantsProblemComparison extends Worker {
                             "seed", Integer.toString(seed),
                             "problem", problem.getClass().getSimpleName().toLowerCase(),
                             "evolver", evolverEntry.getKey(),
-                            "traceLength", String.valueOf(traceLength)
+                            "traceLength", String.valueOf(traceLength),
+                            "validationFraction", String.valueOf(validationFraction)
                     ));
                     try {
                         List<DataCollector<? super Tree<String>, ? super AbstractSTLNode, ? super Double>>
@@ -155,7 +156,7 @@ public class InvariantsProblemComparison extends Worker {
                         Collection<AbstractSTLNode> solutions = evolver.solve(
                                 Misc.cached(problem.getFitnessFunction(), 10000),
                                 new TargetFitness<>(0d),
-//                                new Iterations(1),
+//                                new Iterations(0),
                                 new Random(seed),
                                 executorService,
                                 Listener.onExecutor((listenerFactory.getBaseFileName() == null) ?

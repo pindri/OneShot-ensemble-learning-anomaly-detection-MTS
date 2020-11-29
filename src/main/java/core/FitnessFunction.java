@@ -23,12 +23,22 @@ public class FitnessFunction extends AbstractFitnessFunction {
     private final List<Signal<Record>> testSignals;
     private final List<Integer> testLabels;
     List<Signal<Record>> signals;
+    List<Signal<Record>> trainSignals;
+    List<Signal<Record>> validationSignals;
 
-    public FitnessFunction(String trainPath, String testPath, String labelPath, int traceLength) throws IOException {
+    public FitnessFunction(String trainPath, String testPath, String labelPath,
+                           int traceLength, double validationFraction) throws IOException {
         this.signalBuilder = new SignalBuilder(traceLength);
         this.signals = this.signalBuilder.build(trainPath, this.boolIndexes, this.numIndexes);
+        // Splitting into training and validation set.
+        this.trainSignals = this.signalBuilder.extractPortion(this.signals, 0, 1-validationFraction);
+        this.validationSignals = this.signalBuilder.extractPortion(this.signals, 1-validationFraction, 1);
+
         this.testSignals = this.signalBuilder.build(testPath, this.boolIndexes, this.numIndexes);
         this.testLabels = this.signalBuilder.parseLabels(labelPath);
+        System.out.println("Sig: " + signals.size() + " train: " + trainSignals.size() + " val: "
+                                   + validationSignals.size() + " test: " + testSignals.size()
+                                   + " labels: " + testLabels.size());
     }
 
 
@@ -38,7 +48,7 @@ public class FitnessFunction extends AbstractFitnessFunction {
         double penalty = Double.MAX_VALUE;
         double fitness = 0.0;
 
-        for (Signal<Record> signal : this.signals) {
+        for (Signal<Record> signal : this.trainSignals) {
             if (signal.size() <= monitor.getMinLength()) {
                 fitness += penalty;
                 continue;
@@ -47,15 +57,15 @@ public class FitnessFunction extends AbstractFitnessFunction {
             Signal<Double> robustness = monitor.getOperator().apply(signal).monitor(signal);
 
             // Last element.
-            fitness += Math.abs(robustness.valueAt(robustness.end()));
+//            fitness += Math.abs(robustness.valueAt(robustness.end()));
 
             // Mean fitness for this signal.
-//            int range = (int) robustness.start() - (int) robustness.end();
-//            fitness += ((Arrays.stream(SignalHandler.toDoubleArray(robustness)))
-//                    .mapToDouble(x -> Math.abs(x[1])).sum())/(1.0*range);
+            int range = (int) robustness.end() - (int) robustness.start() + 1;
+            fitness += (Arrays.stream(SignalHandler.toDoubleArray(robustness))
+                    .mapToDouble(x -> Math.abs(x[1])).sum())/(1.0*range);
         }
 
-        return fitness/this.signals.size();
+        return fitness/this.trainSignals.size();
     }
 
 
@@ -72,28 +82,29 @@ public class FitnessFunction extends AbstractFitnessFunction {
         long N = this.testLabels.size() - P;
         double fitness;
         int label;
-        int position = 0;
+//        int position = 0;
 
-//        for (Signal<Record> signal : this.testSignals) {
-//            Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
-//            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
-//                label = this.testLabels.get(t);
-//                fitness = robustness.valueAt(t);
         for (Signal<Record> signal : this.testSignals) {
-            fitness = solution.getOperator().apply(signal).monitor(signal).valueAt(signal.end());
-            label = this.testLabels.get(position);
-            position++;
-            if (fitness >= 0) {
-                if (label > 0) {
-                    FN++;
+            Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
+            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
+                label = this.testLabels.get(t);
+                fitness = robustness.valueAt(t);
+//        for (Signal<Record> signal : this.testSignals) {
+//            fitness = solution.getOperator().apply(signal).monitor(signal).valueAt(signal.end());
+//            label = this.testLabels.get(position);
+//            position++;
+                if (fitness >= 0) {
+                    if (label > 0) {
+                        FN++;
+                    } else {
+                        TN++;
+                    }
                 } else {
-                    TN++;
-                }
-            } else {
-                if (label > 0) {
-                    TP++;
-                } else {
-                    FP++;
+                    if (label > 0) {
+                        TP++;
+                    } else {
+                        FP++;
+                    }
                 }
             }
         }
@@ -118,20 +129,22 @@ public class FitnessFunction extends AbstractFitnessFunction {
 
         double fitness;
         int label;
-        int position = 0;
+//        int position = 0;
 
         for (Signal<Record> signal : this.testSignals) {
             Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
-            fitness = robustness.valueAt(signal.end());
-            label = this.testLabels.get(position);
-            fw.write(fitness + ";" + label + "\n");
-            position++;
-//            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
-//                label = this.testLabels.get(t);
-//                fitness = robustness.valueAt(t);
-//                fw.write(fitness + ";" + label + "\n");
-//            }
+//            fitness = robustness.valueAt(signal.end());
+//            label = this.testLabels.get(position);
+//            fw.write(fitness + ";" + label + "\n");
+//            System.out.println(position);
+//            position++;
+            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
+                label = this.testLabels.get(t);
+                fitness = robustness.valueAt(t);
+                fw.write(fitness + ";" + label + "\n");
+            }
         }
+        fw.close();
     }
 
 }

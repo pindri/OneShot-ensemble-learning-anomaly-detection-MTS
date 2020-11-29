@@ -64,6 +64,36 @@ public class SignalBuilder extends AbstractSignalBuilder<List<Signal<Record>>> {
         return signals;
     }
 
+    public List<Signal<Record>> extractPortion(List<Signal<Record>> signals, double from, double to) {
+        // If more than one signal (traceLength > 0), extract portion of signals.
+        if (traceLength > 0) {
+            int fromIndex = (int) (from * signals.size());
+            int toIndex = (int) (to * signals.size());
+
+            return signals.subList(fromIndex, toIndex);
+
+        } else { // If one signal, extract portion of record.
+
+            Signal<Record> signal = signals.get(0);
+            List<Signal<Record>> resultList = new ArrayList<>();
+            Signal<Record> resultSignal = new Signal<>();
+            int range = (int) signal.end() - (int) signal.start() + 1;
+            int fromIndex = (int) (signal.start() + (range * from));
+            int toIndex = (int) (signal.start() + (range * to));
+
+            int time = 0;
+
+            for (int t = fromIndex; t <= toIndex; t++) {
+                resultSignal.add(time, signal.valueAt(t));
+                time++;
+            }
+
+            resultList.add(resultSignal);
+
+            return resultList;
+        }
+    }
+
     @Override
     public List<Integer> parseLabels(String path) throws IOException {
         BufferedReader buffReader = Files.newBufferedReader(Paths.get(path));
