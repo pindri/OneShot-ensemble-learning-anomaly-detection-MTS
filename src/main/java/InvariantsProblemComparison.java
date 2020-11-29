@@ -55,8 +55,8 @@ public class InvariantsProblemComparison extends Worker {
         String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
         String grammarPath = a("grammarPath", "grammar_temporal.bnf");
         String testResultsFile = a("testResultsFile", "testResults.txt");
-        int traceLength = i(a("traceLength", "30"));
-        double validationFraction = d(a("validationFraction", "0.2"));
+        int traceLength = i(a("traceLength", "0"));
+        double validationFraction = d(a("validationFraction", "0.1"));
 
 
         List<InvariantsProblem> problems = null;

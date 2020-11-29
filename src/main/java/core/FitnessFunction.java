@@ -36,9 +36,11 @@ public class FitnessFunction extends AbstractFitnessFunction {
 
         this.testSignals = this.signalBuilder.build(testPath, this.boolIndexes, this.numIndexes);
         this.testLabels = this.signalBuilder.parseLabels(labelPath);
-        System.out.println("Sig: " + signals.size() + " train: " + trainSignals.size() + " val: "
-                                   + validationSignals.size() + " test: " + testSignals.size()
-                                   + " labels: " + testLabels.size());
+        System.out.println("Signal size: " + signals.size() + ". Train: " + trainSignals.size() + ", validation: "
+                                   + validationSignals.size() + ", test: " + testSignals.size()
+                                   + ", test labels: " + testLabels.size());
+        System.out.println("Signal element size: " + signals.get(0).size() + ", train: " + trainSignals.get(0).size() +
+                " validation: " + validationSignals.get(0).size());
     }
 
 

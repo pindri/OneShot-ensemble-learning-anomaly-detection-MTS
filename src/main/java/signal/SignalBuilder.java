@@ -81,10 +81,13 @@ public class SignalBuilder extends AbstractSignalBuilder<List<Signal<Record>>> {
             int fromIndex = (int) (signal.start() + (range * from));
             int toIndex = (int) (signal.start() + (range * to));
 
+            double[] timePoints = IntStream.range(fromIndex, toIndex).asDoubleStream().toArray();
+            List<Record> records = signal.getTimePoints(timePoints);
+
             int time = 0;
 
-            for (int t = fromIndex; t <= toIndex; t++) {
-                resultSignal.add(time, signal.valueAt(t));
+            for (Record record: records) {
+                resultSignal.add(time, record);
                 time++;
             }
 
