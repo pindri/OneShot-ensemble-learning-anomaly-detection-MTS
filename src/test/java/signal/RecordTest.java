@@ -16,7 +16,7 @@ public class RecordTest {
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
         // Initialises the variables names taking the first line from the data-path.
-        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10);
+        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
         boolean[] boolValues = new boolean[]{};
         double[] numValues = new double[]{1.43, 12.2, 14.1, 232.3};
 

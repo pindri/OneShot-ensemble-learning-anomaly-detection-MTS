@@ -20,7 +20,7 @@ public class SignalBuilderTest {
         String dataPath = "data/toy_train_data.csv";
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
-        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10);
+        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
         SignalBuilder sb = new SignalBuilder(10);
         List<Integer> numIndexes = new ArrayList<>(Arrays.asList(0, 1, 2, 3));
         List<Integer> boolIndexes = new ArrayList<>(Collections.emptyList());
@@ -39,7 +39,7 @@ public class SignalBuilderTest {
         String dataPath = "data/toy_train_data.csv";
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
-        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10);
+        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
         SignalBuilder sb = new SignalBuilder(10);
         List<Integer> numIndexes = new ArrayList<>(Arrays.asList(0, 1, 2, 3));
         List<Integer> boolIndexes = new ArrayList<>(Collections.emptyList());

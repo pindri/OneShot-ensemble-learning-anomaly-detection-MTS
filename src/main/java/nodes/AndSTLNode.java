@@ -6,6 +6,8 @@ import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.STLMapper;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AndSTLNode extends AbstractSTLNode {
 
@@ -23,5 +25,11 @@ public class AndSTLNode extends AbstractSTLNode {
     @Override
     public int getMinLength() {
         return Math.max(this.firstChild.getMinLength(), this.secondChild.getMinLength());
+    }
+
+    @Override
+    public List<String> getVariablesList() {
+        return Stream.concat(this.firstChild.getVariablesList().stream(),
+                             this.secondChild.getVariablesList().stream()).collect(Collectors.toList());
     }
 }

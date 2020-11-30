@@ -55,8 +55,9 @@ public class InvariantsProblemComparison extends Worker {
         String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
         String grammarPath = a("grammarPath", "grammar_temporal.bnf");
         String testResultsFile = a("testResultsFile", "testResults.txt");
+        String validationResultsFile = a("validationResultsFile", "validationResults.txt");
         int traceLength = i(a("traceLength", "0"));
-        double validationFraction = d(a("validationFraction", "0.1"));
+        double validationFraction = d(a("validationFraction", "0.6"));
 
 
         List<InvariantsProblem> problems = null;
@@ -156,7 +157,7 @@ public class InvariantsProblemComparison extends Worker {
                         Collection<AbstractSTLNode> solutions = evolver.solve(
                                 Misc.cached(problem.getFitnessFunction(), 10000),
                                 new TargetFitness<>(0d),
-//                                new Iterations(0),
+//                                new Iterations(2),
                                 new Random(seed),
                                 executorService,
                                 Listener.onExecutor((listenerFactory.getBaseFileName() == null) ?
@@ -166,10 +167,30 @@ public class InvariantsProblemComparison extends Worker {
                                                     executorService)
                         );
 
-                        AbstractSTLNode solution = solutions.iterator().next();
 
+                        // Validation.
+                        if (validationFraction > 0.0) {
+                            System.out.println("Computing validation");
+                            // Select solution with smaller FPR.
+                            Optional<AbstractSTLNode> validationSolution = solutions.stream()
+                                    .reduce((a, b) -> problem.getFitnessFunction().validateSolution(a) <=
+                                            problem.getFitnessFunction().validateSolution(b) ? a : b );
+
+                            validationSolution.ifPresent(valSolution -> {
+                                try {
+                                    problem.getFitnessFunction().solutionToFile(valSolution, validationResultsFile);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                        }
+
+
+                        // Test.
+                        AbstractSTLNode solution = solutions.iterator().next();
                         System.out.println("\n" + solution);
                         problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
+                        solution.getVariablesList().forEach(System.out::println);
 
                         L.info(String.format("Done %s: %d solutions in %4.1fs",
                                              keys,

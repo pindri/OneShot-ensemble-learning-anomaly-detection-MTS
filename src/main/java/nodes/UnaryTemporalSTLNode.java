@@ -36,4 +36,9 @@ public class UnaryTemporalSTLNode extends AbstractTemporalSTLNode {
     public int getMinLength() {
         return firstChild.getMinLength() + this.end;
     }
+
+    @Override
+    public List<String> getVariablesList() {
+        return this.firstChild.getVariablesList();
+    }
 }

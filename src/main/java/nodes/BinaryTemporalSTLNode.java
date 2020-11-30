@@ -7,6 +7,8 @@ import mapper.Expression;
 import mapper.STLMapper;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BinaryTemporalSTLNode extends AbstractTemporalSTLNode {
     public BinaryTemporalSTLNode(List<Tree<String>> siblings, List<Tree<String>> ancestors, Expression expression) {
@@ -30,5 +32,11 @@ public class BinaryTemporalSTLNode extends AbstractTemporalSTLNode {
     @Override
     public int getMinLength() {
         return Math.max(this.firstChild.getMinLength(), this.secondChild.getMinLength()) + this.end;
+    }
+
+    @Override
+    public List<String> getVariablesList() {
+        return Stream.concat(this.firstChild.getVariablesList().stream(),
+                             this.secondChild.getVariablesList().stream()).collect(Collectors.toList());
     }
 }

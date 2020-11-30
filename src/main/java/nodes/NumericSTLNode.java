@@ -4,6 +4,7 @@ import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.Comparison;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,13 @@ public class NumericSTLNode extends AbstractSTLNode {
     @Override
     public int getMinLength() {
         return 0;
+    }
+
+    @Override
+    public List<String> getVariablesList() {
+        List<String> list = new ArrayList<>();
+        list.add(this.variable);
+        return list;
     }
 
     private double parseNumber(List<Tree<String>> digits) {

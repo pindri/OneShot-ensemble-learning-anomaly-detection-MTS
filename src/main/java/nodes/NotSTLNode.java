@@ -19,4 +19,9 @@ public class NotSTLNode extends AbstractSTLNode {
     public int getMinLength() {
         return this.firstChild.getMinLength();
     }
+
+    @Override
+    public List<String> getVariablesList() {
+       return this.firstChild.getVariablesList();
+    }
 }

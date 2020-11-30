@@ -4,6 +4,7 @@ import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import eu.quanticol.moonlight.signal.Signal;
 import signal.Record;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -32,6 +33,8 @@ public abstract class AbstractSTLNode {
     }
 
     public abstract int getMinLength();
+
+    public abstract List<String> getVariablesList();
 
     @Override
     public boolean equals(Object o) {
@@ -69,7 +72,8 @@ public abstract class AbstractSTLNode {
         return sb.toString();
     }
 
-    private static void traverseNodes(StringBuilder sb, String padding, String pointer, AbstractSTLNode node, boolean hasRightSibling) {
+    private static void traverseNodes(StringBuilder sb, String padding, String pointer,
+                                      AbstractSTLNode node, boolean hasRightSibling) {
         if (node != null) {
             sb.append("\n");
             sb.append(padding);

@@ -9,6 +9,8 @@ import signal.Record;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ImpliesSTLNode extends AbstractSTLNode {
 
@@ -31,5 +33,11 @@ public class ImpliesSTLNode extends AbstractSTLNode {
     @Override
     public int getMinLength() {
         return Math.max(this.firstChild.getMinLength(), this.secondChild.getMinLength());
+    }
+
+    @Override
+    public List<String> getVariablesList() {
+        return Stream.concat(this.firstChild.getVariablesList().stream(),
+                             this.secondChild.getVariablesList().stream()).collect(Collectors.toList());
     }
 }

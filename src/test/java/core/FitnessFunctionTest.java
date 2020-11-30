@@ -20,7 +20,8 @@ public class FitnessFunctionTest {
         String dataPath = "data/toy_train_data.csv";
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
-        InvariantsProblem p = new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10);
+        InvariantsProblem p = new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 0,
+                                                    0.0);
 
         // Creating monitor manually.
         STLMapper mapper = new STLMapper();

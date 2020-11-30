@@ -36,11 +36,15 @@ public class FitnessFunction extends AbstractFitnessFunction {
 
         this.testSignals = this.signalBuilder.build(testPath, this.boolIndexes, this.numIndexes);
         this.testLabels = this.signalBuilder.parseLabels(labelPath);
-        System.out.println("Signal size: " + signals.size() + ". Train: " + trainSignals.size() + ", validation: "
-                                   + validationSignals.size() + ", test: " + testSignals.size()
-                                   + ", test labels: " + testLabels.size());
-        System.out.println("Signal element size: " + signals.get(0).size() + ", train: " + trainSignals.get(0).size() +
-                " validation: " + validationSignals.get(0).size());
+        System.out.println("Sizes. Signal: " + signals.size() + ". Train: " + trainSignals.size()
+                                   + ". Test: " + testSignals.size() + ". Test labels: " + testLabels.size()
+                                   + ". Validation: " + this.validationSignals.size());
+        System.out.print("Element sizes. Signal: " + signals.get(0).size() + ". Train: "
+                                 + trainSignals.get(0).size() + ". Test: " + testSignals.get(0).size() + ".");
+        if (validationFraction > 0.0) {
+            System.out.print(" Validation: " + validationSignals.get(0).size());
+        }
+        System.out.println();
     }
 
 
@@ -91,7 +95,6 @@ public class FitnessFunction extends AbstractFitnessFunction {
             for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
                 label = this.testLabels.get(t);
                 fitness = robustness.valueAt(t);
-//        for (Signal<Record> signal : this.testSignals) {
 //            fitness = solution.getOperator().apply(signal).monitor(signal).valueAt(signal.end());
 //            label = this.testLabels.get(position);
 //            position++;
@@ -124,6 +127,19 @@ public class FitnessFunction extends AbstractFitnessFunction {
     }
 
     @Override
+    public double validateSolution(AbstractSTLNode solution) {
+       long FP = 0;
+
+       for (Signal<Record> signal : this.validationSignals) {
+           Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
+           FP += Arrays.stream(SignalHandler.toDoubleArray(robustness)).mapToDouble(x -> x[1])
+                   .filter(x -> x < 0).count();
+       }
+       return FP;
+    }
+
+
+    @Override
     public void solutionToFile(AbstractSTLNode solution, String filename) throws IOException {
 
         FileWriter fw = new FileWriter(filename);
@@ -140,9 +156,15 @@ public class FitnessFunction extends AbstractFitnessFunction {
 //            fw.write(fitness + ";" + label + "\n");
 //            System.out.println(position);
 //            position++;
+
+            double[] robustnessArray = Arrays.stream(SignalHandler.toDoubleArray(robustness))
+                    .mapToDouble(x -> x[1]).toArray();
+            int position = 0;
+
             for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
                 label = this.testLabels.get(t);
-                fitness = robustness.valueAt(t);
+                fitness = robustnessArray[position];
+                position++;
                 fw.write(fitness + ";" + label + "\n");
             }
         }

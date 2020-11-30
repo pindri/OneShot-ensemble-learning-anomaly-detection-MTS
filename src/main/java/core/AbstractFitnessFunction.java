@@ -13,5 +13,7 @@ public abstract class AbstractFitnessFunction implements Function<AbstractSTLNod
 
     public abstract List<Item> evaluateSolution(AbstractSTLNode solution);
 
+    public abstract double validateSolution(AbstractSTLNode solution);
+
     public abstract void solutionToFile(AbstractSTLNode solution, String filename) throws IOException;
 }
