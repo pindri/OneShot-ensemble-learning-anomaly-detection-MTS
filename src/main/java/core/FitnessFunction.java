@@ -51,10 +51,6 @@ public class FitnessFunction extends AbstractFitnessFunction {
     @Override
     public Double apply(AbstractSTLNode monitor) {
 
-        System.out.println(monitor);
-        System.out.println(monitor.getVariablesList());
-        System.out.println(monitor.getVariablesList().stream().distinct().count());
-
         double penalty = Double.MAX_VALUE;
         double fitness = 0.0;
 

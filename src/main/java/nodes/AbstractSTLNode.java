@@ -36,6 +36,10 @@ public abstract class AbstractSTLNode {
 
     public abstract List<String> getVariablesList();
 
+    public double getCoverage() {
+        return this.getMinLength() * this.getVariablesList().stream().distinct().count();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

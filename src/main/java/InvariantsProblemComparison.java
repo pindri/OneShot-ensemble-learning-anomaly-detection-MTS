@@ -58,7 +58,7 @@ public class InvariantsProblemComparison extends Worker {
         String testResultsFile = a("testResultsFile", "testResults.txt");
         String validationResultsFile = a("validationResultsFile", "validationResults.txt");
         int traceLength = i(a("traceLength", "0"));
-        double validationFraction = d(a("validationFraction", "0.6"));
+        double validationFraction = d(a("validationFraction", "0.0"));
 
 
         List<InvariantsProblem> problems = null;
@@ -138,11 +138,12 @@ public class InvariantsProblemComparison extends Worker {
                                         new Population(),
                                         new Diversity(),
                                         new FunctionOfOneBest<>
-                                                (i -> List.of(new Item(
-                                                        "temporal.length",
-                                                        i.getSolution().getMinLength(),
-                                                        "%3d"
-                                                ))),
+                                                (i -> List.of(new Item("temporal.length",
+                                                                       i.getSolution().getMinLength(),
+                                                                       "%3d"),
+                                                              new Item("coverage",
+                                                                       i.getSolution().getCoverage(),
+                                                                       "%7.0f"))),
                                         new FunctionOfOneBest<>
                                                 (i -> problem.getFitnessFunction().evaluateSolution(i.getSolution())),
                                         new BestTreeInfo("%7.5f")
@@ -190,7 +191,7 @@ public class InvariantsProblemComparison extends Worker {
                         AbstractSTLNode solution = solutions.iterator().next();
                         System.out.println("\n" + solution);
                         problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
-                        solution.getVariablesList().forEach(System.out::println);
+                        System.out.println("Coverage: " + solution.getCoverage());
 
                         L.info(String.format("Done %s: %d solutions in %4.1fs",
                                              keys,
