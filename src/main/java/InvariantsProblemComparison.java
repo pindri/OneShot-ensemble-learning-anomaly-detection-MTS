@@ -12,6 +12,7 @@ import it.units.malelab.jgea.core.listener.Listener;
 import it.units.malelab.jgea.core.listener.MultiFileListenerFactory;
 import it.units.malelab.jgea.core.listener.collector.*;
 import it.units.malelab.jgea.core.order.PartialComparator;
+import it.units.malelab.jgea.core.order.PartiallyOrderedCollection;
 import it.units.malelab.jgea.core.selector.Tournament;
 import it.units.malelab.jgea.core.selector.Worst;
 import it.units.malelab.jgea.core.util.Misc;
@@ -74,7 +75,6 @@ public class InvariantsProblemComparison extends Worker {
                 a("dir", "."),
                 a("file", null)
         );
-
 
         Map<String, Function<InvariantsProblem, Evolver<Tree<String>, AbstractSTLNode, Double>>>
                 evolvers =new TreeMap<>();
