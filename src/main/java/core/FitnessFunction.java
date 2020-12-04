@@ -59,21 +59,60 @@ public class FitnessFunction extends AbstractFitnessFunction {
                 fitness += penalty;
                 continue;
             }
-
-            Signal<Double> robustness = monitor.getOperator().apply(signal).monitor(signal);
-
-            // Last element.
-//            fitness += Math.abs(robustness.valueAt(robustness.end()));
-
-            // Mean fitness for this signal.
-            int range = (int) robustness.end() - (int) robustness.start() + 1;
-            fitness += (Arrays.stream(SignalHandler.toDoubleArray(robustness))
-                    .mapToDouble(x -> Math.abs(x[1])).sum())/(1.0*range);
+            fitness += applyMonitor(monitor, signal);
         }
 
         return fitness/this.trainSignals.size();
     }
 
+    public double applyMonitor(AbstractSTLNode monitor, Signal<Record> signal) {
+
+        double result;
+
+        Signal<Double> robustness = monitor.getOperator().apply(signal).monitor(signal);
+        // Last element.
+//        result = Math.abs(robustness.valueAt(robustness.end()));
+        // Mean fitness for this signal.
+        int range = (int) robustness.end() - (int) robustness.start() + 1;
+        result = (Arrays.stream(SignalHandler.toDoubleArray(robustness))
+                        .mapToDouble(x -> Math.abs(x[1])).sum())/(1.0*range);
+
+        return result;
+    }
+
+
+    public Map<String, Integer> computeIndices(double[] fitness, int[] label) {
+
+        Map<String, Integer> indices = new HashMap<>();
+
+        int TP = 0;
+        int FP = 0;
+        int TN = 0;
+        int FN = 0;
+
+        for (int i = 0; i < fitness.length; i++) {
+            if (fitness[i] >= 0) {
+                if (label[i] > 0) {
+                    FN++;
+                } else {
+                    TN++;
+                }
+            } else {
+                if (label[i] > 0) {
+                    TP++;
+                } else {
+                    FP++;
+                }
+            }
+        }
+
+        indices.put("TP", TP);
+        indices.put("FP", FP);
+        indices.put("TN", TN);
+        indices.put("FN", FN);
+
+        return indices;
+    }
 
     @Override
     public List<Item> evaluateSolution(AbstractSTLNode solution) {
@@ -86,32 +125,24 @@ public class FitnessFunction extends AbstractFitnessFunction {
         // TODO: first elements will not be considered.
         long P = this.testLabels.stream().filter(x -> x > 0).count();
         long N = this.testLabels.size() - P;
-        double fitness;
-        int label;
-//        int position = 0;
+        double[] fitness;
+        int[] labels;
+        Map<String, Integer> indices;
 
         for (Signal<Record> signal : this.testSignals) {
             Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
-            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
-                label = this.testLabels.get(t);
-                fitness = robustness.valueAt(t);
-//            fitness = solution.getOperator().apply(signal).monitor(signal).valueAt(signal.end());
-//            label = this.testLabels.get(position);
-//            position++;
-                if (fitness >= 0) {
-                    if (label > 0) {
-                        FN++;
-                    } else {
-                        TN++;
-                    }
-                } else {
-                    if (label > 0) {
-                        TP++;
-                    } else {
-                        FP++;
-                    }
-                }
-            }
+            int from = (int) robustness.start();
+            int to = (int) robustness.end();
+
+            fitness = Arrays.stream(SignalHandler.toDoubleArray(robustness))
+                            .mapToDouble(x -> Math.abs(x[1])).toArray();
+            labels = IntStream.range(from, to + 1).map(this.testLabels::get).toArray();
+            indices = computeIndices(fitness, labels);
+
+            TP += indices.get("TP");
+            FP += indices.get("FP");
+            TN += indices.get("TN");
+            FN += indices.get("FN");
         }
 
         double TPR =(TP*1.0)/(P*1.0);

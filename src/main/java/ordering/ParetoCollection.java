@@ -26,6 +26,7 @@ public class ParetoCollection<T, C extends Comparable<C>> implements PartiallyOr
         candidates.forEach(this::addToFirst);
     }
 
+
     @Override
     public Collection<T> all() {
         return this.candidates;

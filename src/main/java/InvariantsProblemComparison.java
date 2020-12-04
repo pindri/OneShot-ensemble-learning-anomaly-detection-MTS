@@ -1,6 +1,7 @@
 import com.google.common.base.Stopwatch;
 import core.InvariantsProblem;
 import datacollectors.BestTreeInfo;
+import datacollectors.FunctionOfAll;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.Evolver;
@@ -147,6 +148,9 @@ public class InvariantsProblemComparison extends Worker {
                                         new FunctionOfOneBest<>
                                                 (i -> problem.getFitnessFunction().evaluateSolution(i.getSolution())),
                                         new BestTreeInfo("%7.5f")
+                                        , new FunctionOfAll<>(i -> List.of(new Item("prova",
+                                                                                    i.size(),
+                                                                                    "%7.0f")))
 //                                        , new BestPrinter(BestPrinter.Part.SOLUTION, "%80.80s")
                         );
 
