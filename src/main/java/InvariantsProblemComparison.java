@@ -2,18 +2,17 @@ import com.google.common.base.Stopwatch;
 import core.InvariantsProblem;
 import datacollectors.BestTreeInfo;
 import datacollectors.FunctionOfAll;
+import datacollectors.Pareto;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
-import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.listener.Listener;
 import it.units.malelab.jgea.core.listener.MultiFileListenerFactory;
 import it.units.malelab.jgea.core.listener.collector.*;
 import it.units.malelab.jgea.core.order.PartialComparator;
-import it.units.malelab.jgea.core.order.PartiallyOrderedCollection;
 import it.units.malelab.jgea.core.selector.Tournament;
 import it.units.malelab.jgea.core.selector.Worst;
 import it.units.malelab.jgea.core.util.Misc;
@@ -148,9 +147,7 @@ public class InvariantsProblemComparison extends Worker {
                                         new FunctionOfOneBest<>
                                                 (i -> problem.getFitnessFunction().evaluateSolution(i.getSolution())),
                                         new BestTreeInfo("%7.5f")
-                                        , new FunctionOfAll<>(i -> List.of(new Item("prova",
-                                                                                    i.size(),
-                                                                                    "%7.0f")))
+//                                        , new FunctionOfAll<>(Pareto::computeIndices)
 //                                        , new BestPrinter(BestPrinter.Part.SOLUTION, "%80.80s")
                         );
 
@@ -195,7 +192,6 @@ public class InvariantsProblemComparison extends Worker {
                         AbstractSTLNode solution = solutions.iterator().next();
                         System.out.println("\n" + solution);
                         problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
-                        System.out.println("Coverage: " + solution.getCoverage());
 
                         L.info(String.format("Done %s: %d solutions in %4.1fs",
                                              keys,
