@@ -1,11 +1,35 @@
 package arrayUtilities;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ArraysUtilities {
 
-    static int[] sumIntArrays(List<int[]> arrays) {
+    public static int minLength(List<int[]> arrays) {
+        int min = Integer.MAX_VALUE;
+        for (int[] arr : arrays) {
+            if (arr.length < min) {
+                min = arr.length;
+            }
+        }
+        return min;
+    }
+
+    public static List<int[]> trimHeadSameSize(List<int[]> arrays) {
+        int min = minLength(arrays);
+        List<int[]> result = new ArrayList<>();
+
+        for (int[] arr : arrays) {
+            int[] trimmed = new int[min];
+            System.arraycopy(arr, arr.length-min, trimmed, 0, min);
+            result.add(trimmed);
+        }
+
+        return result;
+    }
+
+    public static int[] sumIntArrays(List<int[]> arrays) {
 
         int maxLength = 0;
 
@@ -24,7 +48,7 @@ public class ArraysUtilities {
         return sum;
     }
 
-    static int[] arraysAND(List<int[]> arrays) {
+    public static int[] labelsOR(List<int[]> arrays) {
 
         int[] sum = sumIntArrays(arrays);
         int threshold = arrays.size();
@@ -32,7 +56,7 @@ public class ArraysUtilities {
         return Arrays.stream(sum).map(x -> x == threshold ? 1 : 0).toArray();
     }
 
-    static int[] arraysOR(List<int[]> arrays) {
+    public static int[] labelsAND(List<int[]> arrays) {
 
         int[] sum = sumIntArrays(arrays);
 

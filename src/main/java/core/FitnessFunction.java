@@ -1,5 +1,6 @@
 package core;
 
+import arrayUtilities.ArraysUtilities;
 import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.core.listener.collector.Item;
 import nodes.AbstractSTLNode;
@@ -7,7 +8,6 @@ import signal.Record;
 import signal.SignalBuilder;
 import signal.SignalHandler;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -141,14 +141,14 @@ public class FitnessFunction extends AbstractFitnessFunction {
     }
 
     @Override
-    public List<Item> evaluateSolution(AbstractSTLNode solution) {
+    public List<Item> evaluateSolution(AbstractSTLNode solution, String prefix) {
 
         double[] fitness = getTestFitnessArray(solution);
 
-        return evaluateSingleSolution(fitnessToLabel(fitness, this.epsilon));
+        return evaluateSingleSolution(fitnessToLabel(fitness, this.epsilon), prefix);
     }
 
-    private List<Item> evaluateSingleSolution(int[] predictions) {
+    private List<Item> evaluateSingleSolution(int[] predictions, String prefix) {
 
         int[] labels;
         Map<String, Integer> indices;
@@ -176,26 +176,31 @@ public class FitnessFunction extends AbstractFitnessFunction {
         double FNR = (1.0*FN)/(P*1.0);
 
         List<Item> items = new ArrayList<>();
-        items.add(new Item("test.TPR", TPR, "%7.5f"));
-        items.add(new Item("test.FPR", FPR, "%7.5f"));
-        items.add(new Item("test.FNR", FNR, "%7.5f"));
+        items.add(new Item(prefix + ".TPR", TPR, "%7.5f"));
+        items.add(new Item(prefix + ".FPR", FPR, "%7.5f"));
+        items.add(new Item(prefix + ".FNR", FNR, "%7.5f"));
 
         return items;
     }
 
 
-    public List<Item> evaluateSolutionsAND(List<AbstractSTLNode> solutions) {
-
-
+    public List<Item> evaluateSolutionsAND(List<AbstractSTLNode> solutions, String prefix) {
         List<int[]> predictions = solutions.stream().map(x -> fitnessToLabel(getTestFitnessArray(x), this.epsilon))
                                            .collect(Collectors.toList());
-//
-//        double[] fitness = getTestFitnessArray(solution);
-//
-//        return evaluateSingleSolution(fitnessToLabel(fitness, this.epsilon));
-        return null;
+        predictions = ArraysUtilities.trimHeadSameSize(predictions);
+        int[] predictionsAND = ArraysUtilities.labelsAND(predictions);
+
+        return evaluateSingleSolution(predictionsAND, prefix);
     }
 
+    public List<Item> evaluateSolutionsOR(List<AbstractSTLNode> solutions, String prefix) {
+        List<int[]> predictions = solutions.stream().map(x -> fitnessToLabel(getTestFitnessArray(x), this.epsilon))
+                                           .collect(Collectors.toList());
+        predictions = ArraysUtilities.trimHeadSameSize(predictions);
+        int[] predictionsOR = ArraysUtilities.labelsOR(predictions);
+
+        return evaluateSingleSolution(predictionsOR, prefix);
+    }
 
 
 

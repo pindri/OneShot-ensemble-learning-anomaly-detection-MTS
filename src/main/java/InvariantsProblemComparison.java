@@ -143,11 +143,16 @@ public class InvariantsProblemComparison extends Worker {
                                                                        "%3d"),
                                                               new Item("coverage",
                                                                        i.getSolution().getCoverage(),
-                                                                       "%7.0f"))),
+                                                                       "%3f"))),
                                         new FunctionOfOneBest<>
-                                                (i -> problem.getFitnessFunction().evaluateSolution(i.getSolution())),
+                                                (i -> problem.getFitnessFunction().evaluateSolution(i.getSolution(),
+                                                                                                    "test")),
                                         new BestTreeInfo("%7.5f")
-//                                        , new FunctionOfAll<>(Pareto::computeIndices)
+                                        , new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, "AND"))
+                                        , new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, "OR"))
+                                        , new FunctionOfAll<>(i -> List.of(new Item("front.size",
+                                                                                    Pareto.getFront(i).size(),
+                                                                                    "3d%")))
 //                                        , new BestPrinter(BestPrinter.Part.SOLUTION, "%80.80s")
                         );
 

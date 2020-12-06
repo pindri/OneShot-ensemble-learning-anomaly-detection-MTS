@@ -11,7 +11,11 @@ public abstract class AbstractFitnessFunction implements Function<AbstractSTLNod
     @Override
     public abstract Double apply(AbstractSTLNode monitor);
 
-    public abstract List<Item> evaluateSolution(AbstractSTLNode solution);
+    public abstract List<Item> evaluateSolution(AbstractSTLNode solution, String prefix);
+
+    public abstract List<Item> evaluateSolutionsOR(List<AbstractSTLNode> solutions, String prefix);
+
+    public abstract List<Item> evaluateSolutionsAND(List<AbstractSTLNode> solutions, String prefix);
 
     public abstract double validateSolution(AbstractSTLNode solution);
 

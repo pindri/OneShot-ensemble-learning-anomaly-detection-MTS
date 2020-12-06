@@ -7,6 +7,7 @@ import it.units.malelab.jgea.core.listener.collector.Item;
 import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AbstractSTLNode;
 import ordering.ParetoCollection;
+import org.apache.commons.math3.analysis.function.Abs;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Pareto {
+
 
     public static Collection<Pair<AbstractSTLNode, Double>>
     getFront(Collection<Individual<? extends Tree<String>, ? extends AbstractSTLNode, ? extends Double>> individuals) {
@@ -34,17 +36,16 @@ public class Pareto {
     }
 
     public static List<Item> computeIndices(Collection<Individual<? extends Tree<String>, ? extends AbstractSTLNode,
-            ? extends Double>> individuals, InvariantsProblem problem) {
+            ? extends Double>> individuals, InvariantsProblem problem, String how) {
+
         Collection<Pair<AbstractSTLNode, Double>> front = Pareto.getFront(individuals);
+        List<AbstractSTLNode> frontSolutions = front.stream().map(Pair::getFirst).collect(Collectors.toList());
 
-        // Get labels array and fitness arrays for all solutions of the front.
+        return switch (how) {
+            case "OR" -> problem.getFitnessFunction().evaluateSolutionsOR(frontSolutions, "Pareto.OR");
+            default -> problem.getFitnessFunction().evaluateSolutionsAND(frontSolutions, "Pareto.AND");
+        };
 
-
-        List<Item> items = new ArrayList<>();
-        items.add(new Item("pareto.size", front.size(), "%3d"));
-        front.forEach(x -> System.out.println("Coverage: " + x.getFirst().getCoverage()
-                                                      + ", \t Fitness: " + x.getSecond()));
-        return items;
     }
 
 
