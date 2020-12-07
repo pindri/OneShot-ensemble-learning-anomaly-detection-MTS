@@ -8,6 +8,7 @@ import signal.Record;
 import signal.SignalBuilder;
 import signal.SignalHandler;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ public class FitnessFunction extends AbstractFitnessFunction {
     List<Signal<Record>> signals;
     List<Signal<Record>> trainSignals;
     List<Signal<Record>> validationSignals;
-    private final double epsilon = 0.0;
+    private final double epsilon = 0.000000001;
 
     public FitnessFunction(String trainPath, String testPath, String labelPath,
                            int traceLength, double validationFraction) throws IOException {
@@ -117,17 +118,17 @@ public class FitnessFunction extends AbstractFitnessFunction {
         int FN = 0;
 
         for (int i = 0; i < predictions.length; i++) {
-            if (predictions[i] >= 0) {
-                if (label[i] > 0) {
-                    FN++;
-                } else {
-                    TN++;
-                }
-            } else {
+            if (predictions[i] > 0) { // If predicted anomaly.
                 if (label[i] > 0) {
                     TP++;
                 } else {
                     FP++;
+                }
+            } else {
+                if (label[i] > 0) {
+                    FN++;
+                } else {
+                    TN++;
                 }
             }
         }
@@ -148,14 +149,14 @@ public class FitnessFunction extends AbstractFitnessFunction {
         return evaluateSingleSolution(fitnessToLabel(fitness, this.epsilon), prefix);
     }
 
+
     private List<Item> evaluateSingleSolution(int[] predictions, String prefix) {
 
-        int[] labels;
         Map<String, Integer> indices;
 
         int from = this.testLabels.size() - predictions.length;
         int to = this.testLabels.size();
-        labels = IntStream.range(from, to).map(this.testLabels::get).toArray();
+        int[] labels = IntStream.range(from, to).map(this.testLabels::get).toArray();
 
         long P = Arrays.stream(labels).filter(x -> x > 0).count();
         long N = this.testLabels.size() - P;
@@ -184,70 +185,54 @@ public class FitnessFunction extends AbstractFitnessFunction {
     }
 
 
-    public List<Item> evaluateSolutionsAND(List<AbstractSTLNode> solutions, String prefix) {
+    @Override
+    public List<Item> evaluateSolutions(List<AbstractSTLNode> solutions, String prefix, Operator operator) {
         List<int[]> predictions = solutions.stream().map(x -> fitnessToLabel(getTestFitnessArray(x), this.epsilon))
                                            .collect(Collectors.toList());
         predictions = ArraysUtilities.trimHeadSameSize(predictions);
-        int[] predictionsAND = ArraysUtilities.labelsAND(predictions);
+        int[] aggregatedPredictions;
 
-        return evaluateSingleSolution(predictionsAND, prefix);
+        switch (operator) {
+            case OR -> aggregatedPredictions = ArraysUtilities.labelsOR(predictions);
+            case AND -> aggregatedPredictions = ArraysUtilities.labelsAND(predictions);
+            case MAJORITY -> aggregatedPredictions = ArraysUtilities.labelsMajority(predictions);
+            default -> throw new IllegalStateException("Unexpected value: " + operator);
+        }
+
+        return evaluateSingleSolution(aggregatedPredictions, prefix);
     }
-
-    public List<Item> evaluateSolutionsOR(List<AbstractSTLNode> solutions, String prefix) {
-        List<int[]> predictions = solutions.stream().map(x -> fitnessToLabel(getTestFitnessArray(x), this.epsilon))
-                                           .collect(Collectors.toList());
-        predictions = ArraysUtilities.trimHeadSameSize(predictions);
-        int[] predictionsOR = ArraysUtilities.labelsOR(predictions);
-
-        return evaluateSingleSolution(predictionsOR, prefix);
-    }
-
 
 
     @Override
     public double validateSolution(AbstractSTLNode solution) {
-//       long FP = 0;
-//
-//       for (Signal<Record> signal : this.validationSignals) {
-//           Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
-//           FP += Arrays.stream(SignalHandler.toDoubleArray(robustness)).mapToDouble(x -> x[1])
-//                   .filter(x -> x < 0).count();
-//       }
-//       return FP;
-       return 0.0;
+
+        long FP = Arrays.stream(fitnessToLabel(getValidationFitnessArray(solution), this.epsilon))
+                        .filter(x -> x < 0).count();
+        int N = this.validationSignals.size();
+
+        return (FP*1.0)/(N*1.0);
     }
 
 
     @Override
     public void solutionToFile(AbstractSTLNode solution, String filename) throws IOException {
 
-//        FileWriter fw = new FileWriter(filename);
-//        fw.write("fitness;label\n");
-//
-//        double fitness;
-//        int label;
-////        int position = 0;
-//
-//        for (Signal<Record> signal : this.testSignals) {
-//            Signal<Double> robustness = solution.getOperator().apply(signal).monitor(signal);
-////            fitness = robustness.valueAt(signal.end());
-////            label = this.testLabels.get(position);
-////            fw.write(fitness + ";" + label + "\n");
-////            System.out.println(position);
-////            position++;
-//
-//            double[] robustnessArray = Arrays.stream(SignalHandler.toDoubleArray(robustness))
-//                    .mapToDouble(x -> x[1]).toArray();
-//            int position = 0;
-//
-//            for (int t = (int) robustness.start(); t <= robustness.end(); t++) {
-//                label = this.testLabels.get(t);
-//                fitness = robustnessArray[position];
-//                position++;
-//                fw.write(fitness + ";" + label + "\n");
-//            }
-//        }
-//        fw.close();
+        double[] fitness = getTestFitnessArray(solution);
+
+        int from = this.testLabels.size() - fitness.length;
+        int to = this.testLabels.size();
+        int[] labels = IntStream.range(from, to).map(this.testLabels::get).toArray();
+
+        FileWriter fw = new FileWriter(filename);
+        fw.write("fitness;label\n");
+
+        assert fitness.length == labels.length;
+
+        for (int i = 0; i < fitness.length; i++) {
+            fw.write(fitness[i] + ";" + labels[i] + "\n");
+        }
+
+        fw.close();
     }
 
 }

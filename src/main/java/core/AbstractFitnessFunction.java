@@ -13,9 +13,7 @@ public abstract class AbstractFitnessFunction implements Function<AbstractSTLNod
 
     public abstract List<Item> evaluateSolution(AbstractSTLNode solution, String prefix);
 
-    public abstract List<Item> evaluateSolutionsOR(List<AbstractSTLNode> solutions, String prefix);
-
-    public abstract List<Item> evaluateSolutionsAND(List<AbstractSTLNode> solutions, String prefix);
+    public abstract List<Item> evaluateSolutions(List<AbstractSTLNode> solutions, String prefix, Operator operator);
 
     public abstract double validateSolution(AbstractSTLNode solution);
 

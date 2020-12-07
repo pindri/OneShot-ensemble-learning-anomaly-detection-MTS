@@ -62,4 +62,12 @@ public class ArraysUtilities {
 
         return Arrays.stream(sum).map(x -> x > 0 ? 1 : 0).toArray();
     }
+
+    public static int[] labelsMajority(List<int[]> arrays) {
+
+        int[] sum = sumIntArrays(arrays);
+        int threshold = arrays.size()/2 + 1; // More than half.
+
+        return Arrays.stream(sum).map(x -> x >= threshold ? 1 : 0).toArray();
+    }
 }

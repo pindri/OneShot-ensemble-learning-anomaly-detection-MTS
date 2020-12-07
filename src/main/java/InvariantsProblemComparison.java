@@ -1,5 +1,6 @@
 import com.google.common.base.Stopwatch;
 import core.InvariantsProblem;
+import core.Operator;
 import datacollectors.BestTreeInfo;
 import datacollectors.FunctionOfAll;
 import datacollectors.Pareto;
@@ -12,6 +13,7 @@ import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.listener.Listener;
 import it.units.malelab.jgea.core.listener.MultiFileListenerFactory;
 import it.units.malelab.jgea.core.listener.collector.*;
+import it.units.malelab.jgea.core.order.ParetoDominance;
 import it.units.malelab.jgea.core.order.PartialComparator;
 import it.units.malelab.jgea.core.selector.Tournament;
 import it.units.malelab.jgea.core.selector.Worst;
@@ -50,13 +52,14 @@ public class InvariantsProblemComparison extends Worker {
         int diversityMaxAttempts = 100;
 //        int nIterations = i(a("nIterations", "250"));
         String evolverNamePattern = a("evolver", ".*Diversity.*");
-        int[] seeds = ri(a("seed", "0:1"));
+        int[] seeds = ri(a("seed", "3:4"));
         String trainPath = a("trainPath", "data/SWaT/train.csv");
         String testPath = a("testPath", "data/SWaT/test.csv");
         String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
         String grammarPath = a("grammarPath", "grammar_temporal.bnf");
         String testResultsFile = a("testResultsFile", "testResults.txt");
         String validationResultsFile = a("validationResultsFile", "validationResults.txt");
+        String paretoResultsFile = a("paretoResultsFile", "paretoResults.txt");
         int traceLength = i(a("traceLength", "0"));
         double validationFraction = d(a("validationFraction", "0.0"));
 
@@ -77,27 +80,13 @@ public class InvariantsProblemComparison extends Worker {
         );
 
         Map<String, Function<InvariantsProblem, Evolver<Tree<String>, AbstractSTLNode, Double>>>
-                evolvers =new TreeMap<>();
-
-        evolvers.put("Standard", p -> new StandardEvolver<>(
-                p.getSolutionMapper(),
-                new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
-                PartialComparator.from(Double.class).comparing(Individual::getFitness),
-                nPop,
-                Map.of(
-                    new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
-                    new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
-                ),
-                new Tournament(nTournament),
-                new Worst(),
-                500,
-                true
-        ));
+                evolvers = new TreeMap<>();
 
         evolvers.put("StandardDiversity", p -> new StandardWithEnforcedDiversityEvolver<>(
                 p.getSolutionMapper(),
                 new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
                 PartialComparator.from(Double.class).comparing(Individual::getFitness),
+//                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
                 nPop,
                 Map.of(
                         new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
@@ -110,7 +99,9 @@ public class InvariantsProblemComparison extends Worker {
                 diversityMaxAttempts
         ));
 
-        // Actual run.
+        /////////////////
+        // Actual run. //
+        /////////////////
 
         // Filtering evolvers.
         evolvers = evolvers.entrySet().stream()
@@ -147,13 +138,14 @@ public class InvariantsProblemComparison extends Worker {
                                         new FunctionOfOneBest<>
                                                 (i -> problem.getFitnessFunction().evaluateSolution(i.getSolution(),
                                                                                                     "test")),
-                                        new BestTreeInfo("%7.5f")
-                                        , new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, "AND"))
-                                        , new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, "OR"))
-                                        , new FunctionOfAll<>(i -> List.of(new Item("front.size",
-                                                                                    Pareto.getFront(i).size(),
-                                                                                    "3d%")))
-//                                        , new BestPrinter(BestPrinter.Part.SOLUTION, "%80.80s")
+                                        new BestTreeInfo("%7.5f"),
+                                        new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.AND)),
+                                        new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.OR)),
+                                        new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.MAJORITY)),
+                                        new FunctionOfAll<>(i -> List.of(new Item("front.size",
+                                                                                  Pareto.getFront(i).size(),
+                                                                                  "%3d")))
+//                                        , new FunctionOfFirsts<>(i -> List.of(new Item("solution", 2, "3d%")))
                         );
 
                         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -177,7 +169,6 @@ public class InvariantsProblemComparison extends Worker {
 
                         // Validation.
                         if (validationFraction > 0.0) {
-                            System.out.println("Computing validation");
                             // Select solution with smaller FPR.
                             Optional<AbstractSTLNode> validationSolution = solutions.stream()
                                     .reduce((a, b) -> problem.getFitnessFunction().validateSolution(a) <=
@@ -192,8 +183,11 @@ public class InvariantsProblemComparison extends Worker {
                             });
                         }
 
+                        // Pareto.
 
-                        // Test.
+
+
+                        // Test to file.
                         AbstractSTLNode solution = solutions.iterator().next();
                         System.out.println("\n" + solution);
                         problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
