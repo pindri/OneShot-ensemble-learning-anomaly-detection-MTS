@@ -4,6 +4,7 @@ import arrayUtilities.ArraysUtilities;
 import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.core.listener.collector.Item;
 import nodes.AbstractSTLNode;
+import org.tukaani.xz.DeltaInputStream;
 import signal.Record;
 import signal.SignalBuilder;
 import signal.SignalHandler;
@@ -16,37 +17,23 @@ import java.util.stream.IntStream;
 
 public class FitnessFunction extends AbstractFitnessFunction {
 
-    final SignalBuilder signalBuilder;
-    final List<Integer> numIndexes = IntStream.range(0, InvariantsProblem.getNumNames().length).boxed()
-            .collect(Collectors.toList());
-    final List<Integer> boolIndexes = IntStream.range(0, InvariantsProblem.getBoolNames().length).boxed()
-            .collect(Collectors.toList());
-    private final List<Signal<Record>> testSignals;
-    private final List<Integer> testLabels;
-    List<Signal<Record>> signals;
-    List<Signal<Record>> trainSignals;
-    List<Signal<Record>> validationSignals;
-    private final double epsilon = 0.000000001;
-
     public FitnessFunction(String trainPath, String testPath, String labelPath,
                            int traceLength, double validationFraction) throws IOException {
+
         this.signalBuilder = new SignalBuilder(traceLength);
-        this.signals = this.signalBuilder.build(trainPath, this.boolIndexes, this.numIndexes);
-        // Splitting into training and validation set.
+        List<Integer> numIndexes = IntStream.range(0, InvariantsProblem.getNumNames().length).boxed()
+                                            .collect(Collectors.toList());
+        List<Integer> boolIndexes = IntStream.range(0, InvariantsProblem.getBoolNames().length).boxed()
+                                             .collect(Collectors.toList());
+        this.signals = this.signalBuilder.build(trainPath, boolIndexes, numIndexes);
+
         this.trainSignals = this.signalBuilder.extractPortion(this.signals, 0, 1-validationFraction);
         this.validationSignals = this.signalBuilder.extractPortion(this.signals, 1-validationFraction, 1);
 
-        this.testSignals = this.signalBuilder.build(testPath, this.boolIndexes, this.numIndexes);
+        this.testSignals = this.signalBuilder.build(testPath, boolIndexes, numIndexes);
         this.testLabels = this.signalBuilder.parseLabels(labelPath);
-        System.out.println("Sizes. Signal: " + signals.size() + ". Train: " + trainSignals.size()
-                                   + ". Test: " + testSignals.size() + ". Test labels: " + testLabels.size()
-                                   + ". Validation: " + this.validationSignals.size());
-        System.out.print("Element sizes. Signal: " + signals.get(0).size() + ". Train: "
-                                 + trainSignals.get(0).size() + ". Test: " + testSignals.get(0).size() + ".");
-        if (validationFraction > 0.0) {
-            System.out.print(" Validation: " + validationSignals.get(0).size());
-        }
-        System.out.println();
+
+        printInfo(validationFraction > 0);
     }
 
 
@@ -62,9 +49,38 @@ public class FitnessFunction extends AbstractFitnessFunction {
                 fitness += penalty;
                 continue;
             }
+//            if (monitor.getCoverage() < 50 || monitor.getVariablesList().stream().distinct().count() < 5) {
+//                fitness += penalty;
+//                continue;
+//            }
+
+            // Exclude P201
+            if (monitor.getVariablesList().contains("P201")) {
+                fitness += penalty;
+                continue;
+            }
+            if (monitor.getCoverage() < 100) {
+                fitness += 0.0001*(100 - monitor.getCoverage());
+            }
+            if (monitor.getVariablesList().stream().distinct().count() < 10) {
+                fitness += 0.001*(10 - monitor.getVariablesList().stream().distinct().count());
+            }
+//            if (monitor.getCoverage() < 100) {
+//                fitness += 0.0001*(100 - monitor.getCoverage());
+//            }
+//            if (monitor.getVariablesList().stream().distinct().count() < 10) {
+//                fitness += 0.001*(100 - monitor.getVariablesList().stream().distinct().count());
+//            }
+//            // Penalty for false positives.
+//            if (validateSolution(monitor) > 0) {
+//                fitness += penalty;
+//                continue;
+//            }
             fitnessArray = applyMonitor(monitor, signal);
 //            fitness += fitnessArray[fitnessArray.length - 1];
             fitness += Arrays.stream(fitnessArray).map(Math::abs).summaryStatistics().getAverage();
+//            fitness += Arrays.stream(fitnessArray).map(x -> x >= epsilon ? Math.abs(x) : 1).summaryStatistics().getAverage();
+
         }
 
         return fitness/this.trainSignals.size();
@@ -104,6 +120,7 @@ public class FitnessFunction extends AbstractFitnessFunction {
     }
 
 
+    // If fitness larger or equal than epsilon, record is labelled as 0 == NEGATIVE.
     public static int[] fitnessToLabel(double[] fitness, double epsilon) {
         return Arrays.stream(fitness).mapToInt(x -> x >= epsilon ? 0 : 1).toArray();
     }
@@ -118,14 +135,14 @@ public class FitnessFunction extends AbstractFitnessFunction {
         int FN = 0;
 
         for (int i = 0; i < predictions.length; i++) {
-            if (predictions[i] > 0) { // If predicted anomaly.
-                if (label[i] > 0) {
+            if (predictions[i] == 1) { // If predicted anomaly, with POSITIVE == (prediction == 1).
+                if (label[i] == 1) {
                     TP++;
                 } else {
                     FP++;
                 }
             } else {
-                if (label[i] > 0) {
+                if (label[i] == 1) {
                     FN++;
                 } else {
                     TN++;
@@ -196,6 +213,7 @@ public class FitnessFunction extends AbstractFitnessFunction {
             case OR -> aggregatedPredictions = ArraysUtilities.labelsOR(predictions);
             case AND -> aggregatedPredictions = ArraysUtilities.labelsAND(predictions);
             case MAJORITY -> aggregatedPredictions = ArraysUtilities.labelsMajority(predictions);
+            case TWO -> aggregatedPredictions = ArraysUtilities.labelsTwo(predictions);
             default -> throw new IllegalStateException("Unexpected value: " + operator);
         }
 

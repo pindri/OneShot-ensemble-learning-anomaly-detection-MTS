@@ -4,7 +4,9 @@ public enum Operator {
 
     OR("OR"),
     AND("AND"),
+    TWO("TWO"),
     MAJORITY("MAJORITY");
+
 
     private final String operator;
 

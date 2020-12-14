@@ -1,10 +1,16 @@
 package arrayUtilities;
 
+import it.units.malelab.jgea.core.Individual;
+import nodes.AbstractSTLNode;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ArraysUtilities {
+
 
     public static int minLength(List<int[]> arrays) {
         int min = Integer.MAX_VALUE;
@@ -67,6 +73,14 @@ public class ArraysUtilities {
 
         int[] sum = sumIntArrays(arrays);
         int threshold = arrays.size()/2 + 1; // More than half.
+
+        return Arrays.stream(sum).map(x -> x >= threshold ? 1 : 0).toArray();
+    }
+
+    public static int[] labelsTwo(List<int[]> arrays) {
+
+        int[] sum = sumIntArrays(arrays);
+        int threshold = arrays.size() >= 2 ? 2 : 1; // 2 if at least 2 arrays.
 
         return Arrays.stream(sum).map(x -> x >= threshold ? 1 : 0).toArray();
     }

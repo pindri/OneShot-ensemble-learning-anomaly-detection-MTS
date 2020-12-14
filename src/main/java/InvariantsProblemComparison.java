@@ -1,3 +1,4 @@
+import arrayUtilities.ArraysUtilities;
 import com.google.common.base.Stopwatch;
 import core.InvariantsProblem;
 import core.Operator;
@@ -9,6 +10,7 @@ import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
+import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.listener.Listener;
 import it.units.malelab.jgea.core.listener.MultiFileListenerFactory;
@@ -52,14 +54,14 @@ public class InvariantsProblemComparison extends Worker {
         int diversityMaxAttempts = 100;
 //        int nIterations = i(a("nIterations", "250"));
         String evolverNamePattern = a("evolver", ".*Diversity.*");
-        int[] seeds = ri(a("seed", "3:4"));
+        int[] seeds = ri(a("seed", "0:1"));
         String trainPath = a("trainPath", "data/SWaT/train.csv");
         String testPath = a("testPath", "data/SWaT/test.csv");
         String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
         String grammarPath = a("grammarPath", "grammar_temporal.bnf");
         String testResultsFile = a("testResultsFile", "testResults.txt");
         String validationResultsFile = a("validationResultsFile", "validationResults.txt");
-        String paretoResultsFile = a("paretoResultsFile", "paretoResults.txt");
+//        String paretoResultsFile = a("paretoResultsFile", "paretoResults.txt");
         int traceLength = i(a("traceLength", "0"));
         double validationFraction = d(a("validationFraction", "0.0"));
 
@@ -109,9 +111,11 @@ public class InvariantsProblemComparison extends Worker {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         L.info(String.format("Going to test with %d evolver/s: %s%n", evolvers.size(), evolvers.keySet()));
 
-        for (int seed : seeds) {
-            assert problems != null;
-            for (InvariantsProblem problem : problems) {
+        List<AbstractSTLNode> ensemble = new ArrayList<>();
+
+        assert problems != null;
+        for (InvariantsProblem problem : problems) {
+            for (int seed : seeds) {
                 for (Map.Entry<String, Function<InvariantsProblem, Evolver<Tree<String>,
                         AbstractSTLNode, Double>>> evolverEntry : evolvers.entrySet()) {
                     Map<String, String> keys = new TreeMap<>(Map.of(
@@ -138,14 +142,34 @@ public class InvariantsProblemComparison extends Worker {
                                         new FunctionOfOneBest<>
                                                 (i -> problem.getFitnessFunction().evaluateSolution(i.getSolution(),
                                                                                                     "test")),
-                                        new BestTreeInfo("%7.5f"),
-                                        new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.AND)),
+                                        new BestTreeInfo("%7.5f")
+                                        ,new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.AND)),
                                         new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.OR)),
-                                        new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.MAJORITY)),
+                                       new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.MAJORITY)),
+                                        new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.TWO)),
                                         new FunctionOfAll<>(i -> List.of(new Item("front.size",
                                                                                   Pareto.getFront(i).size(),
                                                                                   "%3d")))
-//                                        , new FunctionOfFirsts<>(i -> List.of(new Item("solution", 2, "3d%")))
+                                        , new FunctionOfFirsts<>(
+                                                i -> problem.getFitnessFunction()
+                                                            .evaluateSolutions(i.stream().map(Individual::getSolution)
+                                                                                .collect(Collectors.toList()),
+                                                                               "Ensemble.AND", Operator.AND))
+                                        , new FunctionOfFirsts<>(
+                                                i -> problem.getFitnessFunction()
+                                                            .evaluateSolutions(i.stream().map(Individual::getSolution)
+                                                                                .collect(Collectors.toList()),
+                                                                               "Ensemble.OR", Operator.OR))
+                                        , new FunctionOfFirsts<>(
+                                                i -> problem.getFitnessFunction()
+                                                            .evaluateSolutions(i.stream().map(Individual::getSolution)
+                                                                                .collect(Collectors.toList()),
+                                                                                "Ensemble.MAJ", Operator.MAJORITY))
+                                        , new FunctionOfFirsts<>(
+                                                i -> problem.getFitnessFunction()
+                                                            .evaluateSolutions(i.stream().map(Individual::getSolution)
+                                                                                .collect(Collectors.toList()),
+                                                                               "Ensemble.TWO", Operator.TWO))
                         );
 
                         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -156,7 +180,7 @@ public class InvariantsProblemComparison extends Worker {
                         Collection<AbstractSTLNode> solutions = evolver.solve(
                                 Misc.cached(problem.getFitnessFunction(), 10000),
                                 new TargetFitness<>(0d),
-//                                new Iterations(2),
+//                                new Iterations(10),
                                 new Random(seed),
                                 executorService,
                                 Listener.onExecutor((listenerFactory.getBaseFileName() == null) ?
@@ -183,14 +207,14 @@ public class InvariantsProblemComparison extends Worker {
                             });
                         }
 
-                        // Pareto.
-
-
 
                         // Test to file.
                         AbstractSTLNode solution = solutions.iterator().next();
                         System.out.println("\n" + solution);
                         problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
+
+                        // Add to ensemble.
+                        ensemble.addAll(solutions);
 
                         L.info(String.format("Done %s: %d solutions in %4.1fs",
                                              keys,
@@ -204,6 +228,11 @@ public class InvariantsProblemComparison extends Worker {
                     }
                 }
             }
+            // TODO: aggregate in ensemble.
+//            problem.getFitnessFunction().evaluateSolutions(ensemble, "", Operator.OR);
+//            problem.getFitnessFunction().evaluateSolutions(ensemble, "", Operator.AND);
+//            problem.getFitnessFunction().evaluateSolutions(ensemble, "", Operator.MAJORITY);
+//            problem.getFitnessFunction().evaluateSolutions(ensemble, "", Operator.TWO);
         }
 
     }
