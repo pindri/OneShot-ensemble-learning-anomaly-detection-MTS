@@ -1,6 +1,6 @@
 package nodes;
 
-import core.InvariantsProblem;
+import core.single.SingleInvariantsProblem;
 import eu.quanticol.moonlight.formula.DoubleDomain;
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import eu.quanticol.moonlight.signal.Signal;
@@ -26,7 +26,7 @@ public class AndSTLNodeTest {
         String dataPath = "data/toy_train_data.csv";
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
-        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
+        new SingleInvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
 
             // Tree to be parsed.
             Tree<String> v = Tree.of("x1");

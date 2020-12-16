@@ -1,6 +1,6 @@
 package datacollectors;
 
-import core.InvariantsProblem;
+import core.AbstractInvariantsProblem;
 import core.Operator;
 import eu.quanticol.moonlight.util.Pair;
 import it.units.malelab.jgea.core.Individual;
@@ -8,7 +8,6 @@ import it.units.malelab.jgea.core.listener.collector.Item;
 import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AbstractSTLNode;
 import ordering.ParetoCollection;
-import org.apache.commons.math3.analysis.function.Abs;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +36,7 @@ public class Pareto {
     }
 
     public static List<Item> computeIndices(Collection<Individual<? extends Tree<String>, ? extends AbstractSTLNode,
-            ? extends Double>> individuals, InvariantsProblem problem, Operator operator) {
+            ? extends Double>> individuals, AbstractInvariantsProblem<?> problem, Operator operator) {
 
         Collection<Pair<AbstractSTLNode, Double>> front = Pareto.getFront(individuals);
         List<AbstractSTLNode> frontSolutions = front.stream().map(Pair::getFirst).collect(Collectors.toList());

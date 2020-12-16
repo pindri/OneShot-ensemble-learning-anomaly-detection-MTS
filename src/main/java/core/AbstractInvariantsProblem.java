@@ -9,32 +9,28 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class InvariantsProblem implements GrammarBasedProblem<String, AbstractSTLNode, Double> {
+public class AbstractInvariantsProblem<F> implements GrammarBasedProblem<String, AbstractSTLNode, F> {
 
-    private static String[] boolNames;
-    private static String[] numNames;
-    private final Grammar<String> grammar;
-    private final STLMapper solutionMapper;
-    private final AbstractFitnessFunction fitnessFunction;
+    protected static String[] boolNames;
+    protected static String[] numNames;
+    protected final Grammar<String> grammar;
+    protected final STLMapper solutionMapper;
+    protected AbstractFitnessFunction<F> fitnessFunction;
 
-    public InvariantsProblem(String grammarPath, String trainPath, String testPath, String labelPath,
-                             int traceLength, double validationFraction) throws IOException {
+    protected AbstractInvariantsProblem(String grammarPath, String trainPath, String testPath, String labelPath,
+                                     int traceLength, double validationFraction) throws IOException {
         // Note: names must be initialised first.
         boolNames = new String[]{}; // No boolean variables are used.
         numNames = initialiseNames(trainPath);
         this.grammar = initialiseGrammar(grammarPath, trainPath);
         this.solutionMapper = new STLMapper();
-        this.fitnessFunction = new FitnessFunction(trainPath, testPath, labelPath, traceLength, validationFraction);
     }
 
     public String[] initialiseNames(String dataPath) throws IOException {
         return Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null))
-                .replace("\"", "").split(",");
+                      .replace("\"", "").split(",");
     }
 
     private Grammar<String> initialiseGrammar(String grammarPath, String dataPath) throws IOException {
@@ -62,7 +58,7 @@ public class InvariantsProblem implements GrammarBasedProblem<String, AbstractST
     }
 
     @Override
-    public AbstractFitnessFunction getFitnessFunction() {
+    public AbstractFitnessFunction<F> getFitnessFunction() {
         return this.fitnessFunction;
     }
 

@@ -1,5 +1,6 @@
 package core;
 
+import core.single.SingleInvariantsProblem;
 import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.core.listener.collector.Item;
 import nodes.AbstractSTLNode;
@@ -9,8 +10,10 @@ import signal.SignalBuilder;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public abstract class AbstractFitnessFunction implements Function<AbstractSTLNode, Double> {
+public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTLNode, F> {
 
     protected SignalBuilder signalBuilder;
     protected List<Signal<Record>> testSignals;
@@ -21,6 +24,25 @@ public abstract class AbstractFitnessFunction implements Function<AbstractSTLNod
 
     // If fitness >= epsilon, record is not anomalous == 0 == NEGATIVE.
     protected double epsilon = -0.001;
+
+    protected AbstractFitnessFunction(String trainPath, String testPath, String labelPath, int traceLength,
+                                      double validationFraction) throws IOException {
+
+        this.signalBuilder = new SignalBuilder(traceLength);
+        List<Integer> numIndexes = IntStream.range(0, SingleInvariantsProblem.getNumNames().length).boxed()
+                                            .collect(Collectors.toList());
+        List<Integer> boolIndexes = IntStream.range(0, SingleInvariantsProblem.getBoolNames().length).boxed()
+                                             .collect(Collectors.toList());
+        this.signals = this.signalBuilder.build(trainPath, boolIndexes, numIndexes);
+
+        this.trainSignals = this.signalBuilder.extractPortion(this.signals, 0, 1-validationFraction);
+        this.validationSignals = this.signalBuilder.extractPortion(this.signals, 1-validationFraction, 1);
+
+        this.testSignals = this.signalBuilder.build(testPath, boolIndexes, numIndexes);
+        this.testLabels = this.signalBuilder.parseLabels(labelPath);
+
+        printInfo(validationFraction > 0);
+    }
 
     protected void printInfo(boolean printValidation) {
         System.out.println("Sizes. Signal: " + this.signals.size()
@@ -41,7 +63,7 @@ public abstract class AbstractFitnessFunction implements Function<AbstractSTLNod
 
 
     @Override
-    public abstract Double apply(AbstractSTLNode monitor);
+    public abstract F apply(AbstractSTLNode monitor);
 
     public abstract List<Item> evaluateSolution(AbstractSTLNode solution, String prefix);
 

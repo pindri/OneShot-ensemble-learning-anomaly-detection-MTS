@@ -1,8 +1,7 @@
 package signal;
 
-import core.InvariantsProblem;
+import core.single.SingleInvariantsProblem;
 import eu.quanticol.moonlight.signal.Signal;
-import eu.quanticol.moonlight.signal.SignalCursor;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -20,7 +19,7 @@ public class SignalBuilderTest {
         String dataPath = "data/toy_train_data.csv";
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
-        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
+        new SingleInvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
         SignalBuilder sb = new SignalBuilder(10);
         List<Integer> numIndexes = new ArrayList<>(Arrays.asList(0, 1, 2, 3));
         List<Integer> boolIndexes = new ArrayList<>(Collections.emptyList());
@@ -28,7 +27,7 @@ public class SignalBuilderTest {
         assertFalse(signals.get(0).isEmpty());
 
         // Asserting values have been correctly read.
-        double value = signals.get(0).valueAt(2).getNum(InvariantsProblem.getNumNames()[0]);
+        double value = signals.get(0).valueAt(2).getNum(SingleInvariantsProblem.getNumNames()[0]);
         double check = 1.67; // Directly from file.
         assertEquals(value, check, 0.01);
     }
@@ -39,7 +38,7 @@ public class SignalBuilderTest {
         String dataPath = "data/toy_train_data.csv";
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
-        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
+        new SingleInvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
         SignalBuilder sb = new SignalBuilder(10);
         List<Integer> numIndexes = new ArrayList<>(Arrays.asList(0, 1, 2, 3));
         List<Integer> boolIndexes = new ArrayList<>(Collections.emptyList());
@@ -47,7 +46,7 @@ public class SignalBuilderTest {
         assertFalse(signals.get(0).isEmpty());
 
         // Asserting values have been correctly read.
-        double value = signals.get(0).valueAt(2).getNum(InvariantsProblem.getNumNames()[0]);
+        double value = signals.get(0).valueAt(2).getNum(SingleInvariantsProblem.getNumNames()[0]);
         double check = 1.67; // Directly from file.
         assertEquals(value, check, 0.01);
     }

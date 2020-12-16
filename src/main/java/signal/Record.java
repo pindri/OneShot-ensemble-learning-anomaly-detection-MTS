@@ -1,6 +1,6 @@
 package signal;
 
-import core.InvariantsProblem;
+import core.single.SingleInvariantsProblem;
 
 import java.util.HashMap;
 
@@ -9,12 +9,12 @@ public class Record {
     private static final HashMap<String, Integer> namesToIdx = new HashMap<>();
     static {
         int i = 0;
-        for (String name : InvariantsProblem.getBoolNames()) {
+        for (String name : SingleInvariantsProblem.getBoolNames()) {
             namesToIdx.put(name, i);
             ++i;
         }
         i = 0;
-        for (String name: InvariantsProblem.getNumNames()) {
+        for (String name: SingleInvariantsProblem.getNumNames()) {
             namesToIdx.put(name, i);
             ++i;
         }

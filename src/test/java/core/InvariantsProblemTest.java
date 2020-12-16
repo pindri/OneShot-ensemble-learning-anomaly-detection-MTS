@@ -1,5 +1,6 @@
 package core;
 
+import core.single.SingleInvariantsProblem;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -15,8 +16,8 @@ public class InvariantsProblemTest {
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
         // Null before an InvariantsProblem is created.
-        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
-        assertArrayEquals(new String[]{"x1", "x2", "x3", "x4"}, InvariantsProblem.getNumNames());
-        assertArrayEquals(new String[]{}, InvariantsProblem.getBoolNames());
+        new SingleInvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
+        assertArrayEquals(new String[]{"x1", "x2", "x3", "x4"}, SingleInvariantsProblem.getNumNames());
+        assertArrayEquals(new String[]{}, SingleInvariantsProblem.getBoolNames());
     }
 }

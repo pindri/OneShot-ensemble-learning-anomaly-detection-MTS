@@ -1,12 +1,11 @@
 package nodes;
 
-import core.InvariantsProblem;
+import core.single.SingleInvariantsProblem;
 import eu.quanticol.moonlight.formula.DoubleDomain;
 import eu.quanticol.moonlight.formula.Interval;
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.representation.tree.Tree;
-import mapper.Comparison;
 import org.junit.Test;
 import signal.Record;
 
@@ -46,7 +45,7 @@ public class UnaryTemporalSTLNodeTest {
         String dataPath = "data/toy_train_data.csv";
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
-        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
+        new SingleInvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
     }
 
     public void populateSignal() {

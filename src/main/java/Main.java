@@ -1,4 +1,4 @@
-import core.InvariantsProblem;
+import core.single.SingleInvariantsProblem;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
@@ -52,8 +52,8 @@ public class Main extends Worker {
         String dataPath = "data/SWaT/train.csv";
         String testPath = "data/SWaT/test.csv";
         String labelsPath = "data/SWaT/labels.csv";
-        InvariantsProblem problem = new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 1000,
-                                                          0);
+        SingleInvariantsProblem problem = new SingleInvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 1000,
+                                                                      0);
 
 
         int treeHeight = 20;

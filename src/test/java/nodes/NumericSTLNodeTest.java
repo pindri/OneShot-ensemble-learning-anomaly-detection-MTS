@@ -1,6 +1,6 @@
 package nodes;
 
-import core.InvariantsProblem;
+import core.single.SingleInvariantsProblem;
 import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.representation.tree.Tree;
 import org.junit.Test;
@@ -23,7 +23,7 @@ public class NumericSTLNodeTest {
         String dataPath = "data/toy_train_data.csv";
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
-        new InvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
+        new SingleInvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
 
         // Tree to be parsed.
         Tree<String> v = Tree.of("x2");

@@ -1,12 +1,12 @@
-package core;
+package core.single;
 
 import arrayUtilities.ArraysUtilities;
+import core.AbstractFitnessFunction;
+import core.Operator;
 import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.core.listener.collector.Item;
 import nodes.AbstractSTLNode;
-import org.tukaani.xz.DeltaInputStream;
 import signal.Record;
-import signal.SignalBuilder;
 import signal.SignalHandler;
 
 import java.io.FileWriter;
@@ -15,25 +15,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class FitnessFunction extends AbstractFitnessFunction {
+public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
 
-    public FitnessFunction(String trainPath, String testPath, String labelPath,
-                           int traceLength, double validationFraction) throws IOException {
-
-        this.signalBuilder = new SignalBuilder(traceLength);
-        List<Integer> numIndexes = IntStream.range(0, InvariantsProblem.getNumNames().length).boxed()
-                                            .collect(Collectors.toList());
-        List<Integer> boolIndexes = IntStream.range(0, InvariantsProblem.getBoolNames().length).boxed()
-                                             .collect(Collectors.toList());
-        this.signals = this.signalBuilder.build(trainPath, boolIndexes, numIndexes);
-
-        this.trainSignals = this.signalBuilder.extractPortion(this.signals, 0, 1-validationFraction);
-        this.validationSignals = this.signalBuilder.extractPortion(this.signals, 1-validationFraction, 1);
-
-        this.testSignals = this.signalBuilder.build(testPath, boolIndexes, numIndexes);
-        this.testLabels = this.signalBuilder.parseLabels(labelPath);
-
-        printInfo(validationFraction > 0);
+    public SingleFitnessFunction(String trainPath, String testPath, String labelPath, int traceLength,
+                                 double validationFraction) throws IOException {
+        super(trainPath, testPath, labelPath, traceLength, validationFraction);
     }
 
 
@@ -49,10 +35,6 @@ public class FitnessFunction extends AbstractFitnessFunction {
                 fitness += penalty;
                 continue;
             }
-//            if (monitor.getCoverage() < 50 || monitor.getVariablesList().stream().distinct().count() < 5) {
-//                fitness += penalty;
-//                continue;
-//            }
 
             // Exclude P201
             if (monitor.getVariablesList().contains("P201")) {
@@ -65,22 +47,10 @@ public class FitnessFunction extends AbstractFitnessFunction {
             if (monitor.getVariablesList().stream().distinct().count() < 10) {
                 fitness += 0.001*(10 - monitor.getVariablesList().stream().distinct().count());
             }
-//            if (monitor.getCoverage() < 100) {
-//                fitness += 0.0001*(100 - monitor.getCoverage());
-//            }
-//            if (monitor.getVariablesList().stream().distinct().count() < 10) {
-//                fitness += 0.001*(100 - monitor.getVariablesList().stream().distinct().count());
-//            }
-//            // Penalty for false positives.
-//            if (validateSolution(monitor) > 0) {
-//                fitness += penalty;
-//                continue;
-//            }
+
             fitnessArray = applyMonitor(monitor, signal);
 //            fitness += fitnessArray[fitnessArray.length - 1];
             fitness += Arrays.stream(fitnessArray).map(Math::abs).summaryStatistics().getAverage();
-//            fitness += Arrays.stream(fitnessArray).map(x -> x >= epsilon ? Math.abs(x) : 1).summaryStatistics().getAverage();
-
         }
 
         return fitness/this.trainSignals.size();
