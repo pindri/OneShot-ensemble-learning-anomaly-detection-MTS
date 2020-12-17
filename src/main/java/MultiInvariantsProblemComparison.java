@@ -1,5 +1,5 @@
 import com.google.common.base.Stopwatch;
-import core.multi.MultiInvariantsProblem;
+import core.problem.MultiInvariantsProblem;
 import datacollectors.BestTreeInfo;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
@@ -23,7 +23,6 @@ import ordering.ParetoTarget;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -56,7 +55,7 @@ public class MultiInvariantsProblemComparison extends Worker {
         String validationResultsFile = a("validationResultsFile", "validationResults.txt");
 //        String paretoResultsFile = a("paretoResultsFile", "paretoResults.txt");
         int traceLength = i(a("traceLength", "0"));
-        double validationFraction = d(a("validationFraction", "0.9"));
+        double validationFraction = d(a("validationFraction", "0.8"));
 
 
         List<MultiInvariantsProblem> problems = null;
@@ -64,8 +63,6 @@ public class MultiInvariantsProblemComparison extends Worker {
             problems = List.of(
                     new MultiInvariantsProblem(grammarPath, trainPath, testPath, labelsPath, traceLength,
                                                validationFraction)
-//                    new MultiInvariantsProblem(grammarPath, trainPath, testPath, labelsPath, traceLength,
-//                                                validationFraction)
             );
         } catch (IOException e) {
             e.printStackTrace();
@@ -157,35 +154,35 @@ public class MultiInvariantsProblemComparison extends Worker {
                         );
 
 
-                        // Validation.
-                        if (validationFraction > 0.0) {
-                            // Select solution with smaller FPR.
-                            Optional<AbstractSTLNode> validationSolution = solutions.stream()
-                                    .reduce((a, b) -> problem.getFitnessFunction().validateSolution(a) <=
-                                            problem.getFitnessFunction().validateSolution(b) ? a : b );
+//                        // Validation.
+//                        if (validationFraction > 0.0) {
+//                            // Select solution with smaller FPR.
+//                            Optional<AbstractSTLNode> validationSolution = solutions.stream()
+//                                    .reduce((a, b) -> problem.getFitnessFunction().validateSolution(a) <=
+//                                            problem.getFitnessFunction().validateSolution(b) ? a : b );
+//
+//                            validationSolution.ifPresent(valSolution -> {
+//                                try {
+//                                    problem.getFitnessFunction().solutionToFile(valSolution, validationResultsFile);
+//                                } catch (IOException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            });
+//                        }
 
-                            validationSolution.ifPresent(valSolution -> {
-                                try {
-                                    problem.getFitnessFunction().solutionToFile(valSolution, validationResultsFile);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            });
-                        }
 
+//                        // Test to file.
+//                        AbstractSTLNode solution = solutions.iterator().next();
+//                        System.out.println("\n" + solution);
+//                        problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
+//
+//                        L.info(String.format("Done %s: %d solutions in %4.1fs",
+//                                             keys,
+//                                             solutions.size(),
+//                                             (double) stopwatch.elapsed(TimeUnit.MILLISECONDS) / 1000d
+//                        ));
 
-                        // Test to file.
-                        AbstractSTLNode solution = solutions.iterator().next();
-                        System.out.println("\n" + solution);
-                        problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
-
-                        L.info(String.format("Done %s: %d solutions in %4.1fs",
-                                             keys,
-                                             solutions.size(),
-                                             (double) stopwatch.elapsed(TimeUnit.MILLISECONDS) / 1000d
-                        ));
-
-                    } catch (InterruptedException | ExecutionException | IOException e) {
+                    } catch (InterruptedException | ExecutionException e) {
                         L.severe(String.format("Cannot complete %s due to %s", keys, e));
                         e.printStackTrace();
                     }

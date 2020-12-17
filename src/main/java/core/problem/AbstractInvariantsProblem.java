@@ -1,5 +1,6 @@
-package core;
+package core.problem;
 
+import core.fitness.AbstractFitnessFunction;
 import it.units.malelab.jgea.representation.grammar.Grammar;
 import it.units.malelab.jgea.representation.grammar.GrammarBasedProblem;
 import mapper.STLMapper;
@@ -11,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class AbstractInvariantsProblem<F> implements GrammarBasedProblem<String, AbstractSTLNode, F> {
+public abstract class AbstractInvariantsProblem<F> implements GrammarBasedProblem<String, AbstractSTLNode, F> {
 
     protected static String[] boolNames;
     protected static String[] numNames;

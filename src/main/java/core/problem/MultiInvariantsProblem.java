@@ -1,6 +1,6 @@
-package core.multi;
+package core.problem;
 
-import core.AbstractInvariantsProblem;
+import core.fitness.MultiFitnessFunction;
 
 import java.io.IOException;
 import java.util.List;

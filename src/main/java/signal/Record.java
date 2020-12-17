@@ -1,6 +1,6 @@
 package signal;
 
-import core.single.SingleInvariantsProblem;
+import core.problem.SingleInvariantsProblem;
 
 import java.util.HashMap;
 

@@ -1,61 +1,73 @@
-package core.single;
+package core.fitness;
 
 import arrayUtilities.ArraysUtilities;
-import core.AbstractFitnessFunction;
 import core.Operator;
+import core.problem.SingleInvariantsProblem;
 import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.core.listener.collector.Item;
 import nodes.AbstractSTLNode;
 import signal.Record;
+import signal.SignalBuilder;
 import signal.SignalHandler;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
+public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTLNode, F> {
 
-    public SingleFitnessFunction(String trainPath, String testPath, String labelPath, int traceLength,
-                                 double validationFraction) throws IOException {
-        super(trainPath, testPath, labelPath, traceLength, validationFraction);
+    protected SignalBuilder signalBuilder;
+    protected List<Signal<Record>> testSignals;
+    protected List<Integer> testLabels;
+    protected List<Signal<Record>> signals;
+    protected List<Signal<Record>> trainSignals;
+    protected List<Signal<Record>> validationSignals;
+
+    // If fitness >= epsilon, record is not anomalous == 0 == NEGATIVE.
+    protected double epsilon = -0.001;
+
+    protected AbstractFitnessFunction(String trainPath, String testPath, String labelPath, int traceLength,
+                                      double validationFraction) throws IOException {
+
+        this.signalBuilder = new SignalBuilder(traceLength);
+        List<Integer> numIndexes = IntStream.range(0, SingleInvariantsProblem.getNumNames().length).boxed()
+                                            .collect(Collectors.toList());
+        List<Integer> boolIndexes = IntStream.range(0, SingleInvariantsProblem.getBoolNames().length).boxed()
+                                             .collect(Collectors.toList());
+        this.signals = this.signalBuilder.build(trainPath, boolIndexes, numIndexes);
+
+        this.trainSignals = this.signalBuilder.extractPortion(this.signals, 0, 1-validationFraction);
+        this.validationSignals = this.signalBuilder.extractPortion(this.signals, 1-validationFraction, 1);
+
+        this.testSignals = this.signalBuilder.build(testPath, boolIndexes, numIndexes);
+        this.testLabels = this.signalBuilder.parseLabels(labelPath);
+
+        printInfo(validationFraction > 0);
+    }
+
+    protected void printInfo(boolean printValidation) {
+        System.out.println("Sizes. Signal: " + this.signals.size()
+                                   + ". Train: " + this.trainSignals.size()
+                                   + ". Test: " + this.testSignals.size()
+                                   + ". Test labels: " + this.testLabels.size()
+                                   + ". Validation: " + this.validationSignals.size());
+        System.out.print("Element sizes. Signal: " + this.signals.get(0).size()
+                                 + ". Train: " + this.trainSignals.get(0).size()
+                                 + ". Test: " + this.testSignals.get(0).size() + ".");
+        if (printValidation) {
+            System.out.print(" Validation: " + this.validationSignals.get(0).size());
+        } else {
+            System.out.println(" No validation.");
+        }
+        System.out.println();
     }
 
 
     @Override
-    public Double apply(AbstractSTLNode monitor) {
-
-        double penalty = Double.MAX_VALUE;
-        double fitness = 0.0;
-        double[] fitnessArray;
-
-        for (Signal<Record> signal : this.trainSignals) {
-            if (signal.size() <= monitor.getMinLength()) {
-                fitness += penalty;
-                continue;
-            }
-
-            // Exclude P201
-            if (monitor.getVariablesList().contains("P201")) {
-                fitness += penalty;
-                continue;
-            }
-            if (monitor.getCoverage() < 100) {
-                fitness += 0.0001*(100 - monitor.getCoverage());
-            }
-            if (monitor.getVariablesList().stream().distinct().count() < 10) {
-                fitness += 0.001*(10 - monitor.getVariablesList().stream().distinct().count());
-            }
-
-            fitnessArray = applyMonitor(monitor, signal);
-//            fitness += fitnessArray[fitnessArray.length - 1];
-            fitness += Arrays.stream(fitnessArray).map(Math::abs).summaryStatistics().getAverage();
-        }
-
-        return fitness/this.trainSignals.size();
-    }
-
+    public abstract F apply(AbstractSTLNode monitor);
 
     public double[] applyMonitor(AbstractSTLNode monitor, Signal<Record> signal) {
         Signal<Double> robustness = monitor.getOperator().apply(signal).monitor(signal);
@@ -128,7 +140,6 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
         return indices;
     }
 
-    @Override
     public List<Item> evaluateSolution(AbstractSTLNode solution, String prefix) {
 
         double[] fitness = getTestFitnessArray(solution);
@@ -172,7 +183,6 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
     }
 
 
-    @Override
     public List<Item> evaluateSolutions(List<AbstractSTLNode> solutions, String prefix, Operator operator) {
         List<int[]> predictions = solutions.stream().map(x -> fitnessToLabel(getTestFitnessArray(x), this.epsilon))
                                            .collect(Collectors.toList());
@@ -191,7 +201,6 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
     }
 
 
-    @Override
     public double validateSolution(AbstractSTLNode solution) {
 
         long FP = Arrays.stream(fitnessToLabel(getValidationFitnessArray(solution), this.epsilon))
@@ -202,7 +211,6 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
     }
 
 
-    @Override
     public void solutionToFile(AbstractSTLNode solution, String filename) throws IOException {
 
         double[] fitness = getTestFitnessArray(solution);
@@ -222,5 +230,4 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
 
         fw.close();
     }
-
 }

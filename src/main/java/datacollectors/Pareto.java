@@ -1,6 +1,6 @@
 package datacollectors;
 
-import core.AbstractInvariantsProblem;
+import core.problem.AbstractInvariantsProblem;
 import core.Operator;
 import eu.quanticol.moonlight.util.Pair;
 import it.units.malelab.jgea.core.Individual;

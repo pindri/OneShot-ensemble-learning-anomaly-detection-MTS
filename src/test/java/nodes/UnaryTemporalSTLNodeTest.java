@@ -1,6 +1,6 @@
 package nodes;
 
-import core.single.SingleInvariantsProblem;
+import core.problem.SingleInvariantsProblem;
 import eu.quanticol.moonlight.formula.DoubleDomain;
 import eu.quanticol.moonlight.formula.Interval;
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;

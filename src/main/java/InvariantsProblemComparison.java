@@ -1,5 +1,5 @@
 import com.google.common.base.Stopwatch;
-import core.single.SingleInvariantsProblem;
+import core.problem.SingleInvariantsProblem;
 import core.Operator;
 import datacollectors.BestTreeInfo;
 import datacollectors.FunctionOfAll;
@@ -67,8 +67,6 @@ public class InvariantsProblemComparison extends Worker {
             problems = List.of(
                     new SingleInvariantsProblem(grammarPath, trainPath, testPath, labelsPath, traceLength,
                                                 validationFraction)
-//                    new SingleInvariantsProblem(grammarPath, trainPath, testPath, labelsPath, traceLength,
-//                                                validationFraction)
             );
         } catch (IOException e) {
             e.printStackTrace();

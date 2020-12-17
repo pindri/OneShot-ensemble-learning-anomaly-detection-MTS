@@ -1,7 +1,7 @@
-package core.single;
+package core.problem;
 
-import core.AbstractFitnessFunction;
-import core.AbstractInvariantsProblem;
+import core.fitness.AbstractFitnessFunction;
+import core.fitness.SingleFitnessFunction;
 
 import java.io.IOException;
 

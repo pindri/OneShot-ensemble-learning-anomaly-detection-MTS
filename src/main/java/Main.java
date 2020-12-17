@@ -1,4 +1,4 @@
-import core.single.SingleInvariantsProblem;
+import core.problem.SingleInvariantsProblem;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;

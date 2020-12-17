@@ -1,6 +1,6 @@
 package core;
 
-import core.single.SingleInvariantsProblem;
+import core.problem.SingleInvariantsProblem;
 import org.junit.Test;
 
 import java.io.IOException;

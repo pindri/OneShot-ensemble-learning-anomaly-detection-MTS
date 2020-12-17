@@ -1,6 +1,6 @@
 package nodes;
 
-import core.single.SingleInvariantsProblem;
+import core.problem.SingleInvariantsProblem;
 import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.representation.tree.Tree;
 import org.junit.Test;
