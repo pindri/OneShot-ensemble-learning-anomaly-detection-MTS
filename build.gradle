@@ -17,7 +17,7 @@ task compare (type: JavaExec){
   classpath = sourceSets.main.runtimeClasspath
 }
 
-task buildComparisonJar(type: Jar) {
+task singleJar(type: Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes(
@@ -25,6 +25,25 @@ task buildComparisonJar(type: Jar) {
         )
     }
     archiveBaseName = 'comparison'
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+         }
+            {
+                exclude "META-INF/*.SF"
+                exclude "META-INF/*.DSA"
+                exclude "META-INF/*.RSA"
+            }
+    with jar
+}
+
+task multiJar(type: Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes(
+                'Main-Class': 'MultiInvariantsProblemComparison'             
+        )
+    }
+    archiveBaseName = 'multicomparison'
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
          }
