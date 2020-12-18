@@ -81,7 +81,6 @@ public class InvariantsProblemComparison extends Worker {
         Map<String, Function<SingleInvariantsProblem, Evolver<Tree<String>, AbstractSTLNode, Double>>>
                 evolvers = new TreeMap<>();
 
-        // TODO: Add multi-objective evolver.
         evolvers.put("StandardDiversity", p -> new StandardWithEnforcedDiversityEvolver<>(
                 p.getSolutionMapper(),
                 new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
@@ -109,7 +108,7 @@ public class InvariantsProblemComparison extends Worker {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         L.info(String.format("Going to test with %d evolver/s: %s%n", evolvers.size(), evolvers.keySet()));
 
-        List<AbstractSTLNode> ensemble = new ArrayList<>();
+//        List<AbstractSTLNode> ensemble = new ArrayList<>();
 
         assert problems != null;
         for (SingleInvariantsProblem problem : problems) {
@@ -198,6 +197,7 @@ public class InvariantsProblemComparison extends Worker {
 
                             validationSolution.ifPresent(valSolution -> {
                                 try {
+//                                     Validation to file.
                                     problem.getFitnessFunction().solutionToFile(valSolution, validationResultsFile);
                                 } catch (IOException e) {
                                     e.printStackTrace();
@@ -209,10 +209,12 @@ public class InvariantsProblemComparison extends Worker {
                         // Test to file.
                         AbstractSTLNode solution = solutions.iterator().next();
                         System.out.println("\n" + solution);
-                        problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
+//                        problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
+                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile);
+
 
                         // Add to ensemble.
-                        ensemble.addAll(solutions);
+//                        ensemble.addAll(solutions);
 
                         L.info(String.format("Done %s: %d solutions in %4.1fs",
                                              keys,
@@ -226,11 +228,6 @@ public class InvariantsProblemComparison extends Worker {
                     }
                 }
             }
-            // TODO: aggregate in ensemble.
-//            problem.getFitnessFunction().evaluateSolutions(ensemble, "", Operator.OR);
-//            problem.getFitnessFunction().evaluateSolutions(ensemble, "", Operator.AND);
-//            problem.getFitnessFunction().evaluateSolutions(ensemble, "", Operator.MAJORITY);
-//            problem.getFitnessFunction().evaluateSolutions(ensemble, "", Operator.TWO);
         }
 
     }

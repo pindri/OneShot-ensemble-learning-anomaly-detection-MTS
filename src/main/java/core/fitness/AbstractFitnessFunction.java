@@ -230,4 +230,12 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
 
         fw.close();
     }
+
+    public void collectionToFile(Collection<AbstractSTLNode> solutions, String filename) throws IOException {
+        int i = 0;
+        for (AbstractSTLNode solution : solutions) {
+            solutionToFile(solution, filename + "-" + i);
+            i++;
+        }
+    }
 }

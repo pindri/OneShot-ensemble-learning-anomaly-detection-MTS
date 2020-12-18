@@ -153,35 +153,6 @@ public class MultiInvariantsProblemComparison extends Worker {
                                                     executorService)
                         );
 
-
-//                        // Validation.
-//                        if (validationFraction > 0.0) {
-//                            // Select solution with smaller FPR.
-//                            Optional<AbstractSTLNode> validationSolution = solutions.stream()
-//                                    .reduce((a, b) -> problem.getFitnessFunction().validateSolution(a) <=
-//                                            problem.getFitnessFunction().validateSolution(b) ? a : b );
-//
-//                            validationSolution.ifPresent(valSolution -> {
-//                                try {
-//                                    problem.getFitnessFunction().solutionToFile(valSolution, validationResultsFile);
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            });
-//                        }
-
-
-//                        // Test to file.
-//                        AbstractSTLNode solution = solutions.iterator().next();
-//                        System.out.println("\n" + solution);
-//                        problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
-//
-//                        L.info(String.format("Done %s: %d solutions in %4.1fs",
-//                                             keys,
-//                                             solutions.size(),
-//                                             (double) stopwatch.elapsed(TimeUnit.MILLISECONDS) / 1000d
-//                        ));
-
                     } catch (InterruptedException | ExecutionException e) {
                         L.severe(String.format("Cannot complete %s due to %s", keys, e));
                         e.printStackTrace();
