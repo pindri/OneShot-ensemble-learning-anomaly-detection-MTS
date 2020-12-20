@@ -24,7 +24,7 @@ task singleJar(type: Jar) {
                 'Main-Class': 'InvariantsProblemComparison'             
         )
     }
-    archiveBaseName = 'comparison'
+    archiveBaseName = 'singlecomparison'
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
          }

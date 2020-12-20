@@ -4,6 +4,7 @@ import arrayUtilities.ArraysUtilities;
 import core.Operator;
 import core.problem.SingleInvariantsProblem;
 import eu.quanticol.moonlight.signal.Signal;
+import eu.quanticol.moonlight.util.Pair;
 import it.units.malelab.jgea.core.listener.collector.Item;
 import nodes.AbstractSTLNode;
 import signal.Record;
@@ -237,5 +238,14 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
             solutionToFile(solution, filename + "-" + i);
             i++;
         }
+    }
+
+    public void paretoToFile(List<Pair<AbstractSTLNode, Double>> solutions, String filename) throws IOException {
+        int i = 0;
+        for (Pair<AbstractSTLNode, Double> solution : solutions) {
+            solutionToFile(solution.getFirst(), filename + "-pareto-" + solution.getSecond() + "-" + i);
+            i++;
+        }
+
     }
 }

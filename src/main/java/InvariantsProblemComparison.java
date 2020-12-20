@@ -4,10 +4,12 @@ import core.Operator;
 import datacollectors.BestTreeInfo;
 import datacollectors.FunctionOfAll;
 import datacollectors.Pareto;
+import eu.quanticol.moonlight.util.Pair;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
+import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.listener.Listener;
 import it.units.malelab.jgea.core.listener.MultiFileListenerFactory;
@@ -108,7 +110,7 @@ public class InvariantsProblemComparison extends Worker {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         L.info(String.format("Going to test with %d evolver/s: %s%n", evolvers.size(), evolvers.keySet()));
 
-//        List<AbstractSTLNode> ensemble = new ArrayList<>();
+        List<Pair<AbstractSTLNode, Double>> ensemble = new ArrayList<>();
 
         assert problems != null;
         for (SingleInvariantsProblem problem : problems) {
@@ -166,7 +168,14 @@ public class InvariantsProblemComparison extends Worker {
                                                 i -> problem.getFitnessFunction()
                                                             .evaluateSolutions(i.stream().map(Individual::getSolution)
                                                                                 .collect(Collectors.toList()),
-                                                                               "Ensemble.TWO", Operator.TWO))
+                                                                               "Ensemble.TWO", Operator.TWO)),
+                                        new FunctionOfAll<>(
+                                                i -> {
+                                                    ensemble.removeAll(ensemble);
+                                                    ensemble.addAll(Pareto.getFront(i));
+                                                    return List.of(new Item("aux", 0, "%3d"));
+                                                }
+                                        )
                         );
 
                         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -177,7 +186,7 @@ public class InvariantsProblemComparison extends Worker {
                         Collection<AbstractSTLNode> solutions = evolver.solve(
                                 Misc.cached(problem.getFitnessFunction(), 10000),
                                 new TargetFitness<>(0d),
-//                                new Iterations(10),
+//                                new Iterations(2),
                                 new Random(seed),
                                 executorService,
                                 Listener.onExecutor((listenerFactory.getBaseFileName() == null) ?
@@ -213,8 +222,9 @@ public class InvariantsProblemComparison extends Worker {
                         problem.getFitnessFunction().collectionToFile(solutions, testResultsFile);
 
 
-                        // Add to ensemble.
-//                        ensemble.addAll(solutions);
+                        // Pareto ensemble to file.
+                        problem.getFitnessFunction().paretoToFile(ensemble, testResultsFile);
+
 
                         L.info(String.format("Done %s: %d solutions in %4.1fs",
                                              keys,
