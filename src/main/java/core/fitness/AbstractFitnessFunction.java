@@ -5,8 +5,8 @@ import core.Operator;
 import core.problem.SingleInvariantsProblem;
 import eu.quanticol.moonlight.signal.Signal;
 import eu.quanticol.moonlight.util.Pair;
-import it.units.malelab.jgea.core.listener.collector.Item;
 import nodes.AbstractSTLNode;
+import org.apache.commons.math3.analysis.function.Abs;
 import signal.Record;
 import signal.SignalBuilder;
 import signal.SignalHandler;
@@ -141,75 +141,75 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
         return indices;
     }
 
-    public List<Item> evaluateSolution(AbstractSTLNode solution, String prefix) {
-
-        double[] fitness = getTestFitnessArray(solution);
-
-        return evaluateSingleSolution(fitnessToLabel(fitness, this.epsilon), prefix);
-    }
-
-
-    private List<Item> evaluateSingleSolution(int[] predictions, String prefix) {
-
-        Map<String, Integer> indices;
-
-        int from = this.testLabels.size() - predictions.length;
-        int to = this.testLabels.size();
-        int[] labels = IntStream.range(from, to).map(this.testLabels::get).toArray();
-
-        long P = Arrays.stream(labels).filter(x -> x > 0).count();
-        long N = this.testLabels.size() - P;
-        int TP = 0;
-        int FP = 0;
-        int TN = 0;
-        int FN = 0;
-
-        indices = computeIndices(predictions, labels);
-
-        TP += indices.get("TP");
-        FP += indices.get("FP");
-        TN += indices.get("TN");
-        FN += indices.get("FN");
-
-        double TPR =(TP*1.0)/(P*1.0);
-        double FPR = (FP*1.0)/(N*1.0);
-        double FNR = (1.0*FN)/(P*1.0);
-
-        List<Item> items = new ArrayList<>();
-        items.add(new Item(prefix + ".TPR", TPR, "%7.5f"));
-        items.add(new Item(prefix + ".FPR", FPR, "%7.5f"));
-        items.add(new Item(prefix + ".FNR", FNR, "%7.5f"));
-
-        return items;
-    }
-
-
-    public List<Item> evaluateSolutions(List<AbstractSTLNode> solutions, String prefix, Operator operator) {
-        List<int[]> predictions = solutions.stream().map(x -> fitnessToLabel(getTestFitnessArray(x), this.epsilon))
-                                           .collect(Collectors.toList());
-        predictions = ArraysUtilities.trimHeadSameSize(predictions);
-        int[] aggregatedPredictions;
-
-        switch (operator) {
-            case OR -> aggregatedPredictions = ArraysUtilities.labelsOR(predictions);
-            case AND -> aggregatedPredictions = ArraysUtilities.labelsAND(predictions);
-            case MAJORITY -> aggregatedPredictions = ArraysUtilities.labelsMajority(predictions);
-            case TWO -> aggregatedPredictions = ArraysUtilities.labelsTwo(predictions);
-            default -> throw new IllegalStateException("Unexpected value: " + operator);
-        }
-
-        return evaluateSingleSolution(aggregatedPredictions, prefix);
-    }
-
-
-    public double validateSolution(AbstractSTLNode solution) {
-
-        long FP = Arrays.stream(fitnessToLabel(getValidationFitnessArray(solution), this.epsilon))
-                        .filter(x -> x < 0).count();
-        int N = this.validationSignals.size();
-
-        return (FP*1.0)/(N*1.0);
-    }
+//    public List<Item> evaluateSolution(AbstractSTLNode solution, String prefix) {
+//
+//        double[] fitness = getTestFitnessArray(solution);
+//
+//        return evaluateSingleSolution(fitnessToLabel(fitness, this.epsilon), prefix);
+//    }
+//
+//
+//    private List<Item> evaluateSingleSolution(int[] predictions, String prefix) {
+//
+//        Map<String, Integer> indices;
+//
+//        int from = this.testLabels.size() - predictions.length;
+//        int to = this.testLabels.size();
+//        int[] labels = IntStream.range(from, to).map(this.testLabels::get).toArray();
+//
+//        long P = Arrays.stream(labels).filter(x -> x > 0).count();
+//        long N = this.testLabels.size() - P;
+//        int TP = 0;
+//        int FP = 0;
+//        int TN = 0;
+//        int FN = 0;
+//
+//        indices = computeIndices(predictions, labels);
+//
+//        TP += indices.get("TP");
+//        FP += indices.get("FP");
+//        TN += indices.get("TN");
+//        FN += indices.get("FN");
+//
+//        double TPR =(TP*1.0)/(P*1.0);
+//        double FPR = (FP*1.0)/(N*1.0);
+//        double FNR = (1.0*FN)/(P*1.0);
+//
+//        List<Item> items = new ArrayList<>();
+//        items.add(new Item(prefix + ".TPR", TPR, "%7.5f"));
+//        items.add(new Item(prefix + ".FPR", FPR, "%7.5f"));
+//        items.add(new Item(prefix + ".FNR", FNR, "%7.5f"));
+//
+//        return items;
+//    }
+//
+//
+//    public List<Item> evaluateSolutions(List<AbstractSTLNode> solutions, String prefix, Operator operator) {
+//        List<int[]> predictions = solutions.stream().map(x -> fitnessToLabel(getTestFitnessArray(x), this.epsilon))
+//                                           .collect(Collectors.toList());
+//        predictions = ArraysUtilities.trimHeadSameSize(predictions);
+//        int[] aggregatedPredictions;
+//
+//        switch (operator) {
+//            case OR -> aggregatedPredictions = ArraysUtilities.labelsOR(predictions);
+//            case AND -> aggregatedPredictions = ArraysUtilities.labelsAND(predictions);
+//            case MAJORITY -> aggregatedPredictions = ArraysUtilities.labelsMajority(predictions);
+//            case TWO -> aggregatedPredictions = ArraysUtilities.labelsTwo(predictions);
+//            default -> throw new IllegalStateException("Unexpected value: " + operator);
+//        }
+//
+//        return evaluateSingleSolution(aggregatedPredictions, prefix);
+//    }
+//
+//
+//    public double validateSolution(AbstractSTLNode solution) {
+//
+//        long FP = Arrays.stream(fitnessToLabel(getValidationFitnessArray(solution), this.epsilon))
+//                        .filter(x -> x < 0).count();
+//        int N = this.validationSignals.size();
+//
+//        return (FP*1.0)/(N*1.0);
+//    }
 
 
     public void solutionToFile(AbstractSTLNode solution, String filename) throws IOException {
@@ -248,4 +248,17 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
         }
 
     }
+
+    public void bestParetoToFile(List<Pair<AbstractSTLNode, Double>> solutions, String filename) throws IOException {
+        double min = solutions.get(0).getSecond();
+        Pair<AbstractSTLNode, Double> best = new Pair<>(solutions.get(0).getFirst(), solutions.get(0).getSecond());
+        for (Pair<AbstractSTLNode, Double> solution : solutions) {
+            if (solution.getSecond() <= min) {
+                best = new Pair<>(solution.getFirst(), solution.getSecond());
+                min = solution.getSecond();
+            }
+        }
+        solutionToFile(best.getFirst(), filename + "-best-pareto-" + best.getSecond());
+    }
+    
 }

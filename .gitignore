@@ -2,5 +2,8 @@
 build/
 .gradle/
 *SWaT*/
+*WADI*/
 test*
+results/
 *.txt
+run.sh

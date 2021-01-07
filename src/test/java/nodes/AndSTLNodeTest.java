@@ -26,7 +26,7 @@ public class AndSTLNodeTest {
         String dataPath = "data/toy_train_data.csv";
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
-        new SingleInvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0);
+        new SingleInvariantsProblem(grammarPath, dataPath, testPath, labelsPath, 10, 0, "");
 
             // Tree to be parsed.
             Tree<String> v = Tree.of("x1");

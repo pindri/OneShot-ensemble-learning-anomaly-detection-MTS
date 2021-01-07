@@ -30,24 +30,11 @@ public class MultiFitnessFunction extends AbstractFitnessFunction<List<Double>> 
                 continue;
             }
 
-            // Exclude P201
-            if (monitor.getVariablesList().contains("P201")) {
-                fitness += penalty;
-                continue;
-            }
-
-            if (Arrays.stream(fitnessToLabel(getValidationFitnessArray(monitor), this.epsilon)).sum() > 0) {
-                fitness += penalty;
-                continue;
-            }
-
             fitnessArray = applyMonitor(monitor, signal);
 //            fitness += fitnessArray[fitnessArray.length - 1];
             fitness += Arrays.stream(fitnessArray).map(Math::abs).summaryStatistics().getAverage();
-            coverage += monitor.getCoverage();
+            coverage += 1.0/monitor.getCoverage();
         }
-
-        coverage = 1.0/coverage;
 
         return List.of(fitness/this.trainSignals.size(), coverage/this.trainSignals.size());
     }

@@ -48,14 +48,15 @@ public class ParetoCollection<T, C extends Comparable<C>> implements PartiallyOr
     }
 
     private void addToFirst(T t) {
+        // If some firsts are BEFORE new candidate t, t is not on the front.
         if (this.firsts.stream()
-                       .anyMatch(f -> this.comparator.compare(this.function.apply(t),
-                                                              this.function.apply(f)) == AFTER)) {
+                       .anyMatch(f -> this.comparator.compare(this.function.apply(f),
+                                                              this.function.apply(t)) == BEFORE)) {
             return;
         }
-        // Exclude first that are after new candidate.
-        this.firsts = this.firsts.stream().filter(f -> !(this.comparator.compare(this.function.apply(t),
-                                                                                 this.function.apply(f)) == BEFORE))
+        // Exclude first that are AFTER new candidate t.
+        this.firsts = this.firsts.stream().filter(f -> !(this.comparator.compare(this.function.apply(f),
+                                                                                 this.function.apply(t)) == AFTER))
                                  .collect(Collectors.toList());
         this.firsts.add(t);
     }

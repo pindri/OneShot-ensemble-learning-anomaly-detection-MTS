@@ -9,6 +9,14 @@ import java.util.Arrays;
 
 public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
 
+    private String magicVariable = null;
+
+    public SingleFitnessFunction(String trainPath, String testPath, String labelPath, int traceLength,
+                                 double validationFraction, String magicVariable) throws IOException {
+        super(trainPath, testPath, labelPath, traceLength, validationFraction);
+        this.magicVariable = magicVariable;
+    }
+
     public SingleFitnessFunction(String trainPath, String testPath, String labelPath, int traceLength,
                                  double validationFraction) throws IOException {
         super(trainPath, testPath, labelPath, traceLength, validationFraction);
@@ -21,6 +29,10 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
         double penalty = Double.MAX_VALUE;
         double fitness = 0.0;
         double[] fitnessArray;
+        int lengthMin = 50;
+        int lengthMax = Integer.MAX_VALUE;
+        int varMin = 10;
+        int varMax = Integer.MAX_VALUE;
 
         for (Signal<Record> signal : this.trainSignals) {
             if (signal.size() <= monitor.getMinLength()) {
@@ -28,16 +40,21 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
                 continue;
             }
 
-//            // Exclude P201
-//            if (monitor.getVariablesList().contains("P201")) {
+//            if (!monitor.getVariablesList().contains(magicVariable)) {
 //                fitness += penalty;
-//                continue;
 //            }
-//            if (monitor.getCoverage() < 100) {
-//                fitness += 0.0001*(100 - monitor.getCoverage());
+
+//            if (monitor.getMinLength() < lengthMin) {
+//                fitness += 0.01*(lengthMin - monitor.getMinLength());
 //            }
-//            if (monitor.getVariablesList().stream().distinct().count() < 10) {
-//                fitness += 0.001*(10 - monitor.getVariablesList().stream().distinct().count());
+//            if (monitor.getVariablesList().stream().distinct().count() < varMin) {
+//                fitness += 0.01*(varMin - monitor.getVariablesList().stream().distinct().count());
+//            }
+//            if (monitor.getMinLength() > lengthMax) {
+//                fitness += 0.01*(monitor.getMinLength() - lengthMax);
+//            }
+//            if (monitor.getVariablesList().stream().distinct().count() > varMax) {
+//                fitness += 0.01*(monitor.getVariablesList().stream().distinct().count() - varMax);
 //            }
 
             fitnessArray = applyMonitor(monitor, signal);
