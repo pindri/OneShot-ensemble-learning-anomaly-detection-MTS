@@ -60,7 +60,7 @@ public class InvariantsProblemComparison extends Worker {
         String validationResultsFile = a("validationResultsFile", "validationResults.txt");
 //        String paretoResultsFile = a("paretoResultsFile", "paretoResults.txt");
         int traceLength = i(a("traceLength", "0"));
-        double validationFraction = d(a("validationFraction", "0.0"));
+        double validationFraction = d(a("validationFraction", "0.8"));
 //        String magicVariable = a("magicVariable", "X1_AIT_001_PV");
 
 
@@ -73,12 +73,6 @@ public class InvariantsProblemComparison extends Worker {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-//        MultiFileListenerFactory<Object, RealFunction, Double> listenerFactory = new MultiFileListenerFactory<>(
-//                a("dir", "."),
-//                a("file", null)
-//        );
 
         Map<String, Function<SingleInvariantsProblem, Evolver<Tree<String>, AbstractSTLNode, Double>>>
                 evolvers = new TreeMap<>();
@@ -150,11 +144,11 @@ public class InvariantsProblemComparison extends Worker {
             for (int seed : seeds) {
                 for (Map.Entry<String, Function<SingleInvariantsProblem, Evolver<Tree<String>,
                         AbstractSTLNode, Double>>> evolverEntry : evolvers.entrySet()) {
-                    keys.put("seed", Integer.toString(seed));
+                    keys.put("seed", seed);
                     keys.put("problem", problem.getClass().getSimpleName().toLowerCase());
                     keys.put("evolver", evolverEntry.getKey());
-                    keys.put("traceLength", String.valueOf(traceLength));
-                    keys.put("validationFraction", String.valueOf(validationFraction));
+//                    keys.put("traceLength", String.valueOf(traceLength));
+//                    keys.put("validationFraction", String.valueOf(validationFraction));
                     Consumer<Tree<String>, AbstractSTLNode, Double, ?>
                             consumer = Consumer.of(factories.stream().map(Consumer.Factory::build)
                                                             .collect(Collectors.toList()))
@@ -185,9 +179,8 @@ public class InvariantsProblemComparison extends Worker {
                         e.printStackTrace();
                     }
                 }
-
             }
-
+            factories.forEach(Consumer.Factory::shutdown);
         }
 
 
