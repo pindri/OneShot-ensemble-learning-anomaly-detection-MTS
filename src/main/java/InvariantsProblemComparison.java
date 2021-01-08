@@ -6,11 +6,15 @@ import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.consumer.*;
 import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
+import it.units.malelab.jgea.core.evolver.speciation.KMeansSpeciator;
+import it.units.malelab.jgea.core.evolver.speciation.LazySpeciator;
+import it.units.malelab.jgea.core.evolver.speciation.SpeciatedEvolver;
 import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.order.PartialComparator;
 import it.units.malelab.jgea.core.selector.Tournament;
 import it.units.malelab.jgea.core.selector.Worst;
 import it.units.malelab.jgea.core.util.Misc;
+import it.units.malelab.jgea.distance.Jaccard;
 import it.units.malelab.jgea.representation.grammar.cfggp.GrammarBasedSubtreeMutation;
 import it.units.malelab.jgea.representation.grammar.cfggp.GrammarRampedHalfAndHalf;
 import it.units.malelab.jgea.representation.tree.SameRootSubtreeCrossover;
@@ -46,7 +50,8 @@ public class InvariantsProblemComparison extends Worker {
         int nTournament = 5;
         int diversityMaxAttempts = 100;
 //        int nIterations = i(a("nIterations", "250"));
-        String evolverNamePattern = a("evolver", ".*Diversity.*");
+        String evolverNamePattern = a("evolver", ".*Speciated.*");
+//        String evolverNamePattern = a("evolver", ".*Diversity.*");
         int[] seeds = ri(a("seed", "0:1"));
         String trainPath = a("trainPath", "data/SWaT/train_no201.csv");
         String testPath = a("testPath", "data/SWaT/test_no201.csv");
@@ -73,23 +78,7 @@ public class InvariantsProblemComparison extends Worker {
         Map<String, Function<SingleInvariantsProblem, Evolver<Tree<String>, AbstractSTLNode, Double>>>
                 evolvers = new TreeMap<>();
 
-        evolvers.put("StandardDiversity", p -> new StandardWithEnforcedDiversityEvolver<>(
-                p.getSolutionMapper(),
-                new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
-                PartialComparator.from(Double.class).comparing(Individual::getFitness),
-//                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
-                nPop,
-                Map.of(
-                        new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
-                        new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
-                ),
-                new Tournament(nTournament),
-                new Worst(),
-                500,
-                true,
-                diversityMaxAttempts
-        ));
-//        evolvers.put("Speciated", p -> new SpeciatedEvolver<>(
+//        evolvers.put("StandardDiversity", p -> new StandardWithEnforcedDiversityEvolver<>(
 //                p.getSolutionMapper(),
 //                new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
 //                PartialComparator.from(Double.class).comparing(Individual::getFitness),
@@ -98,11 +87,31 @@ public class InvariantsProblemComparison extends Worker {
 //                Map.of(
 //                        new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
 //                        new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
-//                      ),
-//                5,
-//                0.75
-//
-//        ))
+//                ),
+//                new Tournament(nTournament),
+//                new Worst(),
+//                500,
+//                true,
+//                diversityMaxAttempts
+//        ));
+        evolvers.put("Speciated", p -> new SpeciatedEvolver<Tree<String>, AbstractSTLNode, Double>(
+                p.getSolutionMapper(),
+                new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
+                PartialComparator.from(Double.class).comparing(Individual::getFitness),
+//                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
+                nPop,
+                Map.of(
+                        new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
+                        new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
+                      ),
+                5,
+                new KMeansSpeciator<Tree<String>, AbstractSTLNode, Double>(5, 300,
+                                      (x, y) -> (new Jaccard())
+                                              .on(a -> new HashSet<>(Collections.singletonList(a))).apply(x, y),
+                                      i -> i.getSolution().getVariablesList().stream()
+                                            .mapToDouble(String::hashCode).toArray()),
+                0.75
+        ));
 
         // Consumers.
         assert problems != null;
