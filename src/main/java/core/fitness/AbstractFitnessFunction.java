@@ -1,12 +1,9 @@
 package core.fitness;
 
-import arrayUtilities.ArraysUtilities;
-import core.Operator;
 import core.problem.SingleInvariantsProblem;
 import eu.quanticol.moonlight.signal.Signal;
 import eu.quanticol.moonlight.util.Pair;
 import nodes.AbstractSTLNode;
-import org.apache.commons.math3.analysis.function.Abs;
 import signal.Record;
 import signal.SignalBuilder;
 import signal.SignalHandler;
@@ -109,23 +106,25 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
     }
 
 
-    private Map<String, Integer> computeIndices(int[] predictions, int[] label) {
+    private Map<String, Number> computeIndices(int[] predictions, int[] labels) {
 
-        Map<String, Integer> indices = new HashMap<>();
+        Map<String, Number> indices = new HashMap<>();
+        long P = Arrays.stream(labels).filter(x -> x > 0).count(); // POSITIVE := (label == 1)
+        long N = predictions.length - P;
         int TP = 0;
         int FP = 0;
         int TN = 0;
         int FN = 0;
 
         for (int i = 0; i < predictions.length; i++) {
-            if (predictions[i] == 1) { // If predicted anomaly, with POSITIVE == (prediction == 1).
-                if (label[i] == 1) {
+            if (predictions[i] == 1) { // If predicted anomaly, with POSITIVE := (prediction == 1).
+                if (labels[i] == 1) {
                     TP++;
                 } else {
                     FP++;
                 }
             } else {
-                if (label[i] == 1) {
+                if (labels[i] == 1) {
                     FN++;
                 } else {
                     TN++;
@@ -138,52 +137,35 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
         indices.put("TN", TN);
         indices.put("FN", FN);
 
+        double TPR =(TP*1.0)/(P*1.0);
+        double FPR = (FP*1.0)/(N*1.0);
+        double FNR = (1.0*FN)/(P*1.0);
+
+        indices.put("TPR", TPR);
+        indices.put("FPR", FPR);
+        indices.put("FNR", FNR);
+
         return indices;
     }
 
-//    public List<Item> evaluateSolution(AbstractSTLNode solution, String prefix) {
-//
-//        double[] fitness = getTestFitnessArray(solution);
-//
-//        return evaluateSingleSolution(fitnessToLabel(fitness, this.epsilon), prefix);
-//    }
-//
-//
-//    private List<Item> evaluateSingleSolution(int[] predictions, String prefix) {
-//
-//        Map<String, Integer> indices;
-//
-//        int from = this.testLabels.size() - predictions.length;
-//        int to = this.testLabels.size();
-//        int[] labels = IntStream.range(from, to).map(this.testLabels::get).toArray();
-//
-//        long P = Arrays.stream(labels).filter(x -> x > 0).count();
-//        long N = this.testLabels.size() - P;
-//        int TP = 0;
-//        int FP = 0;
-//        int TN = 0;
-//        int FN = 0;
-//
-//        indices = computeIndices(predictions, labels);
-//
-//        TP += indices.get("TP");
-//        FP += indices.get("FP");
-//        TN += indices.get("TN");
-//        FN += indices.get("FN");
-//
-//        double TPR =(TP*1.0)/(P*1.0);
-//        double FPR = (FP*1.0)/(N*1.0);
-//        double FNR = (1.0*FN)/(P*1.0);
-//
-//        List<Item> items = new ArrayList<>();
-//        items.add(new Item(prefix + ".TPR", TPR, "%7.5f"));
-//        items.add(new Item(prefix + ".FPR", FPR, "%7.5f"));
-//        items.add(new Item(prefix + ".FNR", FNR, "%7.5f"));
-//
-//        return items;
-//    }
-//
-//
+    public Map<String, Number> evaluateSolution(AbstractSTLNode solution) {
+
+        double[] fitness = getTestFitnessArray(solution);
+
+        return evaluateSingleSolution(fitnessToLabel(fitness, this.epsilon));
+    }
+
+
+    private Map<String, Number> evaluateSingleSolution(int[] predictions) {
+
+        int from = this.testLabels.size() - predictions.length;
+        int to = this.testLabels.size();
+        int[] labels = IntStream.range(from, to).map(this.testLabels::get).toArray();
+
+        return computeIndices(predictions, labels);
+    }
+
+
 //    public List<Item> evaluateSolutions(List<AbstractSTLNode> solutions, String prefix, Operator operator) {
 //        List<int[]> predictions = solutions.stream().map(x -> fitnessToLabel(getTestFitnessArray(x), this.epsilon))
 //                                           .collect(Collectors.toList());
@@ -200,16 +182,16 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
 //
 //        return evaluateSingleSolution(aggregatedPredictions, prefix);
 //    }
-//
-//
-//    public double validateSolution(AbstractSTLNode solution) {
-//
-//        long FP = Arrays.stream(fitnessToLabel(getValidationFitnessArray(solution), this.epsilon))
-//                        .filter(x -> x < 0).count();
-//        int N = this.validationSignals.size();
-//
-//        return (FP*1.0)/(N*1.0);
-//    }
+
+
+    public double validateSolution(AbstractSTLNode solution) {
+
+        long FP = Arrays.stream(fitnessToLabel(getValidationFitnessArray(solution), this.epsilon))
+                        .filter(x -> x < 0).count();
+        int N = this.validationSignals.size();
+
+        return (FP*1.0)/(N*1.0);
+    }
 
 
     public void solutionToFile(AbstractSTLNode solution, String filename) throws IOException {

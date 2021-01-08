@@ -1,26 +1,21 @@
 
 import com.google.common.base.Stopwatch;
-import core.problem.AbstractInvariantsProblem;
 import core.problem.SingleInvariantsProblem;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.consumer.*;
 import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
-import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.order.PartialComparator;
 import it.units.malelab.jgea.core.selector.Tournament;
 import it.units.malelab.jgea.core.selector.Worst;
 import it.units.malelab.jgea.core.util.Misc;
-import it.units.malelab.jgea.core.util.Pair;
-import it.units.malelab.jgea.problem.symbolicregression.RealFunction;
 import it.units.malelab.jgea.representation.grammar.cfggp.GrammarBasedSubtreeMutation;
 import it.units.malelab.jgea.representation.grammar.cfggp.GrammarRampedHalfAndHalf;
 import it.units.malelab.jgea.representation.tree.SameRootSubtreeCrossover;
 import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AbstractSTLNode;
-import org.apache.commons.math3.analysis.function.Abs;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static it.units.malelab.jgea.core.consumer.NamedFunctions.constant;
+import static datacollectors.STLConsumer.*;
+import static it.units.malelab.jgea.core.consumer.NamedFunctions.*;
 import static it.units.malelab.jgea.core.util.Args.*;
 
 public class InvariantsProblemComparison extends Worker {
@@ -119,7 +115,31 @@ public class InvariantsProblemComparison extends Worker {
                                 problems.stream().map(p -> p.getClass().getSimpleName())
                                 .collect(Collectors.toList())),
                                  keys),
-                        constant("evolver", "%20.20s", keys));
+                        constant("evolver", "%20.20s", keys),
+                        iterations(),
+                        births(),
+                        elapsedSeconds(),
+                        size().of(all()),
+                        size().of(firsts()),
+                        size().of(lasts()),
+                        uniqueness().of(map(genotype())).of(all()),
+                        uniqueness().of(map(solution())).of(all()),
+                        uniqueness().of(map(fitness())).of(all()),
+                        size().of(genotype()).of(best()),
+//                        size().of(solution()).of(best()),
+                        birthIteration().of(best()),
+                        hist(8).of(map(fitness())).of(all()),
+
+                        // TODO: Better handling.
+                        TPR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
+                        FPR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
+                        FNR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
+
+                        temporalLength().of(solution()).of(best()),
+                        coverage().of(solution()).of(best()),
+
+                        fitness().reformat("%5.3f").of(best())
+                        );
 
         List<Consumer.Factory<Tree<String>, AbstractSTLNode, Double, Void>>
                 factories = new ArrayList<>();
@@ -147,8 +167,9 @@ public class InvariantsProblemComparison extends Worker {
                     keys.put("seed", seed);
                     keys.put("problem", problem.getClass().getSimpleName().toLowerCase());
                     keys.put("evolver", evolverEntry.getKey());
-//                    keys.put("traceLength", String.valueOf(traceLength));
-//                    keys.put("validationFraction", String.valueOf(validationFraction));
+                    keys.put("traceLength", String.valueOf(traceLength));
+                    keys.put("validationFraction", String.valueOf(validationFraction));
+//                    keys.put("magicVariable", String.valueOf(magicVariable));
                     Consumer<Tree<String>, AbstractSTLNode, Double, ?>
                             consumer = Consumer.of(factories.stream().map(Consumer.Factory::build)
                                                             .collect(Collectors.toList()))
@@ -171,7 +192,48 @@ public class InvariantsProblemComparison extends Worker {
                                              solutions.size(),
                                              (double) stopwatch.elapsed(TimeUnit.MILLISECONDS) / 1000d
                                             ));
-                    } catch (InterruptedException | ExecutionException e) {
+
+
+                        // Validation.
+/*
+                        if (validationFraction > 0.0) {
+                            // Select solution with smaller FPR.
+                            Optional<AbstractSTLNode> validationSolution = solutions.stream()
+                                    .reduce((a, b) -> problem.getFitnessFunction().validateSolution(a) <=
+                                            problem.getFitnessFunction().validateSolution(b) ? a : b );
+
+                            validationSolution.ifPresent(valSolution -> {
+                                try {
+//                                     Validation to file.
+                                    problem.getFitnessFunction().solutionToFile(valSolution, validationResultsFile);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                        }
+
+                        // Validation.
+                        double threshold = 0.0;
+                        if (validationFraction > 0.0) {
+                            // Filter solutions with large validation FPR;
+                            solutions = solutions.stream().filter(x -> problem.getFitnessFunction()
+                                                                              .validateSolution(x) <= threshold)
+                                                 .collect(Collectors.toList());
+                        }
+*/
+
+                        // Test to file.
+                        AbstractSTLNode solution = solutions.iterator().next();
+                        System.out.println("\n" + solution);
+//                        problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
+                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile);
+
+
+                        // Pareto ensemble to file.
+//                        problem.getFitnessFunction().paretoToFile(ensemble.get(ensemble.size() - 1), testResultsFile);
+
+
+                    } catch (InterruptedException | ExecutionException | IOException e) {
                         L.severe(String.format("Cannot complete %s due to %s",
                                                keys,
                                                e
@@ -183,22 +245,6 @@ public class InvariantsProblemComparison extends Worker {
             factories.forEach(Consumer.Factory::shutdown);
         }
 
-
-//        List<List<Pair<AbstractSTLNode, Double>>> ensemble = new ArrayList<>();
-//
-//        assert problems != null;
-//        for (SingleInvariantsProblem problem : problems) {
-//            for (int seed : seeds) {
-//                for (Map.Entry<String, Function<SingleInvariantsProblem, Evolver<Tree<String>,
-//                        AbstractSTLNode, Double>>> evolverEntry : evolvers.entrySet()) {
-//                    Map<String, String> keys = new TreeMap<>(Map.of(
-//                            "seed", Integer.toString(seed),
-//                            "problem", problem.getClass().getSimpleName().toLowerCase(),
-//                            "evolver", evolverEntry.getKey(),
-//                            "traceLength", String.valueOf(traceLength),
-//                            "validationFraction", String.valueOf(validationFraction)
-////                            ,"magicVariable", String.valueOf(magicVariable)
-//                    ));
 //                    try {
 //                        List<DataCollector<? super Tree<String>, ? super AbstractSTLNode, ? super Double>>
 //                                collectors = List.of(
@@ -251,81 +297,6 @@ public class InvariantsProblemComparison extends Worker {
 ////                                                                                .collect(Collectors.toList()),
 ////                                                                               "Ensemble.TWO", Operator.TWO))
 //                        );
-//
-//                        Stopwatch stopwatch = Stopwatch.createStarted();
-//                        Evolver<Tree<String>, AbstractSTLNode, Double> evolver = evolverEntry.getValue().apply(problem);
-//                        L.info(String.format("Starting %s", keys));
-//
-//                        @SuppressWarnings("unchecked")
-//                        Collection<AbstractSTLNode> solutions = evolver.solve(
-//                                Misc.cached(problem.getFitnessFunction(), 10000),
-////                                new TargetFitness<>(0d),
-////                                new Iterations(0),
-//                                new MultiTargetFitness<>(0d, 100),
-//                                new Random(seed),
-//                                executorService,
-//                                Listener.onExecutor((listenerFactory.getBaseFileName() == null) ?
-//                                                            listener(collectors.toArray(DataCollector[]::new)) :
-//                                                            listenerFactory
-//                                                                    .build(collectors.toArray(DataCollector[]::new)),
-//                                                    executorService)
-//                        );
-//
-//
-//                        // Validation.
-///*
-//                        if (validationFraction > 0.0) {
-//                            // Select solution with smaller FPR.
-//                            Optional<AbstractSTLNode> validationSolution = solutions.stream()
-//                                    .reduce((a, b) -> problem.getFitnessFunction().validateSolution(a) <=
-//                                            problem.getFitnessFunction().validateSolution(b) ? a : b );
-//
-//                            validationSolution.ifPresent(valSolution -> {
-//                                try {
-////                                     Validation to file.
-//                                    problem.getFitnessFunction().solutionToFile(valSolution, validationResultsFile);
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            });
-//                        }
-//*/
-//
-//                        // Validation.
-//                        double threshold = 0.0;
-//                        if (validationFraction > 0.0) {
-//                            // Filter solutions with large validation FPR;
-//                            solutions = solutions.stream().filter(x -> problem.getFitnessFunction()
-//                                                                              .validateSolution(x) <= threshold)
-//                                                 .collect(Collectors.toList());
-//                        }
-//
-//
-//                        // Test to file.
-//                        AbstractSTLNode solution = solutions.iterator().next();
-//                        System.out.println("\n" + solution);
-////                        problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
-//                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile);
-//
-//
-//                        // Pareto ensemble to file.
-////                        problem.getFitnessFunction().paretoToFile(ensemble.get(ensemble.size() - 1), testResultsFile);
-//
-//
-//                        L.info(String.format("Done %s: %d solutions in %4.1fs",
-//                                             keys,
-//                                             solutions.size(),
-//                                             (double) stopwatch.elapsed(TimeUnit.MILLISECONDS) / 1000d
-//                        ));
-//
-//                    } catch (InterruptedException | ExecutionException | IOException e) {
-//                        L.severe(String.format("Cannot complete %s due to %s", keys, e));
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        }
-//
     }
 
 
