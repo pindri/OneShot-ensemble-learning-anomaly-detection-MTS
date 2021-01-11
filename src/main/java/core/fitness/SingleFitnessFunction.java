@@ -59,8 +59,8 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
 
             fitnessArray = applyMonitor(monitor, signal);
 //            fitness += fitnessArray[fitnessArray.length - 1];
-//            fitness += Arrays.stream(fitnessArray).map(Math::abs).summaryStatistics().getAverage();
-            fitness += Arrays.stream(fitnessArray).map(x -> x >= 0 ? x : 1).summaryStatistics().getAverage();
+            fitness += Arrays.stream(fitnessArray).map(Math::abs).summaryStatistics().getAverage();
+//            fitness += Arrays.stream(fitnessArray).map(x -> x >= 0 ? x : 1).summaryStatistics().getAverage();
         }
 
         return fitness/this.trainSignals.size();

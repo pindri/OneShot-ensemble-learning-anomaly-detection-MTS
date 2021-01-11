@@ -1,29 +1,23 @@
 
 import com.google.common.base.Stopwatch;
 import core.problem.SingleInvariantsProblem;
-import evolver.MySpeciator;
-import evolver.SpecEvo;
+import evolution.AttributeSpeciator;
+import evolution.SpeciatedRemoveEvolver;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.consumer.*;
 import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
-import it.units.malelab.jgea.core.evolver.speciation.KMeansSpeciator;
-import it.units.malelab.jgea.core.evolver.speciation.LazySpeciator;
-import it.units.malelab.jgea.core.evolver.speciation.SpeciatedEvolver;
-import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.order.PartialComparator;
 import it.units.malelab.jgea.core.selector.Tournament;
 import it.units.malelab.jgea.core.selector.Worst;
 import it.units.malelab.jgea.core.util.Misc;
-import it.units.malelab.jgea.distance.Jaccard;
 import it.units.malelab.jgea.representation.grammar.cfggp.GrammarBasedSubtreeMutation;
 import it.units.malelab.jgea.representation.grammar.cfggp.GrammarRampedHalfAndHalf;
 import it.units.malelab.jgea.representation.tree.SameRootSubtreeCrossover;
 import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AbstractSTLNode;
 import stopcondition.MultiTargetFitness;
-import stopcondition.SpeciesZero;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static datacollectors.STLConsumer.*;
+import static consumers.STLConsumer.*;
 import static it.units.malelab.jgea.core.consumer.NamedFunctions.*;
 import static it.units.malelab.jgea.core.util.Args.*;
 
@@ -53,9 +47,7 @@ public class InvariantsProblemComparison extends Worker {
         int maxHeight = i(a("maxHeight", "20"));
         int nTournament = 5;
         int diversityMaxAttempts = 100;
-//        int nIterations = i(a("nIterations", "250"));
-        String evolverNamePattern = a("evolver", ".*MySpeciated.*");
-//        String evolverNamePattern = a("evolver", ".*Diversity.*");
+        String evolverNamePattern = a("evolution", "Speciated");
         int[] seeds = ri(a("seed", "1:2"));
         String trainPath = a("trainPath", "data/SWaT/train_no201.csv");
         String testPath = a("testPath", "data/SWaT/test_no201.csv");
@@ -63,7 +55,6 @@ public class InvariantsProblemComparison extends Worker {
         String grammarPath = a("grammarPath", "grammar_swat_no201.bnf");
         String testResultsFile = a("testResultsFile", "testResults.txt");
         String validationResultsFile = a("validationResultsFile", "validationResults.txt");
-//        String paretoResultsFile = a("paretoResultsFile", "paretoResults.txt");
         int traceLength = i(a("traceLength", "0"));
         double validationFraction = d(a("validationFraction", "0.0"));
 //        String magicVariable = a("magicVariable", "X1_AIT_001_PV");
@@ -82,67 +73,25 @@ public class InvariantsProblemComparison extends Worker {
         Map<String, Function<SingleInvariantsProblem, Evolver<Tree<String>, AbstractSTLNode, Double>>>
                 evolvers = new TreeMap<>();
 
-//        evolvers.put("StandardDiversity", p -> new StandardWithEnforcedDiversityEvolver<>(
-//                p.getSolutionMapper(),
-//                new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
-//                PartialComparator.from(Double.class).comparing(Individual::getFitness),
-////                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
-//                nPop,
-//                Map.of(
-//                        new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
-//                        new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
-//                ),
-//                new Tournament(nTournament),
-//                new Worst(),
-//                500,
-//                true,
-//                diversityMaxAttempts
-//        ));
+        evolvers.put("StandardDiversity", p -> new StandardWithEnforcedDiversityEvolver<>(
+                p.getSolutionMapper(),
+                new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
+                PartialComparator.from(Double.class).comparing(Individual::getFitness),
+//                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
+                nPop,
+                Map.of(
+                        new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
+                        new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
+                ),
+                new Tournament(nTournament),
+                new Worst(),
+                500,
+                true,
+                diversityMaxAttempts
+        ));
 
-//        evolvers.put("Other", p -> new SpeciatedEvolver<Tree<String>, AbstractSTLNode, Double>(
-//                p.getSolutionMapper(),
-//                new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
-//                PartialComparator.from(Double.class).comparing(Individual::getFitness),
-////                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
-//                nPop,
-//                Map.of(
-//                        new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
-//                        new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
-//                      ),
-//                5,
-////                new KMeansSpeciator<Tree<String>, AbstractSTLNode, Double>(5, 300,
-////                                      (x, y) -> (new Jaccard())
-////                                              .on(a -> new HashSet<>(Collections.singletonList(a))).apply(x, y),
-////                                      i -> i.getSolution().getVariablesList().stream()
-////                                            .mapToDouble(String::hashCode).toArray()),
-//
-////                new LazySpeciator<>(
-////                        (new Jaccard()).on(i -> Collections.singleton(i.getSolution().getVariablesList())),
-////                        0.2
-////                ),
-//                0.75
-//        ));
 
-//        evolvers.put("MySpeciated", p -> new SpeciatedEvolver<Tree<String>, AbstractSTLNode, Double>(
-//                p.getSolutionMapper(),
-//                new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
-//                PartialComparator.from(Double.class).comparing(Individual::getFitness),
-////                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
-//                nPop,
-//                Map.of(
-//                        new SameRootSubtreeCrossover<>(maxHeight), 0.3d,
-//                        new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.7d
-//                      ),
-//                1,
-////                new LazySpeciator<>(
-////                        (new Jaccard()).on(i -> new HashSet<>(i.getSolution().getVariablesList())),
-////                        1.0
-////                ),
-//                new MySpeciator<>(),
-//                0.75
-//        ));
-
-        evolvers.put("MySpeciated", p -> new SpecEvo<>(
+        evolvers.put("Speciated", p -> new SpeciatedRemoveEvolver<>(
                 p.getSolutionMapper(),
                 new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
                 PartialComparator.from(Double.class).comparing(Individual::getFitness),
@@ -153,18 +102,14 @@ public class InvariantsProblemComparison extends Worker {
                         new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
                       ),
                 new Tournament(5),
-//                new MySpeciator<>(
-//                        List.of("FIT101", "LIT101", "MV101", "P101", "P102", "AIT201", "AIT202", "AIT203",
-//                                "FIT201", "MV201", "P202", "P203", "P204", "P205", "P206", "DPIT301", "FIT301",
-//                                "LIT301", "MV301", "MV302", "MV303", "MV304", "P301", "P302", "AIT401",
-//                                "AIT402", "FIT401", "LIT401", "P401", "P402", "P403", "P404", "UV401", "AIT501",
-//                                "AIT502", "AIT503", "AIT504", "FIT501", "FIT502", "FIT503", "FIT504", "P501",
-//                                "P502", "PIT501", "PIT502", "PIT503", "FIT601", "P601", "P602", "P603")
-//
-//                )
-                new LazySpeciator<>(
-                        (new Jaccard()).on(i -> new HashSet<>(i.getSolution().getVariablesList())),
-                        1.0
+                new AttributeSpeciator<>(
+                        List.of("FIT101", "LIT101", "MV101", "P101", "P102", "AIT201", "AIT202", "AIT203",
+                                "FIT201", "MV201", "P202", "P203", "P204", "P205", "P206", "DPIT301", "FIT301",
+                                "LIT301", "MV301", "MV302", "MV303", "MV304", "P301", "P302", "AIT401",
+                                "AIT402", "FIT401", "LIT401", "P401", "P402", "P403", "P404", "UV401", "AIT501",
+                                "AIT502", "AIT503", "AIT504", "FIT501", "FIT502", "FIT503", "FIT504", "P501",
+                                "P502", "PIT501", "PIT502", "PIT503", "FIT601", "P601", "P602", "P603")
+
                 )
         ));
 
@@ -180,7 +125,7 @@ public class InvariantsProblemComparison extends Worker {
                                 problems.stream().map(p -> p.getClass().getSimpleName())
                                 .collect(Collectors.toList())),
                                  keys),
-                        constant("evolver", "%20.20s", keys),
+                        constant("evolution", "%20.20s", keys),
                         iterations(),
                         births(),
                         elapsedSeconds(),
@@ -191,7 +136,6 @@ public class InvariantsProblemComparison extends Worker {
                         uniqueness().of(map(solution())).of(all()),
                         uniqueness().of(map(fitness())).of(all()),
                         size().of(genotype()).of(best()),
-//                        size().of(solution()).of(best()),
                         birthIteration().of(best()),
                         hist(8).of(map(fitness())).of(all()),
 
@@ -234,7 +178,7 @@ public class InvariantsProblemComparison extends Worker {
                         AbstractSTLNode, Double>>> evolverEntry : evolvers.entrySet()) {
                     keys.put("seed", seed);
                     keys.put("problem", problem.getClass().getSimpleName().toLowerCase());
-                    keys.put("evolver", evolverEntry.getKey());
+                    keys.put("evolution", evolverEntry.getKey());
                     keys.put("traceLength", String.valueOf(traceLength));
                     keys.put("validationFraction", String.valueOf(validationFraction));
 //                    keys.put("magicVariable", String.valueOf(magicVariable));
@@ -301,11 +245,10 @@ public class InvariantsProblemComparison extends Worker {
                                                  .filter(x -> problem.getFitnessFunction().apply(x).equals(0.0))
                                                  .collect(Collectors.toList());
 
+                        // Print solutions.
+                        solutions.forEach(System.out::println);
 
                         // Test to file.
-//                        AbstractSTLNode solution = solutions.iterator().next();
-//                        System.out.println("\n");
-                        solutions.forEach(System.out::println);
 //                        problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
                         problem.getFitnessFunction().collectionToFile(solutions, testResultsFile + "all");
                         assert solutionsLess != null;
@@ -329,58 +272,6 @@ public class InvariantsProblemComparison extends Worker {
             factories.forEach(Consumer.Factory::shutdown);
         }
 
-//                    try {
-//                        List<DataCollector<? super Tree<String>, ? super AbstractSTLNode, ? super Double>>
-//                                collectors = List.of(
-//                                        new Static(keys),
-//                                        new Basic(),
-//                                        new Population(),
-//                                        new Diversity(),
-//                                        new FunctionOfOneBest<>
-//                                                (i -> List.of(new Item("temporal.length",
-//                                                                       i.getSolution().getMinLength(),
-//                                                                       "%3d"),
-//                                                              new Item("coverage",
-//                                                                       i.getSolution().getCoverage(),
-//                                                                       "%3f"))),
-//                                        new FunctionOfOneBest<>
-//                                                (i -> problem.getFitnessFunction().evaluateSolution(i.getSolution(),
-//                                                                                                    "test")),
-//                                        new BestTreeInfo("%7.5f")
-////                                        new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.AND)),
-////                                        new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.OR)),
-////                                        new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.MAJORITY)),
-////                                        new FunctionOfAll<>(i -> Pareto.computeIndices(i, problem, Operator.TWO)),
-////                                        new FunctionOfAll<>(i -> List.of(new Item("front.size",
-////                                                                                  Pareto.getFront(i).size(),
-////                                                                                  "%3d"))),
-////                                        new FunctionOfAll<>(
-////                                                i -> {
-//////                                                    ensemble.add(new ArrayList<>(Pareto.getFront(i)));
-////                                                    return List.of(new Item("aux", 0, "%3d"));
-////                                                }
-////                                        )
-////                                        new FunctionOfFirsts<>(
-////                                                i -> problem.getFitnessFunction()
-////                                                            .evaluateSolutions(i.stream().map(Individual::getSolution)
-////                                                                                .collect(Collectors.toList()),
-////                                                                               "Ensemble.AND", Operator.AND)),
-////                                        new FunctionOfFirsts<>(
-////                                                i -> problem.getFitnessFunction()
-////                                                            .evaluateSolutions(i.stream().map(Individual::getSolution)
-////                                                                                .collect(Collectors.toList()),
-////                                                                               "Ensemble.OR", Operator.OR)),
-////                                        new FunctionOfFirsts<>(
-////                                                i -> problem.getFitnessFunction()
-////                                                            .evaluateSolutions(i.stream().map(Individual::getSolution)
-////                                                                                .collect(Collectors.toList()),
-////                                                                                "Ensemble.M", Operator.MAJORITY)),
-////                                        new FunctionOfFirsts<>(
-////                                                i -> problem.getFitnessFunction()
-////                                                            .evaluateSolutions(i.stream().map(Individual::getSolution)
-////                                                                                .collect(Collectors.toList()),
-////                                                                               "Ensemble.TWO", Operator.TWO))
-//                        );
     }
 
 

@@ -1,12 +1,10 @@
-package datacollectors;
+package consumers;
 
 import core.fitness.AbstractFitnessFunction;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.consumer.Event;
 import it.units.malelab.jgea.core.consumer.NamedFunction;
-import it.units.malelab.jgea.core.util.Misc;
 import nodes.AbstractSTLNode;
-import org.apache.commons.math3.analysis.function.Abs;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

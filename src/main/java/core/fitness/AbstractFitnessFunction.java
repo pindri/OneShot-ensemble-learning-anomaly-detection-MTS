@@ -1,5 +1,6 @@
 package core.fitness;
 
+import arrayUtilities.ArraysUtilities;
 import core.problem.SingleInvariantsProblem;
 import eu.quanticol.moonlight.signal.Signal;
 import eu.quanticol.moonlight.util.Pair;
@@ -166,22 +167,22 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
     }
 
 
-//    public List<Item> evaluateSolutions(List<AbstractSTLNode> solutions, String prefix, Operator operator) {
-//        List<int[]> predictions = solutions.stream().map(x -> fitnessToLabel(getTestFitnessArray(x), this.epsilon))
-//                                           .collect(Collectors.toList());
-//        predictions = ArraysUtilities.trimHeadSameSize(predictions);
-//        int[] aggregatedPredictions;
-//
-//        switch (operator) {
-//            case OR -> aggregatedPredictions = ArraysUtilities.labelsOR(predictions);
-//            case AND -> aggregatedPredictions = ArraysUtilities.labelsAND(predictions);
-//            case MAJORITY -> aggregatedPredictions = ArraysUtilities.labelsMajority(predictions);
-//            case TWO -> aggregatedPredictions = ArraysUtilities.labelsTwo(predictions);
-//            default -> throw new IllegalStateException("Unexpected value: " + operator);
-//        }
-//
-//        return evaluateSingleSolution(aggregatedPredictions, prefix);
-//    }
+    public Map<String, Number> evaluateSolutions(List<AbstractSTLNode> solutions, Operator operator) {
+        List<int[]> predictions = solutions.stream().map(x -> fitnessToLabel(getTestFitnessArray(x), this.epsilon))
+                                           .collect(Collectors.toList());
+        predictions = ArraysUtilities.trimHeadSameSize(predictions);
+        int[] aggregatedPredictions;
+
+        switch (operator) {
+            case OR -> aggregatedPredictions = ArraysUtilities.labelsOR(predictions);
+            case AND -> aggregatedPredictions = ArraysUtilities.labelsAND(predictions);
+            case MAJORITY -> aggregatedPredictions = ArraysUtilities.labelsMajority(predictions);
+            case TWO -> aggregatedPredictions = ArraysUtilities.labelsTwo(predictions);
+            default -> throw new IllegalStateException("Unexpected value: " + operator);
+        }
+
+        return evaluateSingleSolution(aggregatedPredictions);
+    }
 
 
     public double validateSolution(AbstractSTLNode solution) {
