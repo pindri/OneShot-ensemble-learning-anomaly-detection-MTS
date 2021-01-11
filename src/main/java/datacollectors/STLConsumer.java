@@ -1,8 +1,15 @@
 package datacollectors;
 
 import core.fitness.AbstractFitnessFunction;
+import it.units.malelab.jgea.core.Individual;
+import it.units.malelab.jgea.core.consumer.Event;
 import it.units.malelab.jgea.core.consumer.NamedFunction;
+import it.units.malelab.jgea.core.util.Misc;
 import nodes.AbstractSTLNode;
+import org.apache.commons.math3.analysis.function.Abs;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class STLConsumer {
     private STLConsumer() {
@@ -27,5 +34,20 @@ public class STLConsumer {
     public static <F> NamedFunction<AbstractSTLNode, Number> TPR(AbstractFitnessFunction<F> fitnessFunction) {
         return NamedFunction.build("TPR", "%5f", i -> fitnessFunction.evaluateSolution(i).get("TPR"));
     }
+
+    public static <G, S, F> NamedFunction<Event<? extends G, ? extends S, ? extends F>,
+            Collection<? extends Individual<? extends G, ? extends S, ? extends F>>> zeroFitness() {
+        return NamedFunction.build("best", "%s",e -> e.getOrderedPopulation().all().stream()
+                                                      .filter(i -> i.getFitness().equals(0.0))
+                                                      .collect(Collectors.toList()));
+    }
+
+    public static <G, F>
+    NamedFunction<Event<? extends G, ? extends AbstractSTLNode, ? extends F>, Number> totalVariableCoverage() {
+        return NamedFunction.build("totalVariableCoverage", "%3d",
+                                   e -> e.getOrderedPopulation().all().stream().filter(i -> i.getFitness().equals(0.0))
+                                         .flatMap(i -> i.getSolution().getVariablesList().stream()).distinct().count());
+    }
+
 
 }

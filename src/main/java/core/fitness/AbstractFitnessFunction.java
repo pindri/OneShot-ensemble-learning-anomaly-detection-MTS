@@ -25,7 +25,7 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
     protected List<Signal<Record>> validationSignals;
 
     // If fitness >= epsilon, record is not anomalous == 0 == NEGATIVE.
-    protected double epsilon = -0.001;
+    protected double epsilon = -0.0;
 
     protected AbstractFitnessFunction(String trainPath, String testPath, String labelPath, int traceLength,
                                       double validationFraction) throws IOException {

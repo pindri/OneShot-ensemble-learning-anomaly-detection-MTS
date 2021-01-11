@@ -1,6 +1,8 @@
 
 import com.google.common.base.Stopwatch;
 import core.problem.SingleInvariantsProblem;
+import evolver.MySpeciator;
+import evolver.SpecEvo;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.consumer.*;
@@ -20,6 +22,8 @@ import it.units.malelab.jgea.representation.grammar.cfggp.GrammarRampedHalfAndHa
 import it.units.malelab.jgea.representation.tree.SameRootSubtreeCrossover;
 import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AbstractSTLNode;
+import stopcondition.MultiTargetFitness;
+import stopcondition.SpeciesZero;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,9 +54,9 @@ public class InvariantsProblemComparison extends Worker {
         int nTournament = 5;
         int diversityMaxAttempts = 100;
 //        int nIterations = i(a("nIterations", "250"));
-        String evolverNamePattern = a("evolver", ".*Speciated.*");
+        String evolverNamePattern = a("evolver", ".*MySpeciated.*");
 //        String evolverNamePattern = a("evolver", ".*Diversity.*");
-        int[] seeds = ri(a("seed", "0:1"));
+        int[] seeds = ri(a("seed", "1:2"));
         String trainPath = a("trainPath", "data/SWaT/train_no201.csv");
         String testPath = a("testPath", "data/SWaT/test_no201.csv");
         String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
@@ -61,7 +65,7 @@ public class InvariantsProblemComparison extends Worker {
         String validationResultsFile = a("validationResultsFile", "validationResults.txt");
 //        String paretoResultsFile = a("paretoResultsFile", "paretoResults.txt");
         int traceLength = i(a("traceLength", "0"));
-        double validationFraction = d(a("validationFraction", "0.8"));
+        double validationFraction = d(a("validationFraction", "0.0"));
 //        String magicVariable = a("magicVariable", "X1_AIT_001_PV");
 
 
@@ -94,24 +98,76 @@ public class InvariantsProblemComparison extends Worker {
 //                true,
 //                diversityMaxAttempts
 //        ));
-        evolvers.put("Speciated", p -> new SpeciatedEvolver<Tree<String>, AbstractSTLNode, Double>(
+
+//        evolvers.put("Other", p -> new SpeciatedEvolver<Tree<String>, AbstractSTLNode, Double>(
+//                p.getSolutionMapper(),
+//                new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
+//                PartialComparator.from(Double.class).comparing(Individual::getFitness),
+////                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
+//                nPop,
+//                Map.of(
+//                        new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
+//                        new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
+//                      ),
+//                5,
+////                new KMeansSpeciator<Tree<String>, AbstractSTLNode, Double>(5, 300,
+////                                      (x, y) -> (new Jaccard())
+////                                              .on(a -> new HashSet<>(Collections.singletonList(a))).apply(x, y),
+////                                      i -> i.getSolution().getVariablesList().stream()
+////                                            .mapToDouble(String::hashCode).toArray()),
+//
+////                new LazySpeciator<>(
+////                        (new Jaccard()).on(i -> Collections.singleton(i.getSolution().getVariablesList())),
+////                        0.2
+////                ),
+//                0.75
+//        ));
+
+//        evolvers.put("MySpeciated", p -> new SpeciatedEvolver<Tree<String>, AbstractSTLNode, Double>(
+//                p.getSolutionMapper(),
+//                new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
+//                PartialComparator.from(Double.class).comparing(Individual::getFitness),
+////                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
+//                nPop,
+//                Map.of(
+//                        new SameRootSubtreeCrossover<>(maxHeight), 0.3d,
+//                        new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.7d
+//                      ),
+//                1,
+////                new LazySpeciator<>(
+////                        (new Jaccard()).on(i -> new HashSet<>(i.getSolution().getVariablesList())),
+////                        1.0
+////                ),
+//                new MySpeciator<>(),
+//                0.75
+//        ));
+
+        evolvers.put("MySpeciated", p -> new SpecEvo<>(
                 p.getSolutionMapper(),
                 new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
                 PartialComparator.from(Double.class).comparing(Individual::getFitness),
 //                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
-                nPop,
+                200,
                 Map.of(
                         new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
                         new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
                       ),
-                5,
-                new KMeansSpeciator<Tree<String>, AbstractSTLNode, Double>(5, 300,
-                                      (x, y) -> (new Jaccard())
-                                              .on(a -> new HashSet<>(Collections.singletonList(a))).apply(x, y),
-                                      i -> i.getSolution().getVariablesList().stream()
-                                            .mapToDouble(String::hashCode).toArray()),
-                0.75
+                new Tournament(5),
+//                new MySpeciator<>(
+//                        List.of("FIT101", "LIT101", "MV101", "P101", "P102", "AIT201", "AIT202", "AIT203",
+//                                "FIT201", "MV201", "P202", "P203", "P204", "P205", "P206", "DPIT301", "FIT301",
+//                                "LIT301", "MV301", "MV302", "MV303", "MV304", "P301", "P302", "AIT401",
+//                                "AIT402", "FIT401", "LIT401", "P401", "P402", "P403", "P404", "UV401", "AIT501",
+//                                "AIT502", "AIT503", "AIT504", "FIT501", "FIT502", "FIT503", "FIT504", "P501",
+//                                "P502", "PIT501", "PIT502", "PIT503", "FIT601", "P601", "P602", "P603")
+//
+//                )
+                new LazySpeciator<>(
+                        (new Jaccard()).on(i -> new HashSet<>(i.getSolution().getVariablesList())),
+                        1.0
+                )
         ));
+
 
         // Consumers.
         assert problems != null;
@@ -147,7 +203,10 @@ public class InvariantsProblemComparison extends Worker {
                         temporalLength().of(solution()).of(best()),
                         coverage().of(solution()).of(best()),
 
-                        fitness().reformat("%5.3f").of(best())
+                        size().of(zeroFitness()),
+                        totalVariableCoverage(),
+
+                        fitness().reformat("%7.5f").of(best())
                         );
 
         List<Consumer.Factory<Tree<String>, AbstractSTLNode, Double, Void>>
@@ -189,8 +248,10 @@ public class InvariantsProblemComparison extends Worker {
                         L.info(String.format("Starting %s", keys));
                         Collection<AbstractSTLNode> solutions = evolver.solve(
                                 Misc.cached(problem.getFitnessFunction(), 10000),
-                                new TargetFitness<>(0d),
-////                                new Iterations(0),
+//                                new TargetFitness<>(0.00001d),
+//                                new Iterations(0),
+                                new MultiTargetFitness<>(0d, 20),
+//                                new SpeciesZero(0.0, 40),
                                 new Random(seed),
                                 executorService,
                                 consumer
@@ -221,21 +282,35 @@ public class InvariantsProblemComparison extends Worker {
                             });
                         }
 
-                        // Validation.
-                        double threshold = 0.0;
-                        if (validationFraction > 0.0) {
-                            // Filter solutions with large validation FPR;
-                            solutions = solutions.stream().filter(x -> problem.getFitnessFunction()
-                                                                              .validateSolution(x) <= threshold)
-                                                 .collect(Collectors.toList());
-                        }
 */
 
+                        Collection<AbstractSTLNode> solutionsLess = null;
+                        Collection<AbstractSTLNode> solutionsZero = null;
+
+                        // Validation.
+                        double threshold = 0.0001;
+                        if (validationFraction > 0.0) {
+                            // Filter solutions with large validation FPR;
+                                    solutionsLess = solutions.stream().filter(x -> problem.getFitnessFunction()
+                                                                              .validateSolution(x) <= threshold)
+                                                 .collect(Collectors.toList());
+
+                        }
+
+                        solutionsZero = solutions.stream()
+                                                 .filter(x -> problem.getFitnessFunction().apply(x).equals(0.0))
+                                                 .collect(Collectors.toList());
+
+
                         // Test to file.
-                        AbstractSTLNode solution = solutions.iterator().next();
-                        System.out.println("\n" + solution);
+//                        AbstractSTLNode solution = solutions.iterator().next();
+//                        System.out.println("\n");
+                        solutions.forEach(System.out::println);
 //                        problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
-                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile);
+                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile + "all");
+                        assert solutionsLess != null;
+                        problem.getFitnessFunction().collectionToFile(solutionsLess, testResultsFile + "more");
+                        problem.getFitnessFunction().collectionToFile(solutionsZero, testResultsFile + "zero");
 
 
                         // Pareto ensemble to file.

@@ -29,10 +29,10 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
         double penalty = Double.MAX_VALUE;
         double fitness = 0.0;
         double[] fitnessArray;
-        int lengthMin = 50;
-        int lengthMax = Integer.MAX_VALUE;
-        int varMin = 10;
-        int varMax = Integer.MAX_VALUE;
+        int lengthMin = 25;
+//        int lengthMax = 100;
+        int varMin = 5;
+        int varMax = 5;
 
         for (Signal<Record> signal : this.trainSignals) {
             if (signal.size() <= monitor.getMinLength()) {
@@ -53,13 +53,14 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
 //            if (monitor.getMinLength() > lengthMax) {
 //                fitness += 0.01*(monitor.getMinLength() - lengthMax);
 //            }
-//            if (monitor.getVariablesList().stream().distinct().count() > varMax) {
-//                fitness += 0.01*(monitor.getVariablesList().stream().distinct().count() - varMax);
-//            }
+            if (monitor.getVariablesList().stream().distinct().count() > varMax) {
+                fitness += 0.01*(monitor.getVariablesList().stream().distinct().count() - varMax);
+            }
 
             fitnessArray = applyMonitor(monitor, signal);
 //            fitness += fitnessArray[fitnessArray.length - 1];
-            fitness += Arrays.stream(fitnessArray).map(Math::abs).summaryStatistics().getAverage();
+//            fitness += Arrays.stream(fitnessArray).map(Math::abs).summaryStatistics().getAverage();
+            fitness += Arrays.stream(fitnessArray).map(x -> x >= 0 ? x : 1).summaryStatistics().getAverage();
         }
 
         return fitness/this.trainSignals.size();
