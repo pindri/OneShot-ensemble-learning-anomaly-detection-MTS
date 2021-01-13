@@ -56,7 +56,7 @@ public class InvariantsProblemComparison extends Worker {
         String testResultsFile = a("testResultsFile", "testResults.txt");
         String validationResultsFile = a("validationResultsFile", "validationResults.txt");
         int traceLength = i(a("traceLength", "0"));
-        double validationFraction = d(a("validationFraction", "0.0"));
+        double validationFraction = d(a("validationFraction", "0.2"));
 //        String magicVariable = a("magicVariable", "X1_AIT_001_PV");
 
 
@@ -228,20 +228,36 @@ public class InvariantsProblemComparison extends Worker {
 
 */
 
-                        Collection<AbstractSTLNode> solutionsLess = null;
-                        Collection<AbstractSTLNode> solutionsZero = null;
+                        Collection<AbstractSTLNode> solutionsZero;
+                        Collection<AbstractSTLNode> solutionsSmall;
+                        Collection<AbstractSTLNode> solutionsSmaller;
+                        Collection<AbstractSTLNode> solutionsSmallest;
 
                         // Validation.
-                        double threshold = 0.0001;
+                        double threshold = 0.0;
+                        System.out.println("Number of solutions: " + solutions.size());
                         if (validationFraction > 0.0) {
                             // Filter solutions with large validation FPR;
-                                    solutionsLess = solutions.stream().filter(x -> problem.getFitnessFunction()
+                                    solutions = solutions.stream().filter(x -> problem.getFitnessFunction()
                                                                               .validateSolution(x) <= threshold)
                                                  .collect(Collectors.toList());
 
                         }
+                        System.out.println("Number of validated solutions: " + solutions.size());
 
-                        solutionsZero = solutions.stream()
+                        solutionsSmall = solutions.stream()
+                                                  .filter(x -> problem.getFitnessFunction().apply(x) <= 0.001)
+                                                  .collect(Collectors.toList());
+
+                        solutionsSmaller = solutionsSmall.stream()
+                                                 .filter(x -> problem.getFitnessFunction().apply(x) <= 0.0001)
+                                                 .collect(Collectors.toList());
+
+                        solutionsSmallest = solutionsSmaller.stream()
+                                                    .filter(x -> problem.getFitnessFunction().apply(x) <= 0.00001)
+                                                    .collect(Collectors.toList());
+
+                        solutionsZero = solutionsSmallest.stream()
                                                  .filter(x -> problem.getFitnessFunction().apply(x).equals(0.0))
                                                  .collect(Collectors.toList());
 
@@ -250,10 +266,11 @@ public class InvariantsProblemComparison extends Worker {
 
                         // Test to file.
 //                        problem.getFitnessFunction().solutionToFile(solution, testResultsFile);
-                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile + "all");
-                        assert solutionsLess != null;
-                        problem.getFitnessFunction().collectionToFile(solutionsLess, testResultsFile + "more");
                         problem.getFitnessFunction().collectionToFile(solutionsZero, testResultsFile + "zero");
+                        problem.getFitnessFunction().collectionToFile(solutionsSmallest, testResultsFile + "smallest");
+                        problem.getFitnessFunction().collectionToFile(solutionsSmaller, testResultsFile + "smaller");
+                        problem.getFitnessFunction().collectionToFile(solutionsSmall, testResultsFile + "small");
+                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile + "all");
 
 
                         // Pareto ensemble to file.

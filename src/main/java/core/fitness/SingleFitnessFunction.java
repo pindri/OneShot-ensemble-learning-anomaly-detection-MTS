@@ -53,14 +53,14 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
 //            if (monitor.getMinLength() > lengthMax) {
 //                fitness += 0.01*(monitor.getMinLength() - lengthMax);
 //            }
-            if (monitor.getVariablesList().stream().distinct().count() > varMax) {
-                fitness += 0.01*(monitor.getVariablesList().stream().distinct().count() - varMax);
-            }
+//            if (monitor.getVariablesList().stream().distinct().count() > varMax) {
+//                fitness += 0.01*(monitor.getVariablesList().stream().distinct().count() - varMax);
+//            }
 
             fitnessArray = applyMonitor(monitor, signal);
 //            fitness += fitnessArray[fitnessArray.length - 1];
-            fitness += Arrays.stream(fitnessArray).map(Math::abs).summaryStatistics().getAverage();
-//            fitness += Arrays.stream(fitnessArray).map(x -> x >= 0 ? x : 1).summaryStatistics().getAverage();
+//            fitness += Arrays.stream(fitnessArray).map(Math::abs).summaryStatistics().getAverage();
+            fitness += Arrays.stream(fitnessArray).map(x -> x >= 0 ? x : 10).summaryStatistics().getAverage();
         }
 
         return fitness/this.trainSignals.size();

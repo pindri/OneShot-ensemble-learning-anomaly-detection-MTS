@@ -75,7 +75,7 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
     }
 
 
-    private double[] getFitnessArray(AbstractSTLNode monitor, List<Signal<Record>> signals) {
+    private double[] getRobustnessArray(AbstractSTLNode monitor, List<Signal<Record>> signals) {
         ArrayList<double[]> result = new ArrayList<>();
         double[] fitness;
         for (Signal<Record> signal : signals) {
@@ -89,21 +89,21 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
     }
 
 
-    public double[] getTestFitnessArray(AbstractSTLNode monitor) {
+    public double[] getTestRobustnessArray(AbstractSTLNode monitor) {
 
-        return getFitnessArray(monitor, this.testSignals);
+        return getRobustnessArray(monitor, this.testSignals);
     }
 
 
-    public double[] getValidationFitnessArray(AbstractSTLNode monitor) {
+    public double[] getValidationRobustnessArray(AbstractSTLNode monitor) {
 
-        return getFitnessArray(monitor, this.validationSignals);
+        return getRobustnessArray(monitor, this.validationSignals);
     }
 
 
-    // If fitness larger or equal than epsilon, record is labelled as 0 == NEGATIVE.
-    public static int[] fitnessToLabel(double[] fitness, double epsilon) {
-        return Arrays.stream(fitness).mapToInt(x -> x >= epsilon ? 0 : 1).toArray();
+    // If robustness larger or equal than epsilon, record is labelled as 0 == NEGATIVE.
+    public static int[] robustnessToLabel(double[] robustness, double epsilon) {
+        return Arrays.stream(robustness).mapToInt(x -> x >= epsilon ? 0 : 1).toArray();
     }
 
 
@@ -151,9 +151,9 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
 
     public Map<String, Number> evaluateSolution(AbstractSTLNode solution) {
 
-        double[] fitness = getTestFitnessArray(solution);
+        double[] fitness = getTestRobustnessArray(solution);
 
-        return evaluateSingleSolution(fitnessToLabel(fitness, this.epsilon));
+        return evaluateSingleSolution(robustnessToLabel(fitness, this.epsilon));
     }
 
 
@@ -168,7 +168,7 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
 
 
     public Map<String, Number> evaluateSolutions(List<AbstractSTLNode> solutions, Operator operator) {
-        List<int[]> predictions = solutions.stream().map(x -> fitnessToLabel(getTestFitnessArray(x), this.epsilon))
+        List<int[]> predictions = solutions.stream().map(x -> robustnessToLabel(getTestRobustnessArray(x), this.epsilon))
                                            .collect(Collectors.toList());
         predictions = ArraysUtilities.trimHeadSameSize(predictions);
         int[] aggregatedPredictions;
@@ -187,7 +187,7 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
 
     public double validateSolution(AbstractSTLNode solution) {
 
-        long FP = Arrays.stream(fitnessToLabel(getValidationFitnessArray(solution), this.epsilon))
+        long FP = Arrays.stream(robustnessToLabel(getValidationRobustnessArray(solution), this.epsilon))
                         .filter(x -> x < 0).count();
         int N = this.validationSignals.size();
 
@@ -197,7 +197,7 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
 
     public void solutionToFile(AbstractSTLNode solution, String filename) throws IOException {
 
-        double[] fitness = getTestFitnessArray(solution);
+        double[] fitness = getTestRobustnessArray(solution);
 
         int from = this.testLabels.size() - fitness.length;
         int to = this.testLabels.size();

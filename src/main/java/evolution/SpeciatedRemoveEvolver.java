@@ -101,7 +101,7 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
 //                                           .collect(Collectors.toList()));
                 solutions.addAll(toRemove);
 
-               // Removing solutions from population and solved variables from speciation.
+               // Removing solutions from population.
                 for (Individual<G, S, Double> sol : toRemove) {
                     population = population.stream().filter(ind -> !ind.equals(sol)).collect(Collectors.toList());
                 }
