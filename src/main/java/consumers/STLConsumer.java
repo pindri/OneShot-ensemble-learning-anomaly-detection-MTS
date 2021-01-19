@@ -4,6 +4,7 @@ import core.fitness.AbstractFitnessFunction;
 import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.consumer.Event;
 import it.units.malelab.jgea.core.consumer.NamedFunction;
+import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AbstractSTLNode;
 
 import java.util.Collection;
@@ -19,6 +20,10 @@ public class STLConsumer {
 
     public static NamedFunction<AbstractSTLNode, Number> coverage() {
         return NamedFunction.build("coverage", "%3f", AbstractSTLNode::getCoverage);
+    }
+
+    public static NamedFunction<Tree<String>, Number> height() {
+        return NamedFunction.build("treeHeight", "%3d", Tree::height);
     }
 
     public static <F> NamedFunction<AbstractSTLNode, Number> FPR(AbstractFitnessFunction<F> fitnessFunction) {

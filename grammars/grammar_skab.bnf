@@ -1,0 +1,8 @@
+<e> ::= <prop> | <log>
+<log> ::= and <e> <e> | not <e> | implies <e> <e> | since <e> <interval> <interval> <e> | once <e> <interval> <interval> | historically <e> <interval> <interval>
+<prop> ::= proposition <var> <comp> <num>
+<interval> ::= <dig>
+<var> ::= Accelerometer1RMS | Accelerometer2RMS | Current | Pressure | Temperature | Thermocouple | Voltage | Volume.Flow.RateRMS
+<comp> ::= < | >
+<num> ::= <dig> <dig>
+<dig> ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0

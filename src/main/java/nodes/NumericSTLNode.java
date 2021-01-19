@@ -4,6 +4,8 @@ import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.Comparison;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,6 +48,15 @@ public class NumericSTLNode extends AbstractSTLNode {
         for (int i = 0; i < digits.size(); i++) {
             result += Double.parseDouble(digits.get(i).child(0).content()) * Math.pow(10, - (i+1));
         }
-        return result;
+        return roundDouble(result, 2);
+    }
+
+    public static double roundDouble(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+
+        return bd.doubleValue();
     }
 }

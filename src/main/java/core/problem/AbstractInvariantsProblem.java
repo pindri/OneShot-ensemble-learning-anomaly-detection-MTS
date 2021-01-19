@@ -10,7 +10,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class AbstractInvariantsProblem<F> implements GrammarBasedProblem<String, AbstractSTLNode, F> {
 
@@ -35,17 +38,17 @@ public abstract class AbstractInvariantsProblem<F> implements GrammarBasedProble
     }
 
     private Grammar<String> initialiseGrammar(String grammarPath, String dataPath) throws IOException {
-//        String replacement = Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null))
-//                .replace("\"", "").replace(",", " | ");
-//
-//        try (Stream<String> lines = Files.lines(Path.of(grammarPath))) {
-//            List<String> replaced = lines
-//                    .map(line-> line.replaceAll("(?m)^<var>.*", "<var> ::= " + replacement))
-//                    .collect(Collectors.toList());
-//            Files.write(Path.of(grammarPath), replaced);
-//        }
+        String replacement = Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null))
+                .replace("\"", "").replace(",", " | ");
 
-        return Grammar.fromFile(new File(grammarPath ));
+        try (Stream<String> lines = Files.lines(Path.of(grammarPath))) {
+            List<String> replaced = lines
+                    .map(line-> line.replaceAll("(?m)^<var>.*", "<var> ::= " + replacement))
+                    .collect(Collectors.toList());
+            Files.write(Path.of(grammarPath), replaced);
+        }
+
+        return Grammar.fromFile(new File(grammarPath));
     }
 
     @Override
@@ -69,5 +72,9 @@ public abstract class AbstractInvariantsProblem<F> implements GrammarBasedProble
 
     public static String[] getNumNames() {
         return numNames;
+    }
+
+    public static List<String> getVariableList() {
+        return Stream.of(numNames, boolNames).flatMap(Stream::of).collect(Collectors.toList());
     }
 }

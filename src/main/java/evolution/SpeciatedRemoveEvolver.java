@@ -28,12 +28,11 @@ import java.util.stream.Collectors;
 
 public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends StandardEvolver<G, S, Double> {
 
-    private Speciator<Individual<G, S, Double>> speciator;
+    private final Speciator<Individual<G, S, Double>> speciator;
     private static final Logger L = Logger.getLogger(SpeciatedRemoveEvolver.class.getName());
     int maxAttempts = 100;
-    List<String> variableList;
     double epsilon = 0.0;
-    int solvedVariablesStopCondition = 15;
+    int solvedVariablesStopCondition = 5;
 
     public SpeciatedRemoveEvolver(
             Function<? super G, ? extends S> solutionMapper,
@@ -46,12 +45,6 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
         super(solutionMapper, genotypeFactory, individualComparator, populationSize, operators, parentSelector,
               new Worst(), populationSize, false);
         this.speciator = speciator;
-        this.variableList = List.of("FIT101", "LIT101", "MV101", "P101", "P102", "AIT201", "AIT202", "AIT203",
-                                    "FIT201", "MV201", "P202", "P203", "P204", "P205", "P206", "DPIT301", "FIT301",
-                                    "LIT301", "MV301", "MV302", "MV303", "MV304", "P301", "P302", "AIT401",
-                                    "AIT402", "FIT401", "LIT401", "P401", "P402", "P403", "P404", "UV401", "AIT501",
-                                    "AIT502", "AIT503", "AIT504", "FIT501", "FIT502", "FIT503", "FIT504", "P501",
-                                    "P502", "PIT501", "PIT502", "PIT503", "FIT601", "P601", "P602", "P603");
     }
 
     @Override
@@ -63,6 +56,7 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
             throws InterruptedException, ExecutionException {
 
         System.out.println("SOLVING! Epsilon: " + epsilon);
+        System.out.println("Variables: " + speciator);
         State state = initState();
         List<String> solvedVariables = new ArrayList<>();
         Collection<Individual<G, S, Double>> solutions = new ArrayList<>();
@@ -91,9 +85,10 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
                 System.out.println(solutionVariables);
 
                 List<Individual<G, S, Double>> toRemove = population.stream()
-                                                               .filter(i -> i.getSolution().getVariablesList()
-                                                                             .stream().anyMatch(solutionVariables::contains))
-                                                               .collect(Collectors.toList());
+                                                                    .filter(i -> i.getSolution().getVariablesList()
+                                                                                  .stream().anyMatch(
+                                                                                    solutionVariables::contains))
+                                                                    .collect(Collectors.toList());
 
                 // Add solutions (fitness <= epsilon) to solution list.
 //                solutions.addAll(population.stream()
@@ -101,7 +96,7 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
 //                                           .collect(Collectors.toList()));
                 solutions.addAll(toRemove);
 
-               // Removing solutions from population.
+                // Removing solutions from population.
                 for (Individual<G, S, Double> sol : toRemove) {
                     population = population.stream().filter(ind -> !ind.equals(sol)).collect(Collectors.toList());
                 }
@@ -109,7 +104,7 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
                 // Create new individuals if population is empty.
                 if (population.size() == 0) {
                     Collection<Individual<G, S, Double>> newPop = this.initPopulation(toRemove.size(), fitnessFunction,
-                                                                                 random, executor, state);
+                                                                                      random, executor, state);
                     population.addAll(newPop);
                 }
 
@@ -132,6 +127,8 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
             state.incIterations(1);
         }
 
+        solutions = new DAGPartiallyOrderedCollection<>(solutions, individualComparator).all();
+
         return solutions.stream().map(Individual::getSolution).collect(Collectors.toList());
     }
 
@@ -144,10 +141,10 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
             State state) throws ExecutionException, InterruptedException {
 
         Collection<Individual<G, S, Double>> offspring = new ArrayList<>();
-        speciator = new AttributeSpeciator<>(this.variableList);
 
         // Partition in species.
         List<Species<Individual<G, S, Double>>> allSpecies = new ArrayList<>(speciator.speciate(orderedPopulation));
+        L.fine(String.format("Population partitioned: %d species", allSpecies.size()));
 
         // Elitism for each species.
         for (Species<Individual<G, S, Double>> species : allSpecies) {
@@ -155,8 +152,6 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
             sortedSpecies.sort(individualComparator.comparator());
             offspring.add(sortedSpecies.get(0));
         }
-
-        // Maybe remove duplicates.
 
         // Remaining offsprings.
         int remaining = populationSize - offspring.size();

@@ -15,7 +15,7 @@ public class SignalBuilderTest {
 
     @Test
     public void buildTest() throws IOException {
-        String grammarPath = "test_grammar.bnf";
+        String grammarPath = "grammars/test_grammar.bnf";
         String dataPath = "data/toy_train_data.csv";
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";
@@ -34,7 +34,7 @@ public class SignalBuilderTest {
 
     @Test
     public void buildDenseTest() throws IOException {
-        String grammarPath = "test_grammar.bnf";
+        String grammarPath = "grammars/test_grammar.bnf";
         String dataPath = "data/toy_train_data.csv";
         String testPath = "data/toy_test_data.csv";
         String labelsPath = "data/toy_labels.csv";

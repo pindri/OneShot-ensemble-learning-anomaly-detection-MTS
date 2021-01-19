@@ -187,8 +187,7 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
 
     public double validateSolution(AbstractSTLNode solution) {
 
-        long FP = Arrays.stream(robustnessToLabel(getValidationRobustnessArray(solution), this.epsilon))
-                        .filter(x -> x < 0).count();
+        long FP = Arrays.stream(getValidationRobustnessArray(solution)).filter(x -> x < 0).count();
         int N = this.validationSignals.size();
 
         return (FP*1.0)/(N*1.0);

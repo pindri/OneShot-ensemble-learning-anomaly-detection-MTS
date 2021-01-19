@@ -3,6 +3,8 @@ build/
 .gradle/
 *SWaT*/
 *WADI*/
+*skab*/
+*botnet*/
 test*
 results/
 *.txt

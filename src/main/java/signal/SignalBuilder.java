@@ -4,6 +4,8 @@ import eu.quanticol.moonlight.signal.Signal;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -38,7 +40,8 @@ public class SignalBuilder extends AbstractSignalBuilder<List<Signal<Record>>> {
             while ((line = buffReader.readLine()) != null) {
                 List<String> input = Arrays.stream(line.split(",")).collect(Collectors.toList());
                 numValues = IntStream.range(0, header.length).filter(numIndexes::contains)
-                        .mapToDouble(i -> Double.parseDouble(input.get(i))).toArray();
+//                        .mapToDouble(i -> Double.parseDouble(input.get(i))).toArray();
+                        .mapToDouble(i -> roundDouble(Double.parseDouble(input.get(i)), 2)).toArray();
                 trace.add(time, new Record(boolValues, numValues));
                 time++;
 
@@ -52,7 +55,8 @@ public class SignalBuilder extends AbstractSignalBuilder<List<Signal<Record>>> {
             while ((line = buffReader.readLine()) != null) {
                 List<String> input = Arrays.stream(line.split(",")).collect(Collectors.toList());
                 numValues = IntStream.range(0, header.length).filter(numIndexes::contains)
-                        .mapToDouble(i -> Double.parseDouble(input.get(i))).toArray();
+//                        .mapToDouble(i -> Double.parseDouble(input.get(i))).toArray();
+                        .mapToDouble(i -> roundDouble(Double.parseDouble(input.get(i)), 2)).toArray();
                 trace.add(time, new Record(boolValues, numValues));
                 time++;
             }
@@ -62,6 +66,15 @@ public class SignalBuilder extends AbstractSignalBuilder<List<Signal<Record>>> {
         buffReader.close();
 
         return signals;
+    }
+
+    public static double roundDouble(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+
+        return bd.doubleValue();
     }
 
     public List<Signal<Record>> extractPortion(List<Signal<Record>> signals, double from, double to) {

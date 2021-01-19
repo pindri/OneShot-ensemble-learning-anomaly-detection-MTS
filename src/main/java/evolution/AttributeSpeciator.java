@@ -19,13 +19,12 @@ public class AttributeSpeciator<G, S extends AbstractSTLNode, F> implements Spec
         this.variableList = variableList;
     }
 
-
     @Override
     public Collection<Species<Individual<G, S, F>>> speciate(
             PartiallyOrderedCollection<Individual<G, S, F>> population) {
 
         List<List<Individual<G, S, F>>> clusters = new ArrayList<>();
-        for (String var : variableList) {
+        for (String var : this.variableList) {
             List<Individual<G, S, F>> cluster = new ArrayList<>();
             for (Individual<G, S, F> individual : population.all()) {
                 if (individual.getSolution().getVariablesList().contains(var)) {
@@ -38,4 +37,10 @@ public class AttributeSpeciator<G, S extends AbstractSTLNode, F> implements Spec
         return clusters.stream().filter(c -> c.size() > 0)
                        .map(c -> new Species<>(c, c.get(0))).collect(Collectors.toList());
     }
+
+    @Override
+    public String toString() {
+        return String.join(", ", this.variableList);
+    }
+
 }
