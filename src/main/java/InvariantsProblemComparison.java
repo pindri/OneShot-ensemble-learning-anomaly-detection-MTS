@@ -6,10 +6,11 @@ import evolution.AttributeSpeciator;
 import evolution.SpeciatedRemoveEvolver;
 import it.units.malelab.jgea.Worker;
 import it.units.malelab.jgea.core.Individual;
-import it.units.malelab.jgea.core.consumer.*;
+import it.units.malelab.jgea.core.evolver.Event;
 import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
 import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
+import it.units.malelab.jgea.core.listener.*;
 import it.units.malelab.jgea.core.order.PartialComparator;
 import it.units.malelab.jgea.core.selector.Tournament;
 import it.units.malelab.jgea.core.selector.Worst;
@@ -34,7 +35,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static consumers.STLConsumer.*;
-import static it.units.malelab.jgea.core.consumer.NamedFunctions.*;
+import static it.units.malelab.jgea.core.listener.NamedFunctions.*;
 import static it.units.malelab.jgea.core.util.Args.*;
 
 public class InvariantsProblemComparison extends Worker {
@@ -53,13 +54,15 @@ public class InvariantsProblemComparison extends Worker {
         int maxHeight = i(a("maxHeight", "20"));
         int nTournament = 5;
         int diversityMaxAttempts = 100;
-        String evolverNamePattern = a("evolution", "Speciated");
+        String evolverNamePattern = a("evolution", "StandardDiversity");
+//        String evolverNamePattern = a("evolution", "Speciated");
         int[] seeds = ri(a("seed", "0:1"));
-        String trainPath = a("trainPath", "data/skab/train.csv");
-        String testPath = a("testPath", "data/skab/test.csv");
-        String labelsPath = a("labelsPath", "data/skab/labels.csv");
+        String trainPath = a("trainPath", "data/SKAB/2/train.csv");
+        String testPath = a("testPath", "data/SKAB/2/test.csv");
+        String labelsPath = a("labelsPath", "data/SKAB/2/labels.csv");
         String grammarPath = a("grammarPath", "grammars/grammar_skab.bnf");
         String testResultsFile = a("testResultsFile", "results/testResults.txt");
+        String topResultsFile = a("topResultsFile", "results/topResults.txt");
         int traceLength = i(a("traceLength", "0"));
         double validationFraction = d(a("validationFraction", "0.2"));
 
@@ -106,12 +109,12 @@ public class InvariantsProblemComparison extends Worker {
                 new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
                 PartialComparator.from(Double.class).comparing(Individual::getFitness),
 //                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
-                300,
+                100,
                 Map.of(
                         new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
                         new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
                       ),
-                new Tournament(5),
+                new Tournament(nTournament),
                 new AttributeSpeciator<>(
                         AbstractInvariantsProblem.getVariableList()
                 )
@@ -120,49 +123,49 @@ public class InvariantsProblemComparison extends Worker {
 
         // Consumers.
         assert problems != null;
-        Map<String, Object> keys = new HashMap<>();
 
-        List<NamedFunction<Event<? extends Tree<String>, ? extends AbstractSTLNode, ? extends Double>, ?>>
+        List<NamedFunction<? super Event<? extends Tree<String>, ? extends AbstractSTLNode, ? extends Double>, ?>>
                 functions = List.of(
-                constant("seed", "%2d", keys),
-                constant("problem", NamedFunction.formatOfLongest(
+                eventAttribute("seed", "%2d"),
+                eventAttribute("problem", NamedFunction.formatOfLongest(
                         problems.stream().map(p -> p.getClass().getSimpleName())
-                                .collect(Collectors.toList())),
-                         keys),
-                constant("evolution", "%20.20s", keys),
+                                .collect(Collectors.toList()))),
+                eventAttribute("evolution", "%20.20s"),
                 iterations(),
                 births(),
                 elapsedSeconds(),
                 size().of(all()),
                 size().of(firsts()),
                 size().of(lasts()),
-                uniqueness().of(map(genotype())).of(all()),
-                uniqueness().of(map(solution())).of(all()),
-                uniqueness().of(map(fitness())).of(all()),
+                uniqueness().of(each(genotype())).of(all()),
+                uniqueness().of(each(solution())).of(all()),
+                uniqueness().of(each(fitness())).of(all()),
                 size().of(genotype()).of(best()),
                 birthIteration().of(best()),
-                hist(8).of(map(fitness())).of(all()),
+                hist(8).of(each(fitness())).of(all()),
 
                 // TODO: Better handling.
-                TPR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
-                FPR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
-                FNR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
-
-                temporalLength().of(solution()).of(best()),
-                coverage().of(solution()).of(best()),
-                height().of(genotype()).of(best()),
-
-                size().of(zeroFitness()),
+//                TPR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
+//                FPR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
+//                FNR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
+//
+//                temporalLength().of(solution()).of(best()),
+//                coverage().of(solution()).of(best()),
+//                height().of(genotype()).of(best()),
+//
+//                size().of(zeroFitness()),
                 totalVariableCoverage(),
 
                 fitness().reformat("%7.5f").of(best()));
 
         // Factories.
-        List<Consumer.Factory<Tree<String>, AbstractSTLNode, Double, Void>> factories = new ArrayList<>();
-        factories.add(new TabularPrinter<>(functions, System.out, 10, true));
-
+        Listener.Factory<Event<? extends Tree<String>, ? extends AbstractSTLNode, ? extends Double>>
+                listenerFactory = new TabularPrinter<>(functions);
         if (a("file", null) != null) {
-            factories.add(new CSVPrinter<>(functions, new File(a("file", null))));
+            listenerFactory = Listener.Factory.all(List.of(
+                    listenerFactory,
+                    new CSVPrinter<>(functions, new File(a("file", null)))
+                                                          ));
         }
 
 
@@ -176,19 +179,20 @@ public class InvariantsProblemComparison extends Worker {
                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         L.info(String.format("Going to test with %d evolver/s: %s%n", evolvers.size(), evolvers.keySet()));
 
+        // Run.
         for (SingleInvariantsProblem problem : problems) {
             for (int seed : seeds) {
                 for (Map.Entry<String, Function<SingleInvariantsProblem, Evolver<Tree<String>,
                         AbstractSTLNode, Double>>> evolverEntry : evolvers.entrySet()) {
-                    keys.put("seed", seed);
-                    keys.put("problem", problem.getClass().getSimpleName().toLowerCase());
-                    keys.put("evolution", evolverEntry.getKey());
-                    keys.put("traceLength", String.valueOf(traceLength));
-                    keys.put("validationFraction", String.valueOf(validationFraction));
-                    Consumer<Tree<String>, AbstractSTLNode, Double, ?>
-                            consumer = Consumer.of(factories.stream().map(Consumer.Factory::build)
-                                                            .collect(Collectors.toList()))
-                                               .deferred(executorService);
+                    Map<String, Object> keys = Map.ofEntries(
+                        Map.entry("seed", seed),
+                        Map.entry("problem", problem.getClass().getSimpleName().toLowerCase()),
+                        Map.entry("evolution", evolverEntry.getKey()),
+                        Map.entry("traceLength", String.valueOf(traceLength)),
+                        Map.entry("validationFraction", String.valueOf(validationFraction)));
+                    Listener<Event<? extends Tree<String>, ? extends AbstractSTLNode, ? extends Double>> listener
+                            = Listener.all(List.of(new EventAugmenter(keys),
+                                                   listenerFactory.build())).deferred(executorService);
                     try {
                         Stopwatch stopwatch = Stopwatch.createStarted();
                         Evolver<Tree<String>, AbstractSTLNode, Double> evolver = evolverEntry.getValue().apply(problem);
@@ -201,9 +205,7 @@ public class InvariantsProblemComparison extends Worker {
 //                                new SpeciesZero(0.0, 40),
                                 new Random(seed),
                                 executorService,
-                                consumer
-                                                                             );
-                        consumer.consume(solutions);
+                                listener);
                         L.info(String.format("Done %s: %d solutions in %4.1fs",
                                              keys,
                                              solutions.size(),
@@ -211,7 +213,7 @@ public class InvariantsProblemComparison extends Worker {
                                             ));
 
                         // Validation.
-                        double threshold = 0.0;
+                        double threshold = 0.1;
                         L.info("Number of solutions pre-validation: " + solutions.size());
 
                         // Filter solutions with large validation FPR;
@@ -227,10 +229,10 @@ public class InvariantsProblemComparison extends Worker {
                         Collection<AbstractSTLNode> solutionsTop10;
                         Collection<AbstractSTLNode> solutionsTop25;
                         Collection<AbstractSTLNode> solutionsTop50;
-                        solutionsTop5 = new ArrayList<>(solutions).subList(0, solutions.size() / 20);
+//                        solutionsTop5 = new ArrayList<>(solutions).subList(0, solutions.size() / 20);
                         solutionsTop10 = new ArrayList<>(solutions).subList(0, solutions.size() / 10);
-                        solutionsTop25 = new ArrayList<>(solutions).subList(0, solutions.size() / 4);
-                        solutionsTop50 = new ArrayList<>(solutions).subList(0, solutions.size() / 2);
+//                        solutionsTop25 = new ArrayList<>(solutions).subList(0, solutions.size() / 4);
+//                        solutionsTop50 = new ArrayList<>(solutions).subList(0, solutions.size() / 2);
 
 //                        solutionsZero = solutions.stream()
 //                                                 .filter(x -> problem.getFitnessFunction().apply(x).equals(0.0))
@@ -240,11 +242,10 @@ public class InvariantsProblemComparison extends Worker {
 //                        solutions.forEach(System.out::println);
 
                         // Test to file.
-//                        problem.getFitnessFunction().collectionToFile(solutionsTop5, "5top" + testResultsFile);
+//                        problem.getFitnessFunction().collectionToFile(solutionsTop5, topResultsFile);
 //                        problem.getFitnessFunction().collectionToFile(solutionsTop10, "10top" + testResultsFile);
-//                        problem.getFitnessFunction().collectionToFile(solutionsTop25, "25top" + testResultsFile);
+//                        problem.getFitnessFunction().collectionToFile(solutionsTop10, topResultsFile);
 //                        problem.getFitnessFunction().collectionToFile(solutionsTop50, "50top" + testResultsFile);
-//                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile + "all");
                         problem.getFitnessFunction().collectionToFile(solutions, testResultsFile);
 
                         // Pareto ensemble to file.
@@ -259,7 +260,6 @@ public class InvariantsProblemComparison extends Worker {
                     }
                 }
             }
-            factories.forEach(Consumer.Factory::shutdown);
         }
 
     }

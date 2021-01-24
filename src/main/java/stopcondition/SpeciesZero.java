@@ -1,6 +1,6 @@
 package stopcondition;
 
-import it.units.malelab.jgea.core.consumer.Event;
+import it.units.malelab.jgea.core.evolver.Event;
 import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AbstractSTLNode;
 

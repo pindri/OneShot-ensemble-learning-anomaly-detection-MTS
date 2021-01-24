@@ -1,7 +1,6 @@
 package stopcondition;
 
-
-import it.units.malelab.jgea.core.consumer.Event;
+import it.units.malelab.jgea.core.evolver.Event;
 
 import java.util.List;
 import java.util.function.Predicate;

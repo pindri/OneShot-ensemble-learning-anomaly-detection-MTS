@@ -3,11 +3,11 @@ package evolution;
 import com.google.common.base.Stopwatch;
 import it.units.malelab.jgea.core.Factory;
 import it.units.malelab.jgea.core.Individual;
-import it.units.malelab.jgea.core.consumer.Consumer;
-import it.units.malelab.jgea.core.consumer.Event;
+import it.units.malelab.jgea.core.evolver.Event;
 import it.units.malelab.jgea.core.evolver.StandardEvolver;
 import it.units.malelab.jgea.core.evolver.speciation.Speciator;
 import it.units.malelab.jgea.core.evolver.speciation.Species;
+import it.units.malelab.jgea.core.listener.Listener;
 import it.units.malelab.jgea.core.operator.GeneticOperator;
 import it.units.malelab.jgea.core.order.DAGPartiallyOrderedCollection;
 import it.units.malelab.jgea.core.order.PartialComparator;
@@ -52,10 +52,9 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
             Function<S, Double> fitnessFunction,
             Predicate<? super Event<G, S, Double>> stopCondition,
             Random random, ExecutorService executor,
-            Consumer<? super G, ? super S, ? super Double, ?> consumer)
+            Listener<? super Event<G, S, Double>> listener)
             throws InterruptedException, ExecutionException {
 
-        System.out.println("SOLVING! Epsilon: " + epsilon);
         System.out.println("Variables: " + speciator);
         State state = initState();
         List<String> solvedVariables = new ArrayList<>();
@@ -64,17 +63,16 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
         Collection<Individual<G, S, Double>> population = initPopulation(fitnessFunction, random, executor, state);
         L.fine(String.format("Population initialized: %d individuals", population.size()));
 
+        double lastFitness = 0.0;
+        double currentFitness = 0.0;
+        int staleCounter = 0;
+
         while (true) {
             PartiallyOrderedCollection<Individual<G, S, Double>>
                     orderedPopulation = new DAGPartiallyOrderedCollection<>(population, individualComparator);
             state.setElapsedMillis(stopwatch.elapsed(TimeUnit.MILLISECONDS));
             Event<G, S, Double> event = new Event<>(state, orderedPopulation);
-            consumer.consume(event);
-
-//            if (stopCondition.test(event)) {
-//                L.fine(String.format("Stop condition met: %s", stopCondition.toString()));
-//                break;
-//            }
+            listener.listen(event);
 
             if (event.getOrderedPopulation().all().stream().filter(i -> i.getFitness() <= epsilon).count() >= 1) {
                 List<String> solutionVariables =
@@ -90,7 +88,7 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
                                                                                     solutionVariables::contains))
                                                                     .collect(Collectors.toList());
 
-                // Add solutions (fitness <= epsilon) to solution list.
+//                 Add solutions (fitness <= epsilon) to solution list.
 //                solutions.addAll(population.stream()
 //                                           .filter(i -> i.getFitness() <= epsilon)
 //                                           .collect(Collectors.toList()));
@@ -117,6 +115,24 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
 
                 orderedPopulation = new DAGPartiallyOrderedCollection<>(population, individualComparator);
             }
+
+            // Check if fitness stales.
+            currentFitness = Misc.first(event.getOrderedPopulation().firsts()).getFitness();
+            if (currentFitness == lastFitness) {
+                staleCounter++;
+            } else {
+                staleCounter = 0;
+            }
+            System.out.println("STALE COUNTER: " + staleCounter);
+
+//            if (staleCounter > 100) {
+//                Collection<Individual<G, S, Double>> newInitPop = this
+//                        .initPopulation(population.size(), fitnessFunction, random, executor, state);
+//                orderedPopulation = new DAGPartiallyOrderedCollection<>(newInitPop, individualComparator);
+//
+//            }
+
+            lastFitness = Misc.first(event.getOrderedPopulation().firsts()).getFitness();
 
             if (solvedVariables.stream().distinct().count() >= solvedVariablesStopCondition) {
                 break;

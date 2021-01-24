@@ -2,8 +2,8 @@ package consumers;
 
 import core.fitness.AbstractFitnessFunction;
 import it.units.malelab.jgea.core.Individual;
-import it.units.malelab.jgea.core.consumer.Event;
-import it.units.malelab.jgea.core.consumer.NamedFunction;
+import it.units.malelab.jgea.core.evolver.Event;
+import it.units.malelab.jgea.core.listener.NamedFunction;
 import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AbstractSTLNode;
 

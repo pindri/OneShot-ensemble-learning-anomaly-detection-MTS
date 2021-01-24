@@ -9,12 +9,9 @@ import java.util.Arrays;
 
 public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
 
-    private String magicVariable = null;
-
     public SingleFitnessFunction(String trainPath, String testPath, String labelPath, int traceLength,
                                  double validationFraction, String magicVariable) throws IOException {
         super(trainPath, testPath, labelPath, traceLength, validationFraction);
-        this.magicVariable = magicVariable;
     }
 
     public SingleFitnessFunction(String trainPath, String testPath, String labelPath, int traceLength,
@@ -30,8 +27,8 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
         double fitness = 0.0;
         double[] fitnessArray;
 //        int lengthMin = 100;
-        int lengthMax = 100;
-//        int varMin = 3;
+        int lengthMax = 10;
+        int varMin = 3;
         int varMax = 3;
 
         for (Signal<Record> signal : this.trainSignals) {
@@ -39,10 +36,6 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
                 fitness += penalty;
                 continue;
             }
-
-//            if (!monitor.getVariablesList().contains(magicVariable)) {
-//                fitness += penalty;
-//            }
 
 //            if (monitor.getMinLength() < lengthMin) {
 //                fitness += 0.01*(lengthMin - monitor.getMinLength());
@@ -52,9 +45,11 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
 //            }
 //            if (monitor.getMinLength() > lengthMax) {
 //                fitness += 0.01*(monitor.getMinLength() - lengthMax);
+//                fitness += penalty;
 //            }
 //            if (monitor.getVariablesList().stream().distinct().count() > varMax) {
 //                fitness += 0.01*(monitor.getVariablesList().stream().distinct().count() - varMax);
+//                fitness += penalty;
 //            }
 
             fitnessArray = applyMonitor(monitor, signal);

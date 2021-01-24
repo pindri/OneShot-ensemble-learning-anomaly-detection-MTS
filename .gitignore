@@ -3,7 +3,8 @@ build/
 .gradle/
 *SWaT*/
 *WADI*/
-*skab*/
+*SKAB*/
+*other*/
 *botnet*/
 test*
 results/
