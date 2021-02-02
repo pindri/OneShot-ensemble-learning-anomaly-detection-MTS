@@ -32,7 +32,7 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
     private static final Logger L = Logger.getLogger(SpeciatedRemoveEvolver.class.getName());
     int maxAttempts = 100;
     double epsilon = 0.0;
-    int solvedVariablesStopCondition = 5;
+    int solvedVariablesStopCondition = 20;
 
     public SpeciatedRemoveEvolver(
             Function<? super G, ? extends S> solutionMapper,
@@ -123,13 +123,12 @@ public class SpeciatedRemoveEvolver<G, S extends AbstractSTLNode> extends Standa
             } else {
                 staleCounter = 0;
             }
-            System.out.println("STALE COUNTER: " + staleCounter);
+//            System.out.println("STALE COUNTER: " + staleCounter);
 
 //            if (staleCounter > 100) {
 //                Collection<Individual<G, S, Double>> newInitPop = this
 //                        .initPopulation(population.size(), fitnessFunction, random, executor, state);
 //                orderedPopulation = new DAGPartiallyOrderedCollection<>(newInitPop, individualComparator);
-//
 //            }
 
             lastFitness = Misc.first(event.getOrderedPopulation().firsts()).getFitness();

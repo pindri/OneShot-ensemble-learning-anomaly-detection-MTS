@@ -50,19 +50,20 @@ public class InvariantsProblemComparison extends Worker {
 
     @Override
     public void run() {
-        int nPop = i(a("nPop", "100"));
+        int nPop = i(a("nPop", "200"));
         int maxHeight = i(a("maxHeight", "20"));
         int nTournament = 5;
         int diversityMaxAttempts = 100;
-        String evolverNamePattern = a("evolution", "StandardDiversity");
-//        String evolverNamePattern = a("evolution", "Speciated");
+//        String evolverNamePattern = a("evolution", "StandardDiversity");
+        String evolverNamePattern = a("evolution", "Speciated");
         int[] seeds = ri(a("seed", "0:1"));
-        String trainPath = a("trainPath", "data/SKAB/2/train.csv");
-        String testPath = a("testPath", "data/SKAB/2/test.csv");
-        String labelsPath = a("labelsPath", "data/SKAB/2/labels.csv");
-        String grammarPath = a("grammarPath", "grammars/grammar_skab.bnf");
+        String trainPath = a("trainPath", "data/SWaT/train_no201.csv");
+        String testPath = a("testPath", "data/SWaT/test_no201.csv");
+        String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
+        String grammarPath = a("grammarPath", "grammars/grammar_swat_no201.bnf");
         String testResultsFile = a("testResultsFile", "results/testResults.txt");
         String topResultsFile = a("topResultsFile", "results/topResults.txt");
+        String ensembleResultsFile = a("ensembleResultsFile", "results/ensemble.csv");
         int traceLength = i(a("traceLength", "0"));
         double validationFraction = d(a("validationFraction", "0.2"));
 
@@ -109,7 +110,7 @@ public class InvariantsProblemComparison extends Worker {
                 new GrammarRampedHalfAndHalf<>(3, maxHeight, p.getGrammar()),
                 PartialComparator.from(Double.class).comparing(Individual::getFitness),
 //                new ParetoDominance<>(Double.class).comparing(Individual::getFitness),
-                100,
+                nPop,
                 Map.of(
                         new SameRootSubtreeCrossover<>(maxHeight), 0.8d,
                         new GrammarBasedSubtreeMutation<>(maxHeight, p.getGrammar()), 0.2d
@@ -134,6 +135,7 @@ public class InvariantsProblemComparison extends Worker {
                 iterations(),
                 births(),
                 elapsedSeconds(),
+                fitnessEvaluations(),
                 size().of(all()),
                 size().of(firsts()),
                 size().of(lasts()),
@@ -145,15 +147,15 @@ public class InvariantsProblemComparison extends Worker {
                 hist(8).of(each(fitness())).of(all()),
 
                 // TODO: Better handling.
-//                TPR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
-//                FPR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
-//                FNR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
-//
-//                temporalLength().of(solution()).of(best()),
-//                coverage().of(solution()).of(best()),
-//                height().of(genotype()).of(best()),
-//
-//                size().of(zeroFitness()),
+                TPR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
+                FPR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
+                FNR(problems.get(0).getFitnessFunction()).of(solution()).of(best()),
+
+                temporalLength().of(solution()).of(best()),
+                coverage().of(solution()).of(best()),
+                height().of(genotype()).of(best()),
+
+                size().of(zeroFitness()),
                 totalVariableCoverage(),
 
                 fitness().reformat("%7.5f").of(best()));
@@ -213,7 +215,7 @@ public class InvariantsProblemComparison extends Worker {
                                             ));
 
                         // Validation.
-                        double threshold = 0.1;
+                        double threshold = 0.0;
                         L.info("Number of solutions pre-validation: " + solutions.size());
 
                         // Filter solutions with large validation FPR;
@@ -246,7 +248,9 @@ public class InvariantsProblemComparison extends Worker {
 //                        problem.getFitnessFunction().collectionToFile(solutionsTop10, "10top" + testResultsFile);
 //                        problem.getFitnessFunction().collectionToFile(solutionsTop10, topResultsFile);
 //                        problem.getFitnessFunction().collectionToFile(solutionsTop50, "50top" + testResultsFile);
-                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile);
+//                        problem.getFitnessFunction().collectionToCompressedFile(solutions, testResultsFile);
+//                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile);
+                        problem.getFitnessFunction().ensembleToFile(solutions, ensembleResultsFile);
 
                         // Pareto ensemble to file.
 //                        problem.getFitnessFunction().paretoToFile(ensemble.get(ensemble.size() - 1), testResultsFile);

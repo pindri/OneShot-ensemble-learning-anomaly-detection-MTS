@@ -38,15 +38,15 @@ public abstract class AbstractInvariantsProblem<F> implements GrammarBasedProble
     }
 
     private Grammar<String> initialiseGrammar(String grammarPath, String dataPath) throws IOException {
-        String replacement = Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null))
-                .replace("\"", "").replace(",", " | ");
-
-        try (Stream<String> lines = Files.lines(Path.of(grammarPath))) {
-            List<String> replaced = lines
-                    .map(line-> line.replaceAll("(?m)^<var>.*", "<var> ::= " + replacement))
-                    .collect(Collectors.toList());
-            Files.write(Path.of(grammarPath), replaced);
-        }
+//        String replacement = Objects.requireNonNull(Files.lines(Path.of(dataPath)).findFirst().orElse(null))
+//                .replace("\"", "").replace(",", " | ");
+//
+//        try (Stream<String> lines = Files.lines(Path.of(grammarPath))) {
+//            List<String> replaced = lines
+//                    .map(line-> line.replaceAll("(?m)^<var>.*", "<var> ::= " + replacement))
+//                    .collect(Collectors.toList());
+//            Files.write(Path.of(grammarPath), replaced);
+//        }
 
         return Grammar.fromFile(new File(grammarPath));
     }

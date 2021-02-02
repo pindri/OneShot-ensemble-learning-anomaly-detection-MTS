@@ -26,9 +26,9 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
         double penalty = Double.MAX_VALUE;
         double fitness = 0.0;
         double[] fitnessArray;
-//        int lengthMin = 100;
+        int lengthMin = 50;
         int lengthMax = 10;
-        int varMin = 3;
+        int varMin = 10;
         int varMax = 3;
 
         for (Signal<Record> signal : this.trainSignals) {
@@ -37,18 +37,18 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
                 continue;
             }
 
-//            if (monitor.getMinLength() < lengthMin) {
-//                fitness += 0.01*(lengthMin - monitor.getMinLength());
-//            }
-//            if (monitor.getVariablesList().stream().distinct().count() < varMin) {
-//                fitness += 0.01*(varMin - monitor.getVariablesList().stream().distinct().count());
-//            }
+            if (monitor.getMinLength() < lengthMin) {
+                fitness += 0.01*(lengthMin - monitor.getMinLength());
+            }
+            if (monitor.getVariablesList().stream().distinct().count() < varMin) {
+                fitness += 0.01*(varMin - monitor.getVariablesList().stream().distinct().count());
+            }
 //            if (monitor.getMinLength() > lengthMax) {
-//                fitness += 0.01*(monitor.getMinLength() - lengthMax);
+//                fitness += 0.1*(monitor.getMinLength() - lengthMax);
 //                fitness += penalty;
 //            }
 //            if (monitor.getVariablesList().stream().distinct().count() > varMax) {
-//                fitness += 0.01*(monitor.getVariablesList().stream().distinct().count() - varMax);
+//                fitness += 0.1*(monitor.getVariablesList().stream().distinct().count() - varMax);
 //                fitness += penalty;
 //            }
 

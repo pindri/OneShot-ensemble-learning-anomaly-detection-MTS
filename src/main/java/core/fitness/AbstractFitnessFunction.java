@@ -9,12 +9,15 @@ import signal.Record;
 import signal.SignalBuilder;
 import signal.SignalHandler;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.zip.GZIPOutputStream;
 
 public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTLNode, F> {
 
@@ -38,8 +41,8 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
                                              .collect(Collectors.toList());
         this.signals = this.signalBuilder.build(trainPath, boolIndexes, numIndexes);
 
-        this.trainSignals = this.signalBuilder.extractPortion(this.signals, 0, 1-validationFraction);
-        this.validationSignals = this.signalBuilder.extractPortion(this.signals, 1-validationFraction, 1);
+        this.trainSignals = this.signalBuilder.extractPortion(this.signals, 0, 1 - validationFraction);
+        this.validationSignals = this.signalBuilder.extractPortion(this.signals, 1 - validationFraction, 1);
 
         this.testSignals = this.signalBuilder.build(testPath, boolIndexes, numIndexes);
         this.testLabels = this.signalBuilder.parseLabels(labelPath);
@@ -138,9 +141,9 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
         indices.put("TN", TN);
         indices.put("FN", FN);
 
-        double TPR =(TP*1.0)/(P*1.0);
-        double FPR = (FP*1.0)/(N*1.0);
-        double FNR = (1.0*FN)/(P*1.0);
+        double TPR = (TP * 1.0) / (P * 1.0);
+        double FPR = (FP * 1.0) / (N * 1.0);
+        double FNR = (1.0 * FN) / (P * 1.0);
 
         indices.put("TPR", TPR);
         indices.put("FPR", FPR);
@@ -168,7 +171,8 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
 
 
     public Map<String, Number> evaluateSolutions(List<AbstractSTLNode> solutions, Operator operator) {
-        List<int[]> predictions = solutions.stream().map(x -> robustnessToLabel(getTestRobustnessArray(x), this.epsilon))
+        List<int[]> predictions = solutions.stream()
+                                           .map(x -> robustnessToLabel(getTestRobustnessArray(x), this.epsilon))
                                            .collect(Collectors.toList());
         predictions = ArraysUtilities.trimHeadSameSize(predictions);
         int[] aggregatedPredictions;
@@ -190,9 +194,45 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
         long FP = Arrays.stream(getValidationRobustnessArray(solution)).filter(x -> x < 0).count();
         int N = this.validationSignals.size();
 
-        return (FP*1.0)/(N*1.0);
+        return (FP * 1.0) / (N * 1.0);
     }
 
+    public void solutionToCompressedFile(AbstractSTLNode solution, String filename) throws IOException {
+
+        double[] fitness = getTestRobustnessArray(solution);
+
+        int from = this.testLabels.size() - fitness.length;
+        int to = this.testLabels.size();
+        int[] labels = IntStream.range(from, to).map(this.testLabels::get).toArray();
+
+        assert fitness.length == labels.length;
+
+        try (FileOutputStream output = new FileOutputStream(filename + ".gz")) {
+            try (Writer writer = new OutputStreamWriter(new GZIPOutputStream(output), StandardCharsets.UTF_8)) {
+                writer.write("fitness;label\n");
+                for (int i = 0; i < fitness.length; i++) {
+                    writer.write(roundDouble(fitness[i], 4) + ";" + labels[i] + "\n");
+                }
+            }
+        }
+
+    }
+
+    public int[] ensemblePredictions(Collection<AbstractSTLNode> solutions, double epsilon) {
+        List<int[]> predictions = solutions.stream().map(x -> robustnessToLabel(getTestRobustnessArray(x), epsilon))
+                                           .collect(Collectors.toList());
+        Optional<Integer> opt = predictions.stream().map(x -> x.length).reduce(Math::min);
+        assert opt.isPresent();
+        int minLength = opt.get();
+        int[] ensemble = new int[minLength];
+        for (int[] prediction : predictions) {
+            for (int i = 0; i < minLength; i++) {
+                ensemble[i] += prediction[prediction.length - minLength + i];
+            }
+
+        }
+        return ensemble;
+    }
 
     public void solutionToFile(AbstractSTLNode solution, String filename) throws IOException {
 
@@ -208,7 +248,7 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
         assert fitness.length == labels.length;
 
         for (int i = 0; i < fitness.length; i++) {
-            fw.write(fitness[i] + ";" + labels[i] + "\n");
+            fw.write(roundDouble(fitness[i], 4) + ";" + labels[i] + "\n");
         }
 
         fw.close();
@@ -220,6 +260,34 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
             solutionToFile(solution, filename + "-" + i);
             i++;
         }
+    }
+
+    public void collectionToCompressedFile(Collection<AbstractSTLNode> solutions, String filename) throws IOException {
+        int i = 0;
+        for (AbstractSTLNode solution : solutions) {
+            solutionToCompressedFile(solution, filename + "-" + i);
+            i++;
+        }
+    }
+
+    public void ensembleToFile(Collection<AbstractSTLNode> solutions, String filename) throws IOException {
+        int[] predictions = ensemblePredictions(solutions, 0.0);
+
+        int from = this.testLabels.size() - predictions.length;
+        int to = this.testLabels.size();
+        int[] labels = IntStream.range(from, to).map(this.testLabels::get).toArray();
+
+        FileWriter fw = new FileWriter(filename);
+        fw.write("prediction;normalisedPrediction;label\n");
+
+        assert predictions.length == labels.length;
+
+        for (int i = 0; i < predictions.length; i++) {
+            fw.write(predictions[i] + ";" + roundDouble(predictions[i]*1.0/solutions.size(), 4)
+                             + ";" + labels[i] + "\n");
+        }
+
+        fw.close();
     }
 
     public void paretoToFile(List<Pair<AbstractSTLNode, Double>> solutions, String filename) throws IOException {
@@ -242,5 +310,15 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
         }
         solutionToFile(best.getFirst(), filename + "-best-pareto-" + best.getSecond());
     }
-    
+
+
+    public static double roundDouble(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+
+        return bd.doubleValue();
+    }
+
 }
