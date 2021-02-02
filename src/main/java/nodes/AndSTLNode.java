@@ -2,10 +2,13 @@ package nodes;
 
 import eu.quanticol.moonlight.formula.DoubleDomain;
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
+import eu.quanticol.moonlight.util.Pair;
 import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.STLMapper;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,5 +34,12 @@ public class AndSTLNode extends AbstractSTLNode {
     public List<String> getVariablesList() {
         return Stream.concat(this.firstChild.getVariablesList().stream(),
                              this.secondChild.getVariablesList().stream()).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, List<Integer>> getAreaCoverage() {
+        Map<String, List<Integer>> map1 = this.firstChild.getAreaCoverage();
+        Map<String, List<Integer>> map2 = this.secondChild.getAreaCoverage();
+        return mergeCoverages(map1, map2);
     }
 }

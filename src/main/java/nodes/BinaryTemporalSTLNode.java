@@ -7,6 +7,7 @@ import mapper.Expression;
 import mapper.STLMapper;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,5 +39,14 @@ public class BinaryTemporalSTLNode extends AbstractTemporalSTLNode {
     public List<String> getVariablesList() {
         return Stream.concat(this.firstChild.getVariablesList().stream(),
                              this.secondChild.getVariablesList().stream()).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, List<Integer>> getAreaCoverage() {
+        Map<String, List<Integer>> map1 = this.firstChild.getAreaCoverage();
+        Map<String, List<Integer>> map2 = this.secondChild.getAreaCoverage();
+
+        return(coverageTemporalIncrease(mergeCoverages(map1, map2), this.start, this.end));
+
     }
 }

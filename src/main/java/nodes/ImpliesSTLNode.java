@@ -7,7 +7,9 @@ import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.STLMapper;
 import signal.Record;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,5 +41,16 @@ public class ImpliesSTLNode extends AbstractSTLNode {
     public List<String> getVariablesList() {
         return Stream.concat(this.firstChild.getVariablesList().stream(),
                              this.secondChild.getVariablesList().stream()).collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, List<Integer>> getAreaCoverage() {
+        Map<String, List<Integer>> map1 = this.firstChild.getAreaCoverage();
+        Map<String, List<Integer>> map2 = this.secondChild.getAreaCoverage();
+        map2.forEach(
+                (key, value) -> map1.merge(key, value, (v1, v2) -> Stream.of(v1, v2).flatMap(Collection::stream)
+                                                                         .collect(Collectors.toList()))
+                    );
+        return map2;
     }
 }

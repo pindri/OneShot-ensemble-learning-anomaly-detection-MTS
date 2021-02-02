@@ -4,8 +4,11 @@ import eu.quanticol.moonlight.formula.Interval;
 import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.Expression;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public abstract class AbstractTemporalSTLNode extends AbstractSTLNode {
 
@@ -31,6 +34,21 @@ public abstract class AbstractTemporalSTLNode extends AbstractSTLNode {
             k++;
         }
         return value;
+    }
+
+    public Map<String, List<Integer>> coverageTemporalIncrease(Map<String, List<Integer>> map1, int start, int end) {
+
+        List<Integer> temporalRange = IntStream.rangeClosed(start, end)
+                                               .boxed().collect(Collectors.toList());
+
+        for (Map.Entry<String, List<Integer>> entry : map1.entrySet()) {
+
+            List<Integer> instants = entry.getValue();
+            instants = instants.stream().map(x -> temporalRange.stream().map(y -> y + x).collect(Collectors.toList()))
+                               .flatMap(Collection::stream).distinct().collect(Collectors.toList());
+            entry.setValue(instants);
+        }
+        return map1;
     }
 
 }

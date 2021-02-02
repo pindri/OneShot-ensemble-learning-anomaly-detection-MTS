@@ -2,11 +2,13 @@ package nodes;
 
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import eu.quanticol.moonlight.signal.Signal;
+import eu.quanticol.moonlight.util.Pair;
 import signal.Record;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class AbstractSTLNode {
     // Abstract node of the STL syntax tree.
@@ -36,8 +38,18 @@ public abstract class AbstractSTLNode {
 
     public abstract List<String> getVariablesList();
 
+    public abstract Map<String, List<Integer>> getAreaCoverage();
+
     public double getCoverage() {
         return this.getMinLength() * this.getVariablesList().stream().distinct().count();
+    }
+
+    public Map<String, List<Integer>> mergeCoverages(Map<String, List<Integer>> map1, Map<String, List<Integer>> map2) {
+        map2.forEach(
+                (key, value) -> map1.merge(key, value, (v1, v2) -> Stream.of(v1, v2).flatMap(Collection::stream)
+                                                                         .collect(Collectors.toList()))
+                    );
+        return map1;
     }
 
     @Override

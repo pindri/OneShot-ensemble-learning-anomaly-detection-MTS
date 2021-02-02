@@ -6,7 +6,11 @@ import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.Expression;
 import mapper.STLMapper;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class UnaryTemporalSTLNode extends AbstractTemporalSTLNode {
     public UnaryTemporalSTLNode(List<Tree<String>> siblings, List<Tree<String>> ancestors, Expression expression) {
@@ -41,4 +45,12 @@ public class UnaryTemporalSTLNode extends AbstractTemporalSTLNode {
     public List<String> getVariablesList() {
         return this.firstChild.getVariablesList();
     }
+
+    @Override
+    public Map<String, List<Integer>> getAreaCoverage() {
+        Map<String, List<Integer>> map1 = this.firstChild.getAreaCoverage();
+
+        return coverageTemporalIncrease(map1, this.start, this.end);
+    }
+
 }

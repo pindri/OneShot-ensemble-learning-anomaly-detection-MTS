@@ -1,13 +1,16 @@
 package nodes;
 
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
+import eu.quanticol.moonlight.util.Pair;
 import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.Comparison;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class NumericSTLNode extends AbstractSTLNode {
@@ -41,6 +44,13 @@ public class NumericSTLNode extends AbstractSTLNode {
         List<String> list = new ArrayList<>();
         list.add(this.variable);
         return list;
+    }
+
+    @Override
+    public Map<String, List<Integer>> getAreaCoverage() {
+        Map<String, List<Integer>> coverage = new HashMap<>();
+        coverage.put(this.variable, List.of(0));
+        return coverage;
     }
 
     private double parseNumber(List<Tree<String>> digits) {

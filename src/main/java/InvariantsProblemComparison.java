@@ -9,6 +9,7 @@ import it.units.malelab.jgea.core.Individual;
 import it.units.malelab.jgea.core.evolver.Event;
 import it.units.malelab.jgea.core.evolver.Evolver;
 import it.units.malelab.jgea.core.evolver.StandardWithEnforcedDiversityEvolver;
+import it.units.malelab.jgea.core.evolver.stopcondition.Iterations;
 import it.units.malelab.jgea.core.evolver.stopcondition.TargetFitness;
 import it.units.malelab.jgea.core.listener.*;
 import it.units.malelab.jgea.core.order.PartialComparator;
@@ -54,13 +55,13 @@ public class InvariantsProblemComparison extends Worker {
         int maxHeight = i(a("maxHeight", "20"));
         int nTournament = 5;
         int diversityMaxAttempts = 100;
-//        String evolverNamePattern = a("evolution", "StandardDiversity");
-        String evolverNamePattern = a("evolution", "Speciated");
+        String evolverNamePattern = a("evolution", "StandardDiversity");
+//        String evolverNamePattern = a("evolution", "Speciated");
         int[] seeds = ri(a("seed", "0:1"));
-        String trainPath = a("trainPath", "data/SWaT/train_no201.csv");
-        String testPath = a("testPath", "data/SWaT/test_no201.csv");
-        String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
-        String grammarPath = a("grammarPath", "grammars/grammar_swat_no201.bnf");
+        String trainPath = a("trainPath", "data/SKAB/2/train.csv");
+        String testPath = a("testPath", "data/SKAB/2/train.csv");
+        String labelsPath = a("labelsPath", "data/SKAB/2/labels.csv");
+        String grammarPath = a("grammarPath", "grammars/grammar_skab.bnf");
         String testResultsFile = a("testResultsFile", "results/testResults.txt");
         String topResultsFile = a("topResultsFile", "results/topResults.txt");
         String ensembleResultsFile = a("ensembleResultsFile", "results/ensemble.csv");
@@ -201,8 +202,8 @@ public class InvariantsProblemComparison extends Worker {
                         L.info(String.format("Starting %s", keys));
                         Collection<AbstractSTLNode> solutions = evolver.solve(
                                 Misc.cached(problem.getFitnessFunction(), 10000),
-                                new TargetFitness<>(0.0d),
-//                                new Iterations(0),
+//                                new TargetFitness<>(0.0d),
+                                new Iterations(3),
 //                                new MultiTargetFitness<>(0d, 20),
 //                                new SpeciesZero(0.0, 40),
                                 new Random(seed),
@@ -254,6 +255,11 @@ public class InvariantsProblemComparison extends Worker {
 
                         // Pareto ensemble to file.
 //                        problem.getFitnessFunction().paretoToFile(ensemble.get(ensemble.size() - 1), testResultsFile);
+
+                        solutions.forEach(i -> {
+                            System.out.println(i);
+                            i.getAreaCoverage().forEach((k, v) -> System.out.println(k + " " + v));
+                        });
 
                     } catch (InterruptedException | ExecutionException | IOException e) {
                         L.severe(String.format("Cannot complete %s due to %s",
