@@ -102,7 +102,7 @@ public class UnaryTemporalSTLNodeTest {
 
         Signal<Double> fitness = operator.apply(this.signal).monitor(this.signal);
 
-//        printFitness(fitness);
+        printFitness(fitness);
         assertEquals(-0.1, fitness.valueAt(3), 0.001);
     }
 

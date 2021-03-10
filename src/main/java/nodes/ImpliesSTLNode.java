@@ -7,7 +7,6 @@ import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.STLMapper;
 import signal.Record;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,8 +32,8 @@ public class ImpliesSTLNode extends AbstractSTLNode {
     }
 
     @Override
-    public int getMinLength() {
-        return Math.max(this.firstChild.getMinLength(), this.secondChild.getMinLength());
+    public int getNecessaryLength() {
+        return Math.max(this.firstChild.getNecessaryLength(), this.secondChild.getNecessaryLength());
     }
 
     @Override
@@ -44,13 +43,9 @@ public class ImpliesSTLNode extends AbstractSTLNode {
     }
 
     @Override
-    public Map<String, List<Integer>> getAreaCoverage() {
-        Map<String, List<Integer>> map1 = this.firstChild.getAreaCoverage();
-        Map<String, List<Integer>> map2 = this.secondChild.getAreaCoverage();
-        map2.forEach(
-                (key, value) -> map1.merge(key, value, (v1, v2) -> Stream.of(v1, v2).flatMap(Collection::stream)
-                                                                         .collect(Collectors.toList()))
-                    );
-        return map2;
+    public Map<String, List<Integer>> getGreyAreaCoverageMap() {
+        Map<String, List<Integer>> map1 = this.firstChild.getGreyAreaCoverageMap();
+        Map<String, List<Integer>> map2 = this.secondChild.getGreyAreaCoverageMap();
+        return mergeCoverages(map1, map2);
     }
 }

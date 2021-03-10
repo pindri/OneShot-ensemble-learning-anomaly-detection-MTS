@@ -40,8 +40,8 @@ public class STLMapper implements Function<Tree<String>, AbstractSTLNode> {
             case UNTIL, SINCE -> new BinaryTemporalSTLNode(siblings, ancestors, expression);
             case AND -> new AndSTLNode(siblings, ancestors);
             case NOT -> new NotSTLNode(siblings, ancestors);
+            case OR -> new OrSTLNode(siblings, ancestors);
             case IMPLIES -> new ImpliesSTLNode(siblings, ancestors);
-            case OR -> null;
         };
     }
 

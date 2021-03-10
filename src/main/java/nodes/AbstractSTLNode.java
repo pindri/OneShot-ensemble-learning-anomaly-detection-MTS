@@ -2,7 +2,6 @@ package nodes;
 
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
 import eu.quanticol.moonlight.signal.Signal;
-import eu.quanticol.moonlight.util.Pair;
 import signal.Record;
 
 import java.util.*;
@@ -34,17 +33,29 @@ public abstract class AbstractSTLNode {
         return symbol;
     }
 
-    public abstract int getMinLength();
+    public abstract int getNecessaryLength();
 
     public abstract List<String> getVariablesList();
 
-    public abstract Map<String, List<Integer>> getAreaCoverage();
+    public abstract Map<String, List<Integer>> getGreyAreaCoverageMap();
 
-    public double getCoverage() {
-        return this.getMinLength() * this.getVariablesList().stream().distinct().count();
+    public int getGreyAreaCoverage() {
+        Map<String, List<Integer>> coverage = this.getGreyAreaCoverageMap();
+        int greyArea = 0;
+
+        for (Map.Entry<String, List<Integer>> entry : coverage.entrySet()) {
+            List<Integer> instants = entry.getValue();
+            greyArea += instants.stream().distinct().count();
+        }
+
+        return greyArea;
     }
 
-    public Map<String, List<Integer>> mergeCoverages(Map<String, List<Integer>> map1, Map<String, List<Integer>> map2) {
+    public double getNecLengthNumVarsCoverage() {
+        return this.getNecessaryLength() * this.getVariablesList().stream().distinct().count();
+    }
+
+    protected Map<String, List<Integer>> mergeCoverages(Map<String, List<Integer>> map1, Map<String, List<Integer>> map2) {
         map2.forEach(
                 (key, value) -> map1.merge(key, value, (v1, v2) -> Stream.of(v1, v2).flatMap(Collection::stream)
                                                                          .collect(Collectors.toList()))

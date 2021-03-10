@@ -35,7 +35,7 @@ public class NumericSTLNode extends AbstractSTLNode {
     }
 
     @Override
-    public int getMinLength() {
+    public int getNecessaryLength() {
         return 0;
     }
 
@@ -47,7 +47,7 @@ public class NumericSTLNode extends AbstractSTLNode {
     }
 
     @Override
-    public Map<String, List<Integer>> getAreaCoverage() {
+    public Map<String, List<Integer>> getGreyAreaCoverageMap() {
         Map<String, List<Integer>> coverage = new HashMap<>();
         coverage.put(this.variable, List.of(0));
         return coverage;

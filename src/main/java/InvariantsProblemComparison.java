@@ -21,7 +21,6 @@ import it.units.malelab.jgea.representation.grammar.cfggp.GrammarRampedHalfAndHa
 import it.units.malelab.jgea.representation.tree.SameRootSubtreeCrossover;
 import it.units.malelab.jgea.representation.tree.Tree;
 import nodes.AbstractSTLNode;
-import stopcondition.MultiTargetFitness;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,8 +28,6 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -55,16 +52,19 @@ public class InvariantsProblemComparison extends Worker {
         int maxHeight = i(a("maxHeight", "20"));
         int nTournament = 5;
         int diversityMaxAttempts = 100;
-        String evolverNamePattern = a("evolution", "StandardDiversity");
-//        String evolverNamePattern = a("evolution", "Speciated");
+//        String evolverNamePattern = a("evolution", "StandardDiversity");
+        String evolverNamePattern = a("evolution", "Speciated");
         int[] seeds = ri(a("seed", "0:1"));
-        String trainPath = a("trainPath", "data/SKAB/2/train.csv");
-        String testPath = a("testPath", "data/SKAB/2/train.csv");
-        String labelsPath = a("labelsPath", "data/SKAB/2/labels.csv");
-        String grammarPath = a("grammarPath", "grammars/grammar_skab.bnf");
+        String trainPath = a("trainPath", "data/SWaT/train_no201.csv");
+        String testPath = a("testPath", "data/SWaT/test_no201.csv");
+        String labelsPath = a("labelsPath", "data/SWaT/labels.csv");
+        String grammarPath = a("grammarPath", "grammars/grammar_swat_no201.bnf");
         String testResultsFile = a("testResultsFile", "results/testResults.txt");
         String topResultsFile = a("topResultsFile", "results/topResults.txt");
         String ensembleResultsFile = a("ensembleResultsFile", "results/ensemble.csv");
+        String coverageResultsFile = a("coverageResultsFile", "results/coverage.csv");
+        String accuracyResultsFile = a("accuracyResultsFile", "results/accuracy.csv");
+        String uniquenessResultsFile = a("uniquenessResultsFile", "results/uniqueness.csv");
         int traceLength = i(a("traceLength", "0"));
         double validationFraction = d(a("validationFraction", "0.2"));
 
@@ -182,6 +182,8 @@ public class InvariantsProblemComparison extends Worker {
                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         L.info(String.format("Going to test with %d evolver/s: %s%n", evolvers.size(), evolvers.keySet()));
 
+        Collection<AbstractSTLNode> cumulateSolutions = new ArrayList<>();
+
         // Run.
         for (SingleInvariantsProblem problem : problems) {
             for (int seed : seeds) {
@@ -202,8 +204,8 @@ public class InvariantsProblemComparison extends Worker {
                         L.info(String.format("Starting %s", keys));
                         Collection<AbstractSTLNode> solutions = evolver.solve(
                                 Misc.cached(problem.getFitnessFunction(), 10000),
-//                                new TargetFitness<>(0.0d),
-                                new Iterations(3),
+                                new TargetFitness<>(0.0d),
+//                                new Iterations(2),
 //                                new MultiTargetFitness<>(0d, 20),
 //                                new SpeciesZero(0.0, 40),
                                 new Random(seed),
@@ -228,14 +230,6 @@ public class InvariantsProblemComparison extends Worker {
                         }
                         L.info("Number of solutions validated: " + solutions.size());
 
-                        Collection<AbstractSTLNode> solutionsTop5;
-                        Collection<AbstractSTLNode> solutionsTop10;
-                        Collection<AbstractSTLNode> solutionsTop25;
-                        Collection<AbstractSTLNode> solutionsTop50;
-//                        solutionsTop5 = new ArrayList<>(solutions).subList(0, solutions.size() / 20);
-                        solutionsTop10 = new ArrayList<>(solutions).subList(0, solutions.size() / 10);
-//                        solutionsTop25 = new ArrayList<>(solutions).subList(0, solutions.size() / 4);
-//                        solutionsTop50 = new ArrayList<>(solutions).subList(0, solutions.size() / 2);
 
 //                        solutionsZero = solutions.stream()
 //                                                 .filter(x -> problem.getFitnessFunction().apply(x).equals(0.0))
@@ -245,21 +239,18 @@ public class InvariantsProblemComparison extends Worker {
 //                        solutions.forEach(System.out::println);
 
                         // Test to file.
-//                        problem.getFitnessFunction().collectionToFile(solutionsTop5, topResultsFile);
-//                        problem.getFitnessFunction().collectionToFile(solutionsTop10, "10top" + testResultsFile);
-//                        problem.getFitnessFunction().collectionToFile(solutionsTop10, topResultsFile);
-//                        problem.getFitnessFunction().collectionToFile(solutionsTop50, "50top" + testResultsFile);
-//                        problem.getFitnessFunction().collectionToCompressedFile(solutions, testResultsFile);
-//                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile);
+//                        problem.getFitnessFunction().collectionToFile(solutions, testResultsFile + "-" + seed);
                         problem.getFitnessFunction().ensembleToFile(solutions, ensembleResultsFile);
+                        problem.getFitnessFunction().accuracyToFile(solutions, accuracyResultsFile);
+                        problem.getFitnessFunction().coverageToFile(solutions, coverageResultsFile + "-" + seed);
+                        problem.getFitnessFunction().uniquenessToFile(solutions, uniquenessResultsFile + "-" + seed);
+//                        cumulateSolutions.addAll(solutions);
+//                        solutions.forEach(System.out::println);
 
-                        // Pareto ensemble to file.
-//                        problem.getFitnessFunction().paretoToFile(ensemble.get(ensemble.size() - 1), testResultsFile);
-
-                        solutions.forEach(i -> {
-                            System.out.println(i);
-                            i.getAreaCoverage().forEach((k, v) -> System.out.println(k + " " + v));
-                        });
+//                        solutions.forEach(i -> {
+//                            System.out.println(i);
+//                            i.getGreyAreaCoverageMap().forEach((k, v) -> System.out.println(k + " " + v));
+//                        });
 
                     } catch (InterruptedException | ExecutionException | IOException e) {
                         L.severe(String.format("Cannot complete %s due to %s",
@@ -270,6 +261,12 @@ public class InvariantsProblemComparison extends Worker {
                     }
                 }
             }
+//            try {
+//                System.out.println(cumulateSolutions.size() + "TOTAL SOLUTIONS");
+//                problem.getFitnessFunction().uniquenessToFile(cumulateSolutions, uniquenessResultsFile + "-total");
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
 
     }

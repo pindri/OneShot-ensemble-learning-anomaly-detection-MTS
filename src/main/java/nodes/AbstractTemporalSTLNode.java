@@ -36,7 +36,7 @@ public abstract class AbstractTemporalSTLNode extends AbstractSTLNode {
         return value;
     }
 
-    public Map<String, List<Integer>> coverageTemporalIncrease(Map<String, List<Integer>> map1, int start, int end) {
+    protected Map<String, List<Integer>> coverageTemporalIncrease(Map<String, List<Integer>> map1, int start, int end) {
 
         List<Integer> temporalRange = IntStream.rangeClosed(start, end)
                                                .boxed().collect(Collectors.toList());

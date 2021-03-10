@@ -1,5 +1,5 @@
 <e> ::= <prop> | <log>
-<log> ::= and <e> <e> | not <e> | implies <e> <e> | since <e> <interval> <interval> <e> | once <e> <interval> <interval> | historically <e> <interval> <interval>
+<log> ::= and <e> <e> | or <e> <e> | not <e> | implies <e> <e> | since <e> <interval> <interval> <e> | once <e> <interval> <interval> | historically <e> <interval> <interval>
 <prop> ::= proposition <var> <comp> <num>
 <interval> ::= <dig>
 <var> ::= FIT101 | LIT101 | AIT201 | AIT202 | AIT203 | FIT201 | DPIT301 | FIT301 | LIT301 | AIT401 | AIT402 | FIT401 | LIT401 | AIT501 | AIT502 | AIT503 | AIT504 | FIT501 | FIT502 | FIT503 | FIT504 | PIT501 | PIT502 | PIT503 | FIT601 | MV101 | P101 | P102 | MV201 | P202 | P203 | P204 | P205 | P206 | MV301 | MV302 | MV303 | MV304 | P301 | P302 | P401 | P402 | P403 | P404 | UV401 | P501 | P502 | P601 | P602 | P603

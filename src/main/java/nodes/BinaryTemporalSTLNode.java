@@ -31,8 +31,8 @@ public class BinaryTemporalSTLNode extends AbstractTemporalSTLNode {
     }
 
     @Override
-    public int getMinLength() {
-        return Math.max(this.firstChild.getMinLength(), this.secondChild.getMinLength()) + this.end;
+    public int getNecessaryLength() {
+        return Math.max(this.firstChild.getNecessaryLength(), this.secondChild.getNecessaryLength()) + this.end;
     }
 
     @Override
@@ -42,11 +42,13 @@ public class BinaryTemporalSTLNode extends AbstractTemporalSTLNode {
     }
 
     @Override
-    public Map<String, List<Integer>> getAreaCoverage() {
-        Map<String, List<Integer>> map1 = this.firstChild.getAreaCoverage();
-        Map<String, List<Integer>> map2 = this.secondChild.getAreaCoverage();
+    public Map<String, List<Integer>> getGreyAreaCoverageMap() {
+        Map<String, List<Integer>> map1 = this.firstChild.getGreyAreaCoverageMap();
+        Map<String, List<Integer>> map2 = this.secondChild.getGreyAreaCoverageMap();
+        map1 = coverageTemporalIncrease(map1, 0, this.end);
+        map2 = coverageTemporalIncrease(map2, this.start, this.end);
 
-        return(coverageTemporalIncrease(mergeCoverages(map1, map2), this.start, this.end));
+        return(mergeCoverages(map1, map2));
 
     }
 }

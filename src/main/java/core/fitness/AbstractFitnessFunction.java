@@ -290,6 +290,44 @@ public abstract class AbstractFitnessFunction<F> implements Function<AbstractSTL
         fw.close();
     }
 
+    public void coverageToFile(Collection<AbstractSTLNode> solutions, String filename) throws IOException {
+
+        FileWriter fw = new FileWriter(filename);
+        fw.write("numVars;necLengthNumVars;greyArea\n");
+
+        for(AbstractSTLNode solution : solutions) {
+            fw.write(solution.getVariablesList().stream().distinct().count() + ";" +
+                     solution.getNecLengthNumVarsCoverage() + ";" +
+                     solution.getGreyAreaCoverage() + "\n");
+        }
+        fw.close();
+    }
+
+    public void accuracyToFile(Collection<AbstractSTLNode> solutions, String filename) throws IOException {
+
+        FileWriter fw = new FileWriter(filename);
+        fw.write("TPR,FPR\n");
+
+        for(AbstractSTLNode solution : solutions) {
+            Map<String, Number> predictions = evaluateSingleSolution(robustnessToLabel(getTestRobustnessArray(solution),
+                                                                                       this.epsilon));
+            fw.write(predictions.get("TPR") + ";" + predictions.get("FPR") + "\n");
+        }
+        fw.close();
+    }
+
+    public void uniquenessToFile(Collection<AbstractSTLNode> solutions, String filename) throws IOException {
+
+        double solutionUniqueness = (double)solutions.stream().distinct().count() / (double)solutions.size();
+        double fitnessUniqueness = (double)solutions.stream().map(this).distinct().count() / (double)solutions.size();
+
+        FileWriter fw = new FileWriter(filename);
+        fw.write("solutionUniqueness,fitnessUniqueness\n");
+        fw.write(solutionUniqueness + ";" + fitnessUniqueness + ";" + "\n");
+
+        fw.close();
+    }
+
     public void paretoToFile(List<Pair<AbstractSTLNode, Double>> solutions, String filename) throws IOException {
         int i = 0;
         for (Pair<AbstractSTLNode, Double> solution : solutions) {

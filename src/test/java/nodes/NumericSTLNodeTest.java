@@ -5,9 +5,11 @@ import eu.quanticol.moonlight.signal.Signal;
 import it.units.malelab.jgea.representation.tree.Tree;
 import org.junit.Test;
 import signal.Record;
+import signal.SignalHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -61,12 +63,18 @@ public class NumericSTLNodeTest {
         record = new Record(boolValues, numValues);
         signal.add(2, record);
 
-        Signal<Double> m = monitor.getOperator().apply(signal).monitor(signal);
-        System.out.println(m.valueAt(0));
+        System.out.println(signal);
 
+        Signal<Double> m = monitor.getOperator().apply(signal).monitor(signal);
+//        System.out.println(m.valueAt(0));
+        System.out.println(m);
+        System.out.println(Arrays.deepToString(SignalHandler.toDoubleArray(m)));
+
+
+        // Creates monitor with x2 > 0.2.
         assertEquals(0.1, m.valueAt(0), 0.005);
         assertEquals(-0.1, m.valueAt(2), 0.005);
-        assertEquals(monitor.getMinLength(), 0, 0);
+        assertEquals(monitor.getNecessaryLength(), 0, 0);
     }
 
 }

@@ -25,7 +25,7 @@ public class MultiFitnessFunction extends AbstractFitnessFunction<List<Double>> 
         double[] fitnessArray;
 
         for (Signal<Record> signal : this.trainSignals) {
-            if (signal.size() <= monitor.getMinLength()) {
+            if (signal.size() <= monitor.getNecessaryLength()) {
                 fitness += penalty;
                 continue;
             }
@@ -33,7 +33,7 @@ public class MultiFitnessFunction extends AbstractFitnessFunction<List<Double>> 
             fitnessArray = applyMonitor(monitor, signal);
 //            fitness += fitnessArray[fitnessArray.length - 1];
             fitness += Arrays.stream(fitnessArray).map(Math::abs).summaryStatistics().getAverage();
-            coverage += 1.0/monitor.getCoverage();
+            coverage += 1.0/monitor.getNecLengthNumVarsCoverage();
         }
 
         return List.of(fitness/this.trainSignals.size(), coverage/this.trainSignals.size());

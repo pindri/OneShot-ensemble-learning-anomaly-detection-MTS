@@ -2,7 +2,6 @@ package nodes;
 
 import eu.quanticol.moonlight.formula.DoubleDomain;
 import eu.quanticol.moonlight.monitoring.temporal.TemporalMonitor;
-import eu.quanticol.moonlight.util.Pair;
 import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.STLMapper;
 
@@ -18,8 +17,8 @@ public class NotSTLNode extends AbstractSTLNode {
     }
 
     @Override
-    public int getMinLength() {
-        return this.firstChild.getMinLength();
+    public int getNecessaryLength() {
+        return this.firstChild.getNecessaryLength();
     }
 
     @Override
@@ -28,7 +27,7 @@ public class NotSTLNode extends AbstractSTLNode {
     }
 
     @Override
-    public Map<String, List<Integer>> getAreaCoverage() {
-        return this.firstChild.getAreaCoverage();
+    public Map<String, List<Integer>> getGreyAreaCoverageMap() {
+        return this.firstChild.getGreyAreaCoverageMap();
     }
 }

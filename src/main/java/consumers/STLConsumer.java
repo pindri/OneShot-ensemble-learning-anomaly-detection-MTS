@@ -15,11 +15,11 @@ public class STLConsumer {
     }
 
     public static NamedFunction<AbstractSTLNode, Number> temporalLength() {
-        return NamedFunction.build("temporalLength", "%3d", AbstractSTLNode::getMinLength);
+        return NamedFunction.build("temporalLength", "%3d", AbstractSTLNode::getNecessaryLength);
     }
 
     public static NamedFunction<AbstractSTLNode, Number> coverage() {
-        return NamedFunction.build("coverage", "%3f", AbstractSTLNode::getCoverage);
+        return NamedFunction.build("coverage", "%3f", AbstractSTLNode::getNecLengthNumVarsCoverage);
     }
 
     public static NamedFunction<Tree<String>, Number> height() {
@@ -51,6 +51,5 @@ public class STLConsumer {
                                    e -> e.getOrderedPopulation().all().stream().filter(i -> i.getFitness().equals(0.0))
                                          .flatMap(i -> i.getSolution().getVariablesList().stream()).distinct().count());
     }
-
 
 }

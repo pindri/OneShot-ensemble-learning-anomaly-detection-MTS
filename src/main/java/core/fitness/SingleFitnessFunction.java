@@ -32,17 +32,17 @@ public class SingleFitnessFunction extends AbstractFitnessFunction<Double> {
         int varMax = 3;
 
         for (Signal<Record> signal : this.trainSignals) {
-            if (signal.size() <= monitor.getMinLength()) {
+            if (signal.size() <= monitor.getNecessaryLength()) {
                 fitness += penalty;
                 continue;
             }
 
-            if (monitor.getMinLength() < lengthMin) {
-                fitness += 0.01*(lengthMin - monitor.getMinLength());
-            }
-            if (monitor.getVariablesList().stream().distinct().count() < varMin) {
-                fitness += 0.01*(varMin - monitor.getVariablesList().stream().distinct().count());
-            }
+//            if (monitor.getNecessaryLength() < lengthMin) {
+//                fitness += 0.01*(lengthMin - monitor.getNecessaryLength());
+//            }
+//            if (monitor.getVariablesList().stream().distinct().count() < varMin) {
+//                fitness += 0.01*(varMin - monitor.getVariablesList().stream().distinct().count());
+//            }
 //            if (monitor.getMinLength() > lengthMax) {
 //                fitness += 0.1*(monitor.getMinLength() - lengthMax);
 //                fitness += penalty;

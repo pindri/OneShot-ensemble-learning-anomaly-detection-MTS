@@ -6,11 +6,8 @@ import it.units.malelab.jgea.representation.tree.Tree;
 import mapper.Expression;
 import mapper.STLMapper;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class UnaryTemporalSTLNode extends AbstractTemporalSTLNode {
     public UnaryTemporalSTLNode(List<Tree<String>> siblings, List<Tree<String>> ancestors, Expression expression) {
@@ -37,8 +34,8 @@ public class UnaryTemporalSTLNode extends AbstractTemporalSTLNode {
     }
 
     @Override
-    public int getMinLength() {
-        return firstChild.getMinLength() + this.end;
+    public int getNecessaryLength() {
+        return firstChild.getNecessaryLength() + this.end;
     }
 
     @Override
@@ -47,8 +44,8 @@ public class UnaryTemporalSTLNode extends AbstractTemporalSTLNode {
     }
 
     @Override
-    public Map<String, List<Integer>> getAreaCoverage() {
-        Map<String, List<Integer>> map1 = this.firstChild.getAreaCoverage();
+    public Map<String, List<Integer>> getGreyAreaCoverageMap() {
+        Map<String, List<Integer>> map1 = this.firstChild.getGreyAreaCoverageMap();
 
         return coverageTemporalIncrease(map1, this.start, this.end);
     }

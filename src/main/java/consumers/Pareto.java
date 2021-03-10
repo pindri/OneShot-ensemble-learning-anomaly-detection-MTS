@@ -29,7 +29,7 @@ public class Pareto {
         // Coverage ranges [0,inf], larger should be BEFORE, so use negative coverage.
         ParetoCollection<Pair<AbstractSTLNode, Double>, Double>
                 pc = new ParetoCollection<>(solutions, Double.class,
-                                            x -> List.of(-x.getFirst().getCoverage(), x.getSecond()));
+                                            x -> List.of(-x.getFirst().getNecLengthNumVarsCoverage(), x.getSecond()));
 
         return new ArrayList<>(pc.firsts());
     }
